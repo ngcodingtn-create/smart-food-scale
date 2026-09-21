@@ -284,6 +284,18 @@ class. A WebGL2 probe avoids mounting an unsupported renderer, with a side-view
 SVG and the full server-rendered assembly description/table available without WebGL
 or JavaScript. Context loss and renderer failures fall back to the same explanation.
 
+`npm run check:rig -- <local production URL>` checks every generated content route,
+prints initial JS size per route and rejects a renderer chunk in any initial/shared
+route scripts. Browser checks cover the additional dynamic network load, themes,
+mobile view, motion preferences, fallback, interactions and hydration.
+
+Verification on 21 September 2026: the production build and all 14 content routes
+passed. The renderer was isolated in a 234.6 KiB gzipped dynamic chunk; none of the
+13 existing routes requested it in browser checks. Light/dark desktop and 390 px
+mobile layouts, view controls, reduced motion, WebGL-unavailable and JavaScript-off
+fallbacks passed with no console errors or warnings. Touch orbit and pinch were
+exercised through synthetic touch pointer events; no physical phone was used.
+
 **What would change our mind:** a larger part catalogue or detailed supplier CAD
 may justify compressed external models. Until then procedural geometry avoids remote
 assets, font fetches and an additional loading dependency.
