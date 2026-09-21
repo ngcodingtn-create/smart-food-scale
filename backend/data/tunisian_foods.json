@@ -1,0 +1,348 @@
+{
+  "_meta": {
+    "title": "Tunisian food composition table",
+    "version": "0.1.0",
+    "compiled": "2026-09-21",
+    "why_this_exists": "Couscous, lablabi, brik, ojja and mloukhia are absent from USDA FoodData Central, from Nutritionix, and from the fixed label sets of every commercial food-recognition API we surveyed. Without this table the device cannot cost a Tunisian meal at all, and the recogniser has no vocabulary in which to name one.",
+    "READ_THIS_BEFORE_CITING": "Every composite-dish row below is an ESTIMATE computed by the team, not a laboratory measurement and not a database extract. Each was derived by decomposing a typical recipe into its ingredients, taking generic per-100 g values for those ingredients from standard food-composition references, and recombining them by mass fraction. Recipes vary enormously between households and between regions of Tunisia — the olive oil alone can move the energy figure by 30 %. Treat these as good-faith working numbers for a prototype, and say so in the report.",
+    "method": {
+      "steps": [
+        "Write down a typical recipe as mass fractions of its cooked components.",
+        "Take per-100 g energy, protein, carbohydrate and fat for each component from generic ingredient values (cooked chickpeas, cooked semolina, lamb stewing meat, olive oil, hen egg, and so on).",
+        "Combine by mass fraction to get the plated dish per 100 g.",
+        "Check the result against the Atwater factors (4 kcal/g protein, 4 kcal/g carbohydrate, 9 kcal/g fat). Every row below agrees with its own macros to within 1 %."
+      ],
+      "known_limitations": [
+        "Ingredient values are generic, not Tunisian-specific. Tunisian lamb, olive oil and semolina may differ from the reference values used.",
+        "Absorbed frying oil is the single biggest uncertainty in the fried dishes (brik, fricasse, kafteji, bambalouni). We assumed typical absorption; actual values depend on oil temperature and frying time.",
+        "No moisture measurement was made. Stew water content drives the per-100 g figure directly and varies by cook.",
+        "Micronutrients, fibre and salt are out of scope for this prototype."
+      ],
+      "how_to_improve": "Replace any row with a measured or published Tunisian value as one becomes available, set source.kind to 'literature' or 'measured', cite it, and set estimated to false. The test suite checks that every row carries a citation and that its macros stay Atwater-consistent, so an improved row cannot silently break the table."
+    },
+    "atwater_tolerance_percent": 8.0,
+    "fields": {
+      "per_100g": "kcal, protein_g, carbohydrate_g, fat_g — all per 100 g of the dish as served",
+      "typical_portion_g": "An estimated single serving, used only for sanity checks and for the app's manual-entry default. The device measures the real mass; this number is never used in a logged meal.",
+      "estimated": "true when the figures were derived rather than measured or taken from a published table. Currently true for every row.",
+      "confidence": "low | medium | high — the team's own confidence in the row, not a statistical interval"
+    }
+  },
+
+  "foods": [
+    {
+      "key": "couscous_tunisien_agneau",
+      "name_fr": "Couscous tunisien à l'agneau",
+      "name_en": "Tunisian lamb couscous",
+      "aliases": ["couscous", "kosksi", "couscous agneau", "كسكسي"],
+      "category": "plat_principal",
+      "description": "Steamed semolina with lamb, carrot, potato, chickpeas and a red tomato-harissa sauce. The national dish; served in a mound with the meat and vegetables on top.",
+      "per_100g": { "kcal": 167, "protein_g": 7.5, "carbohydrate_g": 14.7, "fat_g": 8.6 },
+      "typical_portion_g": 350,
+      "estimated": true,
+      "confidence": "medium",
+      "source": {
+        "kind": "estimated",
+        "citation": "Team estimate, 2026-09-21. Derived from a plated composition of 55 % cooked semolina, 20 % lamb stewing meat, 20 % cooked vegetables in sauce, 5 % olive oil, using generic per-100 g ingredient values.",
+        "basis": "recipe decomposition"
+      }
+    },
+    {
+      "key": "couscous_poisson",
+      "name_fr": "Couscous au poisson",
+      "name_en": "Tunisian fish couscous",
+      "aliases": ["kosksi hout", "couscous hout"],
+      "category": "plat_principal",
+      "description": "Coastal variant, typically with grouper or sea bream, quince and a lighter sauce. Leaner than the lamb version.",
+      "per_100g": { "kcal": 155, "protein_g": 8.5, "carbohydrate_g": 15.5, "fat_g": 6.5 },
+      "typical_portion_g": 350,
+      "estimated": true,
+      "confidence": "medium",
+      "source": {
+        "kind": "estimated",
+        "citation": "Team estimate, 2026-09-21. As for the lamb couscous, substituting white fish for lamb at the same mass fraction.",
+        "basis": "recipe decomposition"
+      }
+    },
+    {
+      "key": "lablabi",
+      "name_fr": "Lablabi",
+      "name_en": "Tunisian chickpea soup",
+      "aliases": ["leblebi", "لبلابي"],
+      "category": "plat_principal",
+      "description": "Chickpeas in a garlic-cumin broth poured over torn stale bread, finished with olive oil, harissa, capers, tuna and often a poached egg. Breakfast and winter street food.",
+      "per_100g": { "kcal": 186, "protein_g": 6.6, "carbohydrate_g": 23.8, "fat_g": 7.3 },
+      "typical_portion_g": 400,
+      "estimated": true,
+      "confidence": "medium",
+      "source": {
+        "kind": "estimated",
+        "citation": "Team estimate, 2026-09-21. Bowl composition 40 % cooked chickpeas, 25 % bread, 25 % broth, 5 % olive oil, 5 % egg.",
+        "basis": "recipe decomposition"
+      }
+    },
+    {
+      "key": "brik_a_loeuf",
+      "name_fr": "Brik à l'œuf",
+      "name_en": "Tunisian egg brik",
+      "aliases": ["brik", "bric", "بريك"],
+      "category": "entree",
+      "description": "A whole egg, tuna, parsley and onion folded into a malsouka sheet and deep-fried, eaten by hand while the yolk is still running.",
+      "per_100g": { "kcal": 290, "protein_g": 12.0, "carbohydrate_g": 17.0, "fat_g": 19.0 },
+      "typical_portion_g": 110,
+      "estimated": true,
+      "confidence": "low",
+      "source": {
+        "kind": "estimated",
+        "citation": "Team estimate, 2026-09-21. One brik as 25 % pastry, 45 % egg, 15 % tuna and aromatics, plus absorbed frying oil.",
+        "basis": "recipe decomposition"
+      },
+      "note": "Confidence is low because absorbed frying oil dominates the fat figure and was assumed rather than measured."
+    },
+    {
+      "key": "ojja_merguez",
+      "name_fr": "Ojja aux merguez",
+      "name_en": "Tunisian shakshuka with merguez",
+      "aliases": ["ojja", "oudja", "عجة"],
+      "category": "plat_principal",
+      "description": "Eggs broken into a simmering tomato and pepper sauce with harissa and sliced merguez sausage, served in the pan with bread.",
+      "per_100g": { "kcal": 162, "protein_g": 7.2, "carbohydrate_g": 2.7, "fat_g": 13.7 },
+      "typical_portion_g": 300,
+      "estimated": true,
+      "confidence": "medium",
+      "source": {
+        "kind": "estimated",
+        "citation": "Team estimate, 2026-09-21. Pan composition 35 % egg, 45 % tomato-pepper sauce, 15 % merguez, 5 % olive oil.",
+        "basis": "recipe decomposition"
+      }
+    },
+    {
+      "key": "mloukhia",
+      "name_fr": "Mloukhia",
+      "name_en": "Jute leaf stew",
+      "aliases": ["molokhia", "mouloukhia", "ملوخية"],
+      "category": "plat_principal",
+      "description": "Powdered jute leaf cooked for hours with olive oil and beef or lamb into a near-black, glossy stew. Eaten with bread, traditionally at the start of the year.",
+      "per_100g": { "kcal": 177, "protein_g": 9.5, "carbohydrate_g": 4.5, "fat_g": 13.5 },
+      "typical_portion_g": 280,
+      "estimated": true,
+      "confidence": "low",
+      "source": {
+        "kind": "estimated",
+        "citation": "Team estimate, 2026-09-21. 25 % beef, 60 % jute-leaf sauce, 15 % olive oil by mass in the finished stew.",
+        "basis": "recipe decomposition"
+      },
+      "note": "Confidence is low: the olive oil fraction in mloukhia is unusually high and varies widely by household. No published Tunisian value was found."
+    },
+    {
+      "key": "chorba_frik",
+      "name_fr": "Chorba frik",
+      "name_en": "Freekeh soup",
+      "aliases": ["chorba", "شربة فريك"],
+      "category": "soupe",
+      "description": "Green-wheat freekeh simmered with lamb, tomato and parsley into a thin soup. A Ramadan staple.",
+      "per_100g": { "kcal": 69, "protein_g": 3.8, "carbohydrate_g": 8.5, "fat_g": 2.2 },
+      "typical_portion_g": 300,
+      "estimated": true,
+      "confidence": "medium",
+      "source": {
+        "kind": "estimated",
+        "citation": "Team estimate, 2026-09-21. Soup composition 15 % cooked freekeh, 10 % lamb, 70 % broth and tomato, 5 % olive oil.",
+        "basis": "recipe decomposition"
+      }
+    },
+    {
+      "key": "salade_mechouia",
+      "name_fr": "Salade mechouia",
+      "name_en": "Grilled pepper and tomato salad",
+      "aliases": ["mechouia", "méchouia", "سلاطة مشوية"],
+      "category": "entree",
+      "description": "Peppers, tomatoes, garlic and onion grilled over flame, peeled, chopped and dressed with olive oil, usually topped with tuna, egg and olives.",
+      "per_100g": { "kcal": 120, "protein_g": 4.5, "carbohydrate_g": 6.0, "fat_g": 8.8 },
+      "typical_portion_g": 150,
+      "estimated": true,
+      "confidence": "medium",
+      "source": {
+        "kind": "estimated",
+        "citation": "Team estimate, 2026-09-21. 70 % grilled vegetables, 10 % tuna, 8 % olive oil, 7 % egg, 5 % olives.",
+        "basis": "recipe decomposition"
+      }
+    },
+    {
+      "key": "slata_tounsia",
+      "name_fr": "Slata tounsia",
+      "name_en": "Tunisian salad",
+      "aliases": ["salade tunisienne", "سلاطة تونسية"],
+      "category": "entree",
+      "description": "Finely diced cucumber, tomato, onion and green pepper with olive oil, tuna, egg and olives. Raw, unlike mechouia.",
+      "per_100g": { "kcal": 95, "protein_g": 4.0, "carbohydrate_g": 5.0, "fat_g": 6.5 },
+      "typical_portion_g": 180,
+      "estimated": true,
+      "confidence": "medium",
+      "source": {
+        "kind": "estimated",
+        "citation": "Team estimate, 2026-09-21. 75 % raw vegetables, 10 % tuna, 7 % egg, 5 % olive oil, 3 % olives.",
+        "basis": "recipe decomposition"
+      }
+    },
+    {
+      "key": "tajine_tunisien",
+      "name_fr": "Tajine tunisien",
+      "name_en": "Tunisian baked egg tajine",
+      "aliases": ["tajine", "طاجين"],
+      "category": "plat_principal",
+      "description": "Nothing like the Moroccan dish of the same name: a baked set omelette of eggs, grated cheese, shredded chicken or lamb, parsley and sometimes potato, cut into squares.",
+      "per_100g": { "kcal": 196, "protein_g": 15.5, "carbohydrate_g": 4.0, "fat_g": 13.0 },
+      "typical_portion_g": 200,
+      "estimated": true,
+      "confidence": "medium",
+      "source": {
+        "kind": "estimated",
+        "citation": "Team estimate, 2026-09-21. 50 % egg, 20 % chicken, 15 % cheese, 10 % potato and parsley, 5 % olive oil.",
+        "basis": "recipe decomposition"
+      },
+      "note": "Name collision with Moroccan tajine is a real recognition hazard — a vision model with a Western food prior will reach for the wrong dish entirely."
+    },
+    {
+      "key": "kafteji",
+      "name_fr": "Kafteji",
+      "name_en": "Tunisian fried vegetable mix",
+      "aliases": ["kefteji", "كفتاجي"],
+      "category": "plat_principal",
+      "description": "Peppers, tomatoes, potato, pumpkin and egg each fried separately, then chopped together on the board with harissa. Street food, eaten with bread.",
+      "per_100g": { "kcal": 168, "protein_g": 4.2, "carbohydrate_g": 12.0, "fat_g": 11.5 },
+      "typical_portion_g": 250,
+      "estimated": true,
+      "confidence": "low",
+      "source": {
+        "kind": "estimated",
+        "citation": "Team estimate, 2026-09-21. 80 % mixed fried vegetables, 15 % egg, plus absorbed frying oil.",
+        "basis": "recipe decomposition"
+      },
+      "note": "Confidence is low: everything in the dish is fried separately, so oil absorption is both high and highly variable."
+    },
+    {
+      "key": "marqa_jelbana",
+      "name_fr": "Marqa jelbana",
+      "name_en": "Pea and lamb stew",
+      "aliases": ["jelbana", "marqa", "مرقة جلبانة"],
+      "category": "plat_principal",
+      "description": "Green peas stewed with lamb, artichoke hearts and a light tomato sauce. A spring dish.",
+      "per_100g": { "kcal": 128, "protein_g": 7.0, "carbohydrate_g": 9.5, "fat_g": 6.8 },
+      "typical_portion_g": 300,
+      "estimated": true,
+      "confidence": "medium",
+      "source": {
+        "kind": "estimated",
+        "citation": "Team estimate, 2026-09-21. 35 % peas, 20 % lamb, 40 % sauce, 5 % olive oil.",
+        "basis": "recipe decomposition"
+      }
+    },
+    {
+      "key": "kamounia",
+      "name_fr": "Kamounia",
+      "name_en": "Cumin liver stew",
+      "aliases": ["kammounia", "كمونية"],
+      "category": "plat_principal",
+      "description": "Beef or lamb liver slow-cooked with a heavy hand of cumin and garlic until the sauce is dark and thick.",
+      "per_100g": { "kcal": 158, "protein_g": 14.0, "carbohydrate_g": 3.5, "fat_g": 9.8 },
+      "typical_portion_g": 220,
+      "estimated": true,
+      "confidence": "medium",
+      "source": {
+        "kind": "estimated",
+        "citation": "Team estimate, 2026-09-21. 45 % liver, 45 % sauce, 10 % olive oil.",
+        "basis": "recipe decomposition"
+      }
+    },
+    {
+      "key": "fricasse",
+      "name_fr": "Fricassé",
+      "name_en": "Tunisian fried sandwich",
+      "aliases": ["fricasse", "فريكاسي"],
+      "category": "sandwich",
+      "description": "A small deep-fried bread roll split and filled with tuna, potato, olives, egg and harissa. Sold everywhere, eaten standing up.",
+      "per_100g": { "kcal": 315, "protein_g": 10.5, "carbohydrate_g": 28.0, "fat_g": 18.0 },
+      "typical_portion_g": 120,
+      "estimated": true,
+      "confidence": "low",
+      "source": {
+        "kind": "estimated",
+        "citation": "Team estimate, 2026-09-21. 45 % fried dough, 20 % potato, 15 % tuna, 10 % egg, 10 % olives and harissa.",
+        "basis": "recipe decomposition"
+      },
+      "note": "Confidence is low: the roll is deep-fried and oil absorption was assumed."
+    },
+    {
+      "key": "harissa",
+      "name_fr": "Harissa",
+      "name_en": "Tunisian chilli paste",
+      "aliases": ["هريسة"],
+      "category": "condiment",
+      "description": "Dried red chillies pounded with garlic, caraway, coriander and olive oil. A condiment, not a dish — logged in grams because a spoonful carries real energy.",
+      "per_100g": { "kcal": 205, "protein_g": 3.5, "carbohydrate_g": 12.0, "fat_g": 16.0 },
+      "typical_portion_g": 15,
+      "estimated": true,
+      "confidence": "medium",
+      "source": {
+        "kind": "estimated",
+        "citation": "Team estimate, 2026-09-21. 55 % rehydrated chilli, 35 % olive oil, 10 % garlic and spices.",
+        "basis": "recipe decomposition"
+      },
+      "note": "Typical portion is small but the device will weigh it accurately — this is a case where a 15 g measurement beats any photo estimate outright."
+    },
+    {
+      "key": "makroudh",
+      "name_fr": "Makroudh",
+      "name_en": "Semolina date pastry",
+      "aliases": ["makroud", "مقروض"],
+      "category": "dessert",
+      "description": "Semolina dough filled with spiced date paste, cut into lozenges, deep-fried and dipped in honey. Dense and very sweet.",
+      "per_100g": { "kcal": 385, "protein_g": 4.5, "carbohydrate_g": 58.0, "fat_g": 15.0 },
+      "typical_portion_g": 60,
+      "estimated": true,
+      "confidence": "medium",
+      "source": {
+        "kind": "estimated",
+        "citation": "Team estimate, 2026-09-21. 45 % semolina dough, 35 % date paste, 10 % honey coating, plus absorbed frying oil.",
+        "basis": "recipe decomposition"
+      }
+    },
+    {
+      "key": "bambalouni",
+      "name_fr": "Bambalouni",
+      "name_en": "Tunisian sugared doughnut",
+      "aliases": ["banbalouni", "بمبلوني"],
+      "category": "dessert",
+      "description": "A ring of slack dough fried to order and handed over in paper under a heap of granulated sugar. Sidi Bou Saïd's contribution to breakfast.",
+      "per_100g": { "kcal": 333, "protein_g": 5.5, "carbohydrate_g": 44.0, "fat_g": 15.0 },
+      "typical_portion_g": 90,
+      "estimated": true,
+      "confidence": "low",
+      "source": {
+        "kind": "estimated",
+        "citation": "Team estimate, 2026-09-21. 75 % fried dough, 15 % surface sugar, plus absorbed frying oil.",
+        "basis": "recipe decomposition"
+      },
+      "note": "Confidence is low: sugar is applied by hand and the coating mass varies by more than a factor of two."
+    },
+    {
+      "key": "assidat_zgougou",
+      "name_fr": "Assidat zgougou",
+      "name_en": "Aleppo pine nut pudding",
+      "aliases": ["zgougou", "assida zgougou", "عصيدة الزقوقو"],
+      "category": "dessert",
+      "description": "A dark pudding of ground Aleppo pine seed thickened with starch, layered with cream and dressed with nuts. Made for Mawlid.",
+      "per_100g": { "kcal": 240, "protein_g": 5.0, "carbohydrate_g": 28.0, "fat_g": 12.0 },
+      "typical_portion_g": 150,
+      "estimated": true,
+      "confidence": "low",
+      "source": {
+        "kind": "estimated",
+        "citation": "Team estimate, 2026-09-21. 40 % zgougou-and-starch base, 30 % sweetened cream, 20 % sugar, 10 % nut topping.",
+        "basis": "recipe decomposition"
+      },
+      "note": "Confidence is low: no per-100 g reference value for Aleppo pine seed (Pinus halepensis) was found, so its contribution was approximated from other pine nuts."
+    }
+  ]
+}
