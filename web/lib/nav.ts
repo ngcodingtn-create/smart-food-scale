@@ -30,40 +30,19 @@ export const NAV: NavGroup[] = [
       { label: 'Risks', href: '/project/risks' },
     ],
   },
-  {
-    label: 'Deliverables',
-    items: [
-      { label: 'Status board', href: '/deliverables' },
-      { label: 'Backend API', href: '/deliverables/backend', badge: { text: 'Done', tone: 'done' } },
-      {
-        label: 'Tunisian food table',
-        href: '/deliverables/food-table',
-        badge: { text: 'Done', tone: 'done' },
-      },
-      {
-        label: 'Firmware',
-        href: '/deliverables/firmware',
-        badge: { text: 'WIP', tone: 'wip' },
-      },
-      {
-        label: 'Mobile app',
-        href: '/deliverables/app',
-        badge: { text: 'Planned', tone: 'todo' },
-      },
-    ],
-  },
-  {
-    label: 'Reference',
-    items: [
-      { label: 'Decision log', href: '/reference/decisions' },
-      { label: 'Accuracy & calibration', href: '/reference/accuracy' },
-      {
-        label: 'Vision API options',
-        href: '/reference/vision-apis',
-        badge: { text: 'Decide', tone: 'alert' },
-      },
-    ],
-  },
+  // The Deliverables and Reference groups were removed from the sidebar on
+  // the owner's request (2026-09-21). The PAGES still exist and are still
+  // served — they are simply not linked from the nav:
+  //
+  //   /deliverables            /reference/decisions
+  //   /deliverables/backend    /reference/accuracy
+  //   /deliverables/food-table /reference/vision-apis
+  //   /deliverables/firmware
+  //   /deliverables/app
+  //
+  // Restore them by putting their entries back here; nothing else needs to
+  // change. Body links to them (the Overview page's buttons, for one) still
+  // work either way.
 ];
 
 export const REPO_URL = 'https://github.com/ngcodingtn-create/smart-food-scale';
