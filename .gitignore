@@ -1,0 +1,50 @@
+# ---- Secrets: never commit these ----
+**/secrets.h
+!**/secrets.example.h
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# ---- Python / backend ----
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# Runtime data: the SQLite DB and the on-disk nutrition cache are
+# generated, not authored. data/tunisian_foods.json IS authored and
+# must stay tracked.
+backend/*.db
+backend/*.db-journal
+backend/data/cache/
+backend/data/uploads/
+
+# ---- PlatformIO / firmware ----
+.pio/
+.pioenvs/
+.piolibdeps/
+firmware/**/.vscode/
+
+# ---- React Native / Expo ----
+node_modules/
+.expo/
+.expo-shared/
+dist/
+web-build/
+*.jks
+*.p8
+*.p12
+*.mobileprovision
+*.orig.*
+
+# ---- Editors / OS ----
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
