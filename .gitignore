@@ -35,6 +35,8 @@ firmware/**/.vscode/
 out/
 next-env.d.ts
 .vercel/
+# TypeScript incremental build cache — regenerated on every build.
+*.tsbuildinfo
 # package-lock.json IS tracked — Vercel runs `npm ci`, which needs it.
 
 # ---- PlatformIO toolchain venv (root-level, not part of the firmware) ----

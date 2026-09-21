@@ -187,7 +187,7 @@ function CameraBoard({ selected }: { selected: boolean }) {
 }
 
 function Rig(props: SceneProps) {
-  const { selected, onSelect, exploded, reducedMotion, dark, dimensions, lights } = props;
+  const { selected, onSelect, exploded, reducedMotion, dark, dimensions, lights, preset } = props;
   const e = exploded ? 1 : 0;
   const shell = dark ? '#87867e' : '#d7d5c9';
   return <>
@@ -252,14 +252,22 @@ function Rig(props: SceneProps) {
       </>}
       {!exploded && (dimensions || selected === 'camera' || selected === 'ring') && <Stroke points={[[0, DIM.camera.lensBottom, DIM.plate.z], [0, DIM.plate.surface, DIM.plate.z]]} dashed />}
       {dimensions && <>
+        {/* Plan dimensions — readable from every angle, including straight down. */}
         <Stroke points={[[-125, 1, 144], [125, 1, 144]]} />
         <Stroke points={[[-125, 1, 138], [-125, 1, 150]]} /><Stroke points={[[125, 1, 138], [125, 1, 150]]} />
         <Label text="250 mm" position={[0, 2, 160]} dark={dark} />
-        <Stroke points={[[155, 0, -107], [155, 350, -107]]} />
-        <Stroke points={[[149, 0, -107], [161, 0, -107]]} /><Stroke points={[[149, 350, -107], [161, 350, -107]]} />
-        <Label text="350 mm" position={[155, 175, -107]} width={51} dark={dark} />
-        {!exploded && <Label text="249 mm clearance" position={[0, 230, -15]} width={85} dark={dark} />}
         <Label text="Ø180 mm plate" position={[-105, 85 + e * 125, -15]} width={70} dark={dark} />
+
+        {/* Vertical dimensions are hidden in the top view. Seen end-on from
+            directly above, a height measurement collapses to a point: the
+            leader line shoots off the canvas and the label ends up annotating
+            empty space. */}
+        {preset !== 'top' && <>
+          <Stroke points={[[155, 0, -107], [155, 350, -107]]} />
+          <Stroke points={[[149, 0, -107], [161, 0, -107]]} /><Stroke points={[[149, 350, -107], [161, 350, -107]]} />
+          <Label text="350 mm" position={[155, 175, -107]} width={51} dark={dark} />
+          {!exploded && <Label text="249 mm clearance" position={[0, 230, -15]} width={85} dark={dark} />}
+        </>}
       </>}
     </group>
   </>;
