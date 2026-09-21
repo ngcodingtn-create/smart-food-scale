@@ -1,0 +1,19 @@
+# Normalise line endings so the repo behaves the same on Windows, macOS and Linux.
+* text=auto eol=lf
+
+# Shell scripts MUST keep LF. A CRLF shebang line fails on macOS/Linux with
+# "bad interpreter: /usr/bin/env bash^M" — which is exactly the kind of bug
+# that eats an afternoon before a demo.
+*.sh text eol=lf
+
+# Windows-only helpers keep CRLF.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Binary — never touch these.
+*.xlsx binary
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.ico  binary
+*.pdf  binary
