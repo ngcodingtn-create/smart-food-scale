@@ -1,0 +1,80 @@
+export const metadata = {
+  title: "Firmware",
+  description: "Two PlatformIO projects — the scale node and the camera node.",
+};
+
+# Firmware
+
+**Status: 🚧 started.** PlatformIO 6.2.0 installed; Node A's build configuration is
+written. Drivers and the ESP-NOW link are next.
+
+Both projects are **PlatformIO**, not Arduino IDE — they build from the command line,
+which is what makes them verifiable on a machine with no board attached.
+
+## Node A — the scale
+
+ESP32 DevKit V1 (WROOM-32). Owns the weight reading and the local UI, and acts as
+**master**: on capture it tares, takes a median-filtered weight, then commands Node B
+to shoot.
+
+| Item | Plan |
+| --- | --- |
+| HX711 | Channel A, gain 128, **10 SPS**, median filter over 10–16 samples |
+| OLED | SSD1306 128×64 at `0x3C` — live weight, tare state, last result |
+| Buttons | Tare and capture, debounced in software |
+| Buzzer | Driven through a transistor, never straight off a GPIO |
+| Link | ESP-NOW to Node B — no router involved |
+
+### Simulation mode
+
+```bash
+pio run -e node-a-sim -t upload
+```
+
+Fakes the load cell so the **whole pipeline** — weight → OLED → ESP-NOW → camera →
+backend → app — can be exercised on a bare DevKit before the HX711 and the cell
+arrive. This is the difference between being blocked on the faculty and not.
+
+## Node B — the camera
+
+ESP32-CAM (AI-Thinker, OV2640) on a fixed arm above the plate.
+
+| Item | Plan |
+| --- | --- |
+| Camera | JPEG at SVGA or better |
+| Lighting | WS2812B ring through a level shifter, for controlled illumination |
+| Link | ESP-NOW receive |
+| Upload | `multipart/form-data` POST with **retry** |
+| Fallback | microSD buffer when the POST fails, flushed on reconnect |
+
+## Why two boards
+
+The ESP32-CAM is pin-starved, and its 3.3 V rail sags when the camera initialises
+while Wi-Fi is transmitting. Hanging the HX711 off the same board causes brownout
+resets and weight readings that **drift during the capture** — precisely when the
+reading matters.
+
+One extra board removes the entire failure class. See
+[Wiring](/project/wiring) for the pin conflicts this avoids.
+
+## Secrets
+
+Wi-Fi credentials live in a **gitignored** `include/secrets.h`, with a committed
+`include/secrets.example.h` template:
+
+```bash
+cp include/secrets.example.h include/secrets.h
+```
+
+Never hard-coded: campus captive portals block the ESP32 outright, so the SSID and
+password have to be changeable without a rebuild of intent. Assume a phone hotspot or
+a dedicated AP.
+
+## Building
+
+```bash
+cd firmware/node-a-scale
+pio run            # compiles with no board attached
+pio run -t upload  # flash
+pio device monitor # 115200
+```

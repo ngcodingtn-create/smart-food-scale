@@ -1,0 +1,109 @@
+import { Callout } from '@/components/Callout';
+
+export const metadata = {
+  title: 'Overview',
+  description:
+    'An IoT kitchen scale that weighs a meal and returns its calories and macros.',
+};
+
+# Smart Food Scale
+
+{/* These wrappers are <div>, never <p>. MDX parses the children of a block-level
+    JSX element as markdown and wraps them in their own <p>, and a <p> inside a
+    <p> is invalid HTML — which React reports as a hydration failure. */}
+
+<div className="!mt-2 text-lg leading-relaxed text-[var(--ink-soft)]">
+
+The camera answers _what_ the food is. The load cell answers _how&nbsp;much_ of it
+there is.
+
+</div>
+
+<div className="!mt-7 flex flex-wrap gap-3">
+  <a
+    href="/deliverables"
+    className="rounded-lg bg-[var(--accent)] px-4 py-2 text-sm font-semibold !text-white !no-underline transition-opacity hover:opacity-90"
+  >
+    See the deliverables →
+  </a>
+  <a
+    href="/project/component-request"
+    className="rounded-lg border border-[var(--rule)] px-4 py-2 text-sm font-semibold !text-[var(--ink)] !no-underline transition-colors hover:bg-[var(--paper-sunken)]"
+  >
+    Component request
+  </a>
+</div>
+
+## The problem we're attacking
+
+Calorie-tracking apps that work from a single photo — Cal AI and its imitators — have
+to **guess how much food is on the plate**. That guess is their dominant source of
+error. A photo cannot tell a 90 g portion of couscous from a 160 g one, and granular
+foods like rice only ever show their top surface.
+
+Time-of-flight sensors and single-image volume estimation don't fix it either: they
+smooth over granular foods and still only see the top of a pile.
+
+<Callout type="tip" title="The whole idea, in one sentence">
+
+Stop estimating the portion. **Weigh it.** The camera is demoted to answering only
+what the dish *is* — which is the part a camera is actually good at.
+
+</Callout>
+
+## What it is
+
+<div className="!mt-6 grid gap-4 sm:grid-cols-2">
+  <div className="rounded-xl border border-[var(--rule)] p-5">
+    <h3 className="!mt-0 !text-base">Two ESP32 nodes</h3>
+    <div className="!mt-2 text-sm text-[var(--ink-soft)]">
+      <strong>Node A</strong> carries the load cell, the screen and the buttons.{' '}
+      <strong>Node B</strong> carries the camera. They talk over ESP-NOW, which needs
+      no router.
+    </div>
+  </div>
+  <div className="rounded-xl border border-[var(--rule)] p-5">
+    <h3 className="!mt-0 !text-base">A backend that does the arithmetic</h3>
+    <div className="!mt-2 text-sm text-[var(--ink-soft)]">
+      Identifies the dish, looks up nutrients per 100 g, multiplies by the{' '}
+      <strong>measured</strong> mass, stores the meal.
+    </div>
+  </div>
+  <div className="rounded-xl border border-[var(--rule)] p-5">
+    <h3 className="!mt-0 !text-base">A phone app</h3>
+    <div className="!mt-2 text-sm text-[var(--ink-soft)]">
+      Daily log, macro totals, history, and a manual-entry fallback for when the
+      recogniser says it doesn&apos;t know.
+    </div>
+  </div>
+  <div className="rounded-xl border border-[var(--rule)] p-5">
+    <h3 className="!mt-0 !text-base">Our own food table</h3>
+    <div className="!mt-2 text-sm text-[var(--ink-soft)]">
+      Couscous, lablabi, brik, ojja and mloukhia are in <strong>no</strong> food
+      database on earth. So we built one.
+    </div>
+  </div>
+</div>
+
+## Where the project actually stands
+
+| Milestone | State |
+| --- | --- |
+| M1 — Repo structure | ✅ Done |
+| M2 — Backend | ✅ Done — 145 tests passing, no network required |
+| M3 — Firmware | 🚧 Started |
+| M4 — Mobile app | 📋 Not started |
+| M5 — This site | ✅ Live |
+
+Hardware has been requested from the faculty and is **not in hand**. Everything built
+so far is therefore testable without it: the backend runs offline, the firmware
+compiles with no board attached, and Node A can fake its own weight readings.
+
+<Callout type="caution" title="Read this before quoting any nutrient number">
+
+Every row in our Tunisian food table is an **estimate** derived from recipe
+composition — not a lab measurement, because no published composition table exists
+for these dishes. Each row carries its derivation and a confidence rating. See
+[the food table](/deliverables/food-table).
+
+</Callout>

@@ -1,0 +1,51 @@
+export const metadata = {
+  title: "Mobile app",
+  description: "React Native via an Expo development build.",
+};
+
+# Mobile app
+
+**Status: 📋 not started.**
+
+## Plan
+
+React Native through an **Expo development build** — not Expo Go.
+
+| Screen | Contents |
+| --- | --- |
+| Today | Today's meals, macro rings or bars, running totals |
+| History | Previous days, tappable into a day's meals |
+| Manual entry | The fallback when the recogniser says it doesn't know |
+| Settings | Backend URL, configurable without a rebuild |
+
+## Constraints already settled
+
+- **No BLE in the main path.** Expo Go cannot do Bluetooth Low Energy at all. Our
+  path is HTTP, so this shouldn't bite — but any future BLE proposal has to come with
+  a custom dev client attached.
+- **Backend URL is configurable at runtime.** The device's IP changes every time the
+  hotspot restarts; a rebuild per demo is not acceptable.
+- **It must run against `localhost`.** The backend is not deployed. During
+  development the phone and the laptop share a network and the app points at the
+  laptop's LAN address.
+
+## What it consumes
+
+Everything it needs already exists and is tested:
+
+| Endpoint | Screen |
+| --- | --- |
+| `GET /meals?date=` | Today, History |
+| `GET /meals/totals?date=` | The macro rings |
+| `GET /foods` | Manual-entry picker |
+| `POST /meals` with `dish_key` | Manual entry submit |
+| `DELETE /meals/{id}` | Swipe to remove |
+
+## One UI rule already decided
+
+Every meal carries `nutrition.estimated` and a citation. When it's `true` — which is
+currently **every dish in our table** — the app must visibly qualify the number
+rather than presenting it with the same authority as a measurement.
+
+A number that looks precise and isn't is the failure this whole project is built
+against. It would be absurd to reintroduce it in the last 40 pixels.

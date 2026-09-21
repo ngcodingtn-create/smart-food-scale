@@ -1,0 +1,91 @@
+export const metadata = {
+  title: "Architecture",
+  description: "Two ESP32 nodes, ESP-NOW between them, HTTP out to a backend.",
+};
+
+# Architecture
+
+## The whole system
+
+```
+   ┌────────────────────────┐        ESP-NOW         ┌────────────────────────┐
+   │  Node A — SCALE        │ ─────────────────────► │  Node B — CAMERA       │
+   │  ESP32 DevKit V1       │   "tared, 143.2 g,     │  ESP32-CAM (AI-Thinker)│
+   │                        │    shoot now"          │                        │
+   │  HX711 + 1 kg cell     │                        │  OV2640 @ SVGA         │
+   │  SSD1306 OLED          │                        │  WS2812B light ring    │
+   │  tare / capture btns   │                        │  microSD fallback      │
+   │  buzzer                │                        │                        │
+   └────────────────────────┘                        └───────────┬────────────┘
+              master                                             │ Wi-Fi
+                                                                 │ multipart POST
+                                                                 │ (JPEG + grams)
+                                                                 ▼
+                                                     ┌────────────────────────┐
+                                                     │  Backend (FastAPI)     │
+                                                     │  identify → look up    │
+                                                     │  → scale by mass       │
+                                                     │  → persist             │
+                                                     └───────────┬────────────┘
+                                                                 │ HTTP
+                                                                 ▼
+                                                     ┌────────────────────────┐
+                                                     │  React Native app      │
+                                                     │  daily log · macros    │
+                                                     └────────────────────────┘
+```
+
+## Capture sequence
+
+1. User puts the plate on the scale and presses **capture**.
+2. Node A **tares**, then takes a median-filtered weight — 10–16 samples at 10 SPS.
+3. Node A sends the gram value to Node B over **ESP-NOW**.
+4. Node B lights the WS2812B ring, captures a **JPEG at SVGA or better**.
+5. Node B POSTs `multipart/form-data` — the JPEG plus the gram value — over Wi-Fi.
+6. Backend identifies the dish, looks up nutrients **per 100 g**, multiplies by the
+   measured mass, persists the meal.
+7. App reads it back over HTTP.
+
+Only Node B needs Wi-Fi. ESP-NOW between the nodes needs no router, which matters on
+a campus where the network is hostile (see [Risks](/project/risks)).
+
+## Why Node A is the master
+
+The tare has to happen **immediately before** the weight is taken, and the weight has
+to be taken **before** the camera fires. A load cell drifts with temperature; taring
+once at boot and trusting it an hour later gives a reading that is wrong in a way
+nobody notices.
+
+Making the node that owns the cell also own the sequence means that ordering is
+structural rather than a convention two firmwares have to agree on.
+
+## Why two boards, not one
+
+This is the decision most likely to be questioned, so:
+
+The ESP32-CAM is **pin-starved** — with the microSD in 1-bit mode only GPIO 4, 12 and
+13 are free — and its **3.3 V rail sags** when the camera initialises while Wi-Fi is
+transmitting. Hanging the HX711 off the same board produces two failures at once:
+
+- brownout resets, and
+- weight readings that drift **during the capture** — exactly when the number matters.
+
+One extra board costs a few dinars and removes the whole class. See
+[Wiring](/project/wiring).
+
+## Data flow, and where the honesty lives
+
+The mass is measured once and never re-derived. Everything downstream is arithmetic on
+that measurement:
+
+```
+measured_grams ──┐
+                 ├──►  macros = per_100g × (grams / 100)
+per_100g ────────┘
+   ▲
+   └── from our Tunisian table (estimated, flagged)
+       or USDA (measured, cached)
+```
+
+The **provenance of `per_100g` travels with the result** all the way to the app, so a
+figure derived from recipe composition is never displayed as though it were measured.

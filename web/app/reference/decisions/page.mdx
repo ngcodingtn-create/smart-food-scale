@@ -1,0 +1,109 @@
+export const metadata = {
+  title: "Decision log",
+  description: "Every judgement call made while building, with the reasoning.",
+};
+
+# Decision log
+
+Judgement calls the brief did not specify, recorded so the team can review and
+overrule. The canonical copy is `docs/decisions.md` in the repo.
+
+## D0 — The repo was scaffolded from the brief, not the original archive
+
+**Accepted, with an action item.**
+
+The original `smart-food-scale/` archive — `index.md`, the five-sheet
+`IoT_Food_Tracker_Component_Request.xlsx`, `tools/build_bom.py`,
+`tools/add_dropdown.py`, `setup-github.sh` and one commit — **could not be found on
+the build machine.** A search of the whole user profile and both drives turned up no
+`build_bom.py`, no `setup-github.sh`, and no `*food*scale*` directory.
+
+**What this cost.** The brief carries the full pin map, the ESP32-CAM forbidden-pin
+list, the SD_MMC free-pin set, the GPIO 12 strapping warning, the WROVER caveat, the
+load-cell colour code, the power figures and the accuracy envelope — so the firmware
+is not flying blind. What is **not** recoverable is anything the original wiring and
+risks sheets said *beyond* what the brief quoted.
+
+**Action:** diff this repo's BOM and wiring against the original workbook when someone
+locates it.
+
+## D1 — Git history starts fresh
+
+**Accepted.** The original repo had one commit authored by `team@example.invalid`.
+Since the archive was unavailable, history starts fresh with a real identity.
+
+Had the archive been present, the plan was to **leave that commit alone** — rewriting
+history to fix one placeholder commit costs more than it repairs once teammates have
+cloned.
+
+## D2 — FastAPI over Express
+
+**Accepted.** Four reasons, in order of weight:
+
+1. **Pydantic matches the problem.** The client is an embedded device posting
+   multipart — the least forgiving client possible. Typed parsing and machine-readable
+   errors come free. In Express that's `zod` + `multer` + glue we'd own.
+2. **The recogniser interface is the project's one real extension point.** Python ABCs
+   express "swap this implementation" as design rather than convention.
+3. **Every vision and nutrition SDK is Python-first.**
+4. **OpenAPI is generated** — `/docs` is the contract for both the firmware and app
+   authors.
+
+**What would change our mind:** if the team is stronger in JavaScript, that outweighs
+all four. A backend nobody can debug at 2 a.m. before the demo is worse than a
+clumsier one everyone understands.
+
+## D3 — Recognition is driven by *our* candidate list, not a vendor's
+
+**Accepted.** The concrete vision API is still
+[an open decision](/reference/vision-apis).
+
+Food-specific APIs return their own fixed taxonomy. If `lablabi` isn't in it, nothing
+recovers it. So the recogniser is defined as: *given a photo and the dishes we have
+data for, return one or `unknown`.*
+
+Consequences:
+
+- A general multimodal model beats a food-specific API here — the opposite of the
+  obvious choice.
+- **`unknown` must be first-class.** A recogniser that always guesses produces
+  confidently wrong macros, which is worse than a manual-entry prompt.
+- Adding a dish to the table automatically extends what the recogniser can return.
+
+## D4 — `grams` is validated hard
+
+**Accepted.** The entire thesis is that mass is measured rather than estimated. An
+endpoint accepting a missing, zero or negative mass quietly reintroduces the error the
+device exists to remove.
+
+`POST /meals` rejects below 0.5 g and above 5000 g. **The upper bound is our choice,
+not a measurement** — four times a large restaurant portion and well past the 1 kg
+cell, so it only ever catches a broken reading.
+
+## D5 — Lookup order: local → USDA → fail loudly
+
+**Accepted.** Local first, not as a fallback: it's the only source that knows our
+dishes and it needs no network, keeping tests offline and the demo independent of
+campus Wi-Fi.
+
+USDA second, cached on disk — free tier is 1,000 requests/hour per key.
+
+If neither knows the dish, say so. A confident wrong number is the failure mode we're
+building against.
+
+## D6 — Astro + Starlight on GitHub Pages, public repo
+
+**Accepted** (owner decision, 2026-09-21).
+
+The site is docs and showcase, not a live dashboard, so it needs no server — which
+rules out the main reason to reach for Next.js on Vercel.
+
+The deciding constraint was hosting: **GitHub Pages does not publish from a private
+repo on a free plan.** With the repo public, Pages is free and `setup-github.sh`
+already enables it. `setup-github.sh` was changed from `--private` to `--public`.
+
+Starlight gives the sidebar, search, dark mode and mobile nav configured rather than
+hand-built, and adding a route is adding a markdown file.
+
+**Escape hatch:** Astro deploys to Vercel with no rewrite, and supports React
+components via `@astrojs/react` if a page ever needs interactivity.
