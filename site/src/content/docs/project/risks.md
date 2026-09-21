@@ -1,0 +1,77 @@
+---
+title: Risks
+description: What can sink this project, and what we are doing about each.
+sidebar:
+  order: 4
+---
+
+Each of these was researched rather than guessed. They are listed roughly by how much
+time they can cost.
+
+## Campus Wi-Fi blocks the ESP32
+
+**Captive portals block the ESP32 outright** — it has no browser to accept terms in.
+
+WPA2-Enterprise does work via
+`WiFi.begin(ssid, WPA2_AUTH_PEAP, identity, user, pass)` on Arduino core 2.0.3+, but
+it is fragile and awkward to debug on a device with no screen.
+
+**Mitigation:** assume a **phone hotspot or a dedicated AP**. The SSID and password
+are configurable in `secrets.h`, never hard-coded — so switching networks at the demo
+is a reflash of credentials, not a rewrite.
+
+## ESP32-CAM brownout during capture
+
+The 3.3 V rail sags when the camera initialises while Wi-Fi transmits. Symptom is a
+reset mid-capture, or a corrupt frame with a weight reading that drifted.
+
+**Mitigation:** 5 V / 2 A supply, 470–1000 µF low-ESR + 100 nF across the rail as
+close as possible, thick short cables, **no breadboard in the power path**, and the
+HX711 on its own buck rail. This risk is the reason there are
+[two boards](/smart-food-scale/project/architecture/).
+
+## Load cell drift
+
+Creep and temperature drift are real and they are the difference between the
+*readable* figure and the *absolute* one.
+
+**Mitigation:** **tare immediately before every capture**, never once at boot. Node A
+owns the sequence so this is structural rather than a convention.
+
+## Nutrition API rate limits
+
+| Service | Limit |
+| --- | --- |
+| USDA FoodData Central | **1,000 requests/hour** per api.data.gov key, shared |
+| Open Food Facts | Free, barcodes only |
+| Nutritionix | Free tier caps at ~**2 monthly active users** |
+| LogMeal | 30 days **or** 200 queries, whichever first — a trial, not a free tier |
+
+**Mitigation:** every USDA response is cached on disk and never expired — food
+composition does not change. A test asserts that a lookup without a key **raises**
+rather than calling out, so a test run cannot quietly burn the quota.
+
+## Tunisian dishes are in no database
+
+Couscous, lablabi, brik, ojja and mloukhia are absent from USDA, from Nutritionix, and
+from every commercial recogniser's label set.
+
+**Mitigation:** we maintain [our own table](/smart-food-scale/deliverables/food-table/),
+and we drive recognition from **our** candidate list rather than a vendor's taxonomy.
+This turned a risk into the project's most original contribution.
+
+## Expo Go cannot do BLE
+
+Not currently a problem — the main path is HTTP. Listed so nobody proposes a BLE
+feature without also specifying a custom development client.
+
+## The original archive is missing
+
+The project's own `smart-food-scale.zip`, including the five-sheet component-request
+workbook, could not be found on the build machine. The repo was reconstructed from the
+brief.
+
+**Mitigation:** everything reconstructed is marked as such, and
+[decision D0](/smart-food-scale/reference/decisions/) records exactly what could be
+lost — anything the original wiring and risks sheets said *beyond* what the brief
+quoted.

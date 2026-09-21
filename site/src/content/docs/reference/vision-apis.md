@@ -1,0 +1,87 @@
+---
+title: Vision API options
+description: Researched and priced. Waiting on a decision.
+sidebar:
+  order: 3
+  badge:
+    text: Decision needed
+    variant: danger
+---
+
+**This is the open decision.** Until it's made, the backend uses the stub recogniser,
+wired through the same interface the real one will use.
+
+Figures gathered **2026-09-21** from each vendor's live pricing page.
+
+## The constraint that rules out a whole category
+
+Tunisian dishes are absent from every food-specific recogniser's taxonomy. LogMeal,
+Foodvisor and Clarifai's food model each return **their own fixed label set** — if
+`lablabi` isn't in it, no amount of prompting or post-processing recovers it.
+
+So we invert the dependency: **the recogniser is handed our candidate list and picks
+from it.** The vocabulary is ours; the vendor only does the seeing. That makes a
+general multimodal model a better fit than a food-specific API — the opposite of the
+obvious choice.
+
+## The options
+
+### Multimodal LLMs — can name a Tunisian dish
+
+| | Input / 1M tokens | ~Cost per photo | Free tier |
+| --- | ---: | ---: | :---: |
+| **Gemini 2.5 Flash-Lite** | $0.10 | ~$0.0001 | ✅ Yes |
+| GPT-5-nano | $0.05 | ~$0.0001 | ❌ |
+| Claude Haiku 4.5 | $1.00 | ~$0.001 | ❌ |
+| Claude Opus 5 | $5.00 | ~$0.005 | ❌ |
+
+:::note[That per-photo figure is our estimate]
+An SVGA 800×600 frame is roughly 640 image tokens. Cost = tokens × list price, plus
+prompt and output. **Derived, not measured against a bill.**
+:::
+
+### Generic vision labelling — too coarse
+
+| | Price | Free tier | Problem |
+| --- | --- | --- | --- |
+| Google Cloud Vision (labels) | $1.50 / 1000 images | 1000/month | Returns `food`, `dish`, `cuisine` — can't separate couscous from mloukhia |
+
+### Food-specific APIs — wrong taxonomy
+
+| | Free tier | Problem |
+| --- | --- | --- |
+| LogMeal | 30 days **or** 200 queries, 5 users, new members only | Fixed Western taxonomy; paid rates quote-only |
+| Clarifai food model | **not verified** — clarifai.com refused connection when fetched | Fixed taxonomy |
+
+:::caution[One figure we could not verify]
+Clarifai's pricing page refused the connection (`ECONNREFUSED`) on 2026-09-21. Its row
+above is from the taxonomy argument alone — **we have no pricing data for it.** Verify
+before relying on it.
+:::
+
+## Recommendation
+
+**Gemini 2.5 Flash-Lite.** It's the only option with a free tier that can name a
+Tunisian dish, and at this volume the paid rate would be under a cent per meal anyway.
+
+Second choice: **Claude Haiku 4.5**, if you'd rather have a paid key with no quota
+anxiety than a free tier with rate limits.
+
+Swapping is one line in `backend/app/recognition/registry.py` plus `SFS_RECOGNISER` in
+`.env`, so this is reversible — but it's still the team's call, not ours.
+
+## What gets built once you choose
+
+```python
+class GeminiRecogniser(Recogniser):
+    name = "gemini"
+
+    def recognise(self, image: bytes,
+                  candidates: Sequence[DishCandidate]) -> RecognitionResult:
+        # Prompt carries candidate.prompt_line() for all 18 dishes,
+        # and an explicit instruction that "unknown" is a valid answer.
+        ...
+```
+
+The `unknown` path is not optional. A recogniser that always guesses maps mloukhia
+onto whatever Western dish looks closest, and the macros are then confidently wrong.

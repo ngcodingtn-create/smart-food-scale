@@ -30,6 +30,14 @@ backend/data/uploads/
 .piolibdeps/
 firmware/**/.vscode/
 
+# ---- Astro docs site ----
+.astro/
+site/dist/
+# package-lock.json IS tracked — the Pages workflow runs `npm ci`, which needs it.
+
+# ---- PlatformIO toolchain venv (root-level, not part of the firmware) ----
+.pio-venv/
+
 # ---- React Native / Expo ----
 node_modules/
 .expo/
