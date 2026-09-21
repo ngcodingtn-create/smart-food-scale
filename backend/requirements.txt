@@ -1,0 +1,25 @@
+# Backend runtime + test dependencies.
+#
+# Floors, not exact pins: this is a team project on three different machines and
+# over-tight pins cause more pain than they prevent. Re-pin before the demo if you
+# want reproducibility.
+
+fastapi>=0.115
+uvicorn[standard]>=0.30
+sqlalchemy>=2.0
+pydantic>=2.8
+pydantic-settings>=2.4
+
+# Required by FastAPI to parse multipart/form-data — this is how the ESP32-CAM
+# posts the JPEG. Without it, POST /meals returns 500 at import time.
+python-multipart>=0.0.9
+
+# USDA FoodData Central client. Also what fastapi.testclient uses under the hood.
+httpx>=0.27
+
+# --- tests ---
+pytest>=8.0
+
+# Starlette's TestClient wants httpx2; without it every test run prints a
+# deprecation warning. httpx (above) stays for our own USDA client.
+httpx2>=0.28
