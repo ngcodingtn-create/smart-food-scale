@@ -202,3 +202,19 @@ it will fail to find a Next app.
 `setup-github.sh` still creates the repo **public**. That is no longer forced by Pages,
 but a public repo is right for a university project regardless, and Vercel deploys
 either way.
+
+## D9 — Pin React for the isolated 3D viewer
+
+**Date:** 2026-09-21 · **Status:** accepted (owner requirement)
+
+The `/rig` viewer uses React Three version 9.7, whose React peer range excludes
+19.3. Pin both `react` and `react-dom` to **19.2.8**, which also satisfies Next 16.
+Keep the normal npm peer checks enabled and commit the lockfile; no
+`--legacy-peer-deps` workaround is used.
+
+Three.js and the renderer belong behind a dynamic import in a client wrapper.
+The MDX page remains a Server Component, and ordinary documentation routes must
+not fetch the rendering engine. Only add addon transpilation if a build needs it.
+
+**What would change our mind:** a tested renderer release that supports the
+newer React version, with a clean dependency tree and passing route checks.
