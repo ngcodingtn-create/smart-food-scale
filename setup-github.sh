@@ -42,8 +42,10 @@ if git remote get-url origin >/dev/null 2>&1; then
   say "Remote 'origin' already configured: $(git remote get-url origin)"
 else
   say "Creating https://github.com/$GITHUB_USER/$REPO_NAME ..."
+  # Public, deliberately: GitHub Pages does not publish from a private repo on a
+  # free plan, and the docs site is a deliverable. See docs/decisions.md D6.
   gh repo create "$GITHUB_USER/$REPO_NAME" \
-    --private \
+    --public \
     --source=. \
     --remote=origin \
     --description="IoT kitchen scale that weighs a meal and returns its macros — ESP32 + FastAPI + React Native"
