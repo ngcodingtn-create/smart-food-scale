@@ -23,8 +23,13 @@ smart-food-scale/
 │   ├── node-a-scale/         ESP32 DevKit V1 — load cell, OLED, buttons, buzzer
 │   └── node-b-camera/        ESP32-CAM  — OV2640, LED ring, Wi-Fi upload
 ├── backend/                  FastAPI — recognition, nutrition lookup, meal store
+├── web/                      Next.js docs & showcase site (deploys to Vercel)
 └── app/                      React Native (Expo development build)
 ```
+
+⚠️ **`app/` is the React Native app, not Next.js.** The Next.js App Router also wants a
+directory called `app/`, which is why the web site lives in `web/` instead of the repo
+root. See `docs/decisions.md` D7.
 
 Both firmware projects are **PlatformIO**, not Arduino IDE — they build from the
 command line, which is what makes them testable in CI and on a machine that has no
@@ -116,8 +121,22 @@ procedure and an empty results table to fill in once the hardware exists.
 | [docs/setup.md](docs/setup.md) | Toolchain setup for all four sub-projects |
 | [docs/decisions.md](docs/decisions.md) | Every judgement call made while building, with reasoning |
 
-The Pages site is published from `index.md` at
-<https://ngcodingtn-create.github.io/smart-food-scale/>.
+### The docs site
+
+The same documentation, with a sidebar, is a Next.js app in `web/`:
+
+```bash
+cd web
+npm install
+npm run dev      # http://localhost:3000
+```
+
+**Deploying to Vercel.** Import the repo, then set **Root Directory to `web`** in
+project settings — Vercel cannot find the Next app otherwise, because the repo root
+holds the React Native `app/`. Everything else is auto-detected.
+
+Adding a page is two steps: create `web/app/<path>/page.mdx`, then add one line to
+`web/lib/nav.ts`.
 
 ---
 

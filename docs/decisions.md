@@ -145,3 +145,60 @@ requests/hour per `api.data.gov` key.
 
 If neither has the dish, the API says so rather than substituting something plausible.
 See D3 — a confident wrong number is the failure mode we are building against.
+
+---
+
+## D6 — The docs site: Next.js on Vercel
+
+**Date:** 2026-09-21 · **Status:** accepted (owner decision, revised same day)
+
+The site is docs and showcase, not a live dashboard.
+
+**First decision, same day:** Astro + Starlight on GitHub Pages — because the content is
+markdown that already existed, the sidebar and search came configured rather than
+hand-built, and Pages needed no second vendor. That was built and shipped: 13 routes,
+14 pages, search index, all green.
+
+**Revised by the owner to Next.js on Vercel.** The site was ported the same day. What
+that cost and bought:
+
+| | Starlight | Next.js (what we now have) |
+| --- | --- | --- |
+| Sidebar, active state, mobile drawer | configured | **hand-built** (`components/Sidebar.tsx`) |
+| Full-text search | built in (Pagefind) | **not yet — a real gap** |
+| Prev/next links | built in | hand-built (`components/PageNav.tsx`) |
+| Dark mode | built in | hand-built, no-flash boot script |
+| Callouts | `:::tip` syntax | `<Callout>` component |
+| Adding a route | add a `.md` | add `app/<path>/page.mdx` + one line in `lib/nav.ts` |
+| Adding a live dashboard later | needs an integration | **native** |
+
+The honest trade: we gave up search and a few hundred lines of framework to gain a
+stack the team controls end to end, and a direct path to a live meal dashboard hitting
+the FastAPI backend without CORS or mixed-content problems. Given that a dashboard is a
+plausible next step, that is a reasonable bet — but **search should be added back**
+before the site grows much further.
+
+The Astro version is not lost; it is in git history up to commit `4aa8dfe`.
+
+## D7 — The web app lives in `web/`, not the repo root
+
+**Date:** 2026-09-21 · **Status:** forced, not chosen
+
+Next.js's App Router requires an `app/` directory. **The repo already has `app/` — it
+is the React Native app**, named that way by the original brief's structure.
+
+A root-level Next.js install would have collided with it. So the Next app lives in
+`web/`, and Vercel needs its **Root Directory set to `web`** in project settings. There
+is no `vercel.json` field for this; it is a dashboard setting, and a deploy that skips
+it will fail to find a Next app.
+
+## D8 — The GitHub Pages workflow was deleted, and the repo stays public
+
+**Date:** 2026-09-21 · **Status:** accepted
+
+`.github/workflows/deploy-pages.yml` was removed with the Astro site — it built
+`site/`, which no longer exists, so it would have failed on every push.
+
+`setup-github.sh` still creates the repo **public**. That is no longer forced by Pages,
+but a public repo is right for a university project regardless, and Vercel deploys
+either way.
