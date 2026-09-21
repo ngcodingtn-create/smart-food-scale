@@ -1,0 +1,38 @@
+import RigViewer from '@/components/rig/RigViewer';
+import { DimensionTable } from '@/components/rig/DimensionTable';
+
+export const metadata = {
+  title: 'The rig in 3D',
+  description: 'Explore the Smart Food Scale assembly at real geometric scale, with sourced component footprints and clearly marked design estimates.',
+};
+
+# The rig, in scale
+
+A plate on a load cell. A camera looking straight down. Explore how the two nodes fit together, from the measured mass to the photograph.
+
+<RigViewer />
+
+**Real geometric scale, proposed assembly.** Component footprints come from the sources below. The enclosure, mounting arrangement and plate are design estimates: no hardware has been measured and no manufacturing CAD exists. Orbiting and zooming change the view, not the proportions. This is not a life-size calibration of your screen.
+
+## How the assembly works
+
+<div className="rig-assembly" id="rig-assembly-description">
+  <p>The <strong>plate and circular platform</strong> sit above a horizontal straight-bar load cell. One end of the bar is bolted to the stationary base; the opposite end connects upward to the platform. A clearance gap keeps the plate and platform off the enclosure, so the food’s weight passes through the sensor.</p>
+  <p>Inside the base, the <strong>HX711 amplifier</strong> reads the load cell and sends its digital value to the <strong>ESP32 DevKit V1</strong>. The front panel carries an <strong>SSD1306 OLED</strong> and separate tare and capture switches. A passive buzzer provides feedback. Tare the empty plate, add food, then capture the net mass.</p>
+  <p>A separate <strong>fixed arm</strong> rises from the base behind the plate. At its tip, the <strong>AI-Thinker ESP32-CAM and OV2640 lens</strong> point vertically down at the plate’s centre. Twelve pixels in the <strong>WS2812B-compatible ring</strong> face the food around the lens. The arm’s weight is supported by the base, not by the weighing platform.</p>
+  <p><strong>Node A sends grams to Node B over ESP-NOW</strong>, without a router between the boards. Node B pairs those grams with a JPEG and uploads both to the backend over Wi-Fi. No direct phone connection or router hardware is part of this model.</p>
+</div>
+
+## Dimensions & provenance
+
+High confidence means a published dimension for the **selected reference part**, not a measurement of the unit we will receive. Generic breakouts and DevKit clones vary. Mixed rows combine sourced dimensions with estimates; every enclosure dimension is an estimate.
+
+<DimensionTable />
+
+<details className="rig-assumptions" id="assembly-assumptions">
+  <summary>Assembly assumptions and modelling limits</summary>
+  <p>The scene is authored in millimetres, converted once so one Three.js world unit equals one metre. The 250 × 240 mm base accommodates a Ø180 mm plate, a front control strip, a rear arm and separate electronics. A 350 mm overall height leaves 249 mm from the estimated lens face to the plate’s eating surface.</p>
+  <p>The 20 mm arm section, platform, fasteners, enclosure walls, small board details, cables and material finishes are proposed geometry. They are not a fabrication specification. The exact board revisions, plate mass, sensor mounting, arm stiffness and camera field of view must be checked when hardware arrives. The light is illustrative; it is not a calibrated photometric or lens simulation.</p>
+  <p>Exploded mode separates the assemblies vertically and moves the two base boards outward without scaling any part. Its extra spacing is illustrative, not a dimension to manufacture. The platform is attached only at the moving end of the cell; strain and deflection are not exaggerated.</p>
+  <p>Decisions D9–D11 are recorded in the repository’s <code>docs/decisions.md</code>. The current <a href="/project/wiring">wiring page</a> is the electrical reference; this viewer does not certify wiring or power design.</p>
+</details>

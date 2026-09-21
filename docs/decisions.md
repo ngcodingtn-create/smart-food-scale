@@ -218,3 +218,72 @@ not fetch the rendering engine. Only add addon transpilation if a build needs it
 
 **What would change our mind:** a tested renderer release that supports the
 newer React version, with a clean dependency tree and passing route checks.
+
+## D10 — A dimensioned reference assembly, with explicit estimates
+
+**Date:** 2026-09-21 · **Status:** accepted for visualisation; verify before fabrication
+
+The owner requested an interactive `/rig` model despite no hardware or original CAD
+being available. Geometry is authored in millimetres under one 0.001-scaled group:
+one Three.js world unit remains one metre. No component is enlarged for visibility.
+The camera uses a 5 mm near plane and 10 m far plane. Browser zoom is not a promise
+of calibrated, life-size pixels on an arbitrary display.
+
+The reference set is HT Sensor's **TAL221 1000 g (47 × 12 × 6 mm)**, SparkFun's
+**HX711 v1.1 PCB (30.48 × 22.86 mm)**, AI-Thinker's **ESP32-CAM
+(27 × 40.5 × 4.5 mm)**, Adafruit **#326 SSD1306**, **#1643 twelve-pixel ring** and
+**#160 passive piezo**, and Omron **B3F-1000 switches**. `web/components/rig/specs.ts`
+records the sources and drives the page's dimension table. The TAL221 drawing and
+its 1000 g column were read; the HX711 outline was derived from Eagle layer 20.
+Reference vendors establish footprints, not the identity of the eventual supplied
+parts. The LED-ring vendor may supply compatible SK6812 instead of WS2812B pixels.
+
+Espressif's WROOM-32 module is documented at 25.5 × 18 × 3.1 mm. The surrounding
+30-pin DevKit V1 carrier is **estimated at 51.5 × 28.5 mm**, using the module,
+2.54 mm header layout and USB allowance. The board thickness, camera lens barrel,
+minor PCB details and mounting hardware are explicitly estimates too; an MCU
+module datasheet does not establish the outline of an unspecified clone board.
+
+The proposed open base is **250 × 240 × 32 mm on 6 mm feet**. The plate is
+**Ø180 × 12 mm**, on a **Ø130 × 4 mm platform**. A **20 mm-section arm** gives a
+**350 mm overall height** and **249 mm lens-to-eating-surface clearance**. These
+are design estimates selected to fit the electronics and make the load path
+legible, not sourced dimensions or a manufacturing drawing. All component locations,
+fasteners, cable paths, finishes and exploded-view offsets are illustrative.
+
+Only one end of the cell is fixed to the base; its opposite end supports the platform.
+The camera arm attaches to the stationary base. The plate must be tared empty before
+food is added: re-taring a loaded plate would zero away the measurement. This viewer
+describes that physical sequence without changing the existing firmware.
+
+**What would change our mind:** measured supplier parts, the selected plate's mass,
+camera field-of-view tests, or mechanical validation of arm stiffness and cell mounting.
+Replace the corresponding estimates and confidence entries together with the geometry.
+
+## D11 — A route-local, accessible instrument viewer
+
+**Date:** 2026-09-21 · **Status:** accepted
+
+The viewer keeps the site's existing typography and warm-accent CSS variables.
+The assembly is the main visual; the surrounding controls are quiet. Brushed metal,
+a ceramic plate and exposed circuit boards distinguish the load path from electronics.
+Assembled and exploded views preserve part sizes, with component selection, close-up
+focus, front/top/reset views, measurement guides and a light-ring toggle. Focusing a
+hidden base component opens exploded mode so it can actually be inspected.
+
+`page.mdx` imports a client wrapper; only that wrapper dynamically imports `Scene`
+with `ssr: false`. Three.js and React Three Fiber do not enter the shared layout or
+navigation imports. Three.js is pinned to **0.182.0**, compatible with Fiber 9.7;
+newer Three releases warned about Fiber's Clock use and removed soft-shadow APIs.
+The scene uses PCF shadows. No addon transpilation was required.
+
+Rendering is on demand, capped at 1.5 device-pixel ratio with a 1024-pixel shadow
+map. Orbit supports touch. Rotation is opt-in and disabled under reduced motion;
+assembly transitions also become immediate. The scene observes the HTML `dark`
+class. A WebGL2 probe avoids mounting an unsupported renderer, with a side-view
+SVG and the full server-rendered assembly description/table available without WebGL
+or JavaScript. Context loss and renderer failures fall back to the same explanation.
+
+**What would change our mind:** a larger part catalogue or detailed supplier CAD
+may justify compressed external models. Until then procedural geometry avoids remote
+assets, font fetches and an additional loading dependency.

@@ -26,6 +26,7 @@ export const NAV: NavGroup[] = [
     items: [
       { label: 'Component request', href: '/project/component-request' },
       { label: 'Architecture', href: '/project/architecture' },
+      { label: 'The rig in 3D', href: '/rig' },
       { label: 'Wiring & pin map', href: '/project/wiring' },
       { label: 'Risks', href: '/project/risks' },
     ],
