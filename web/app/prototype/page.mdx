@@ -1,0 +1,90 @@
+import { Callout } from '@/components/Callout';
+import { Simulator } from '@/components/sim/Simulator';
+
+export const metadata = {
+  title: 'Prototype',
+  description:
+    'The whole Smart Food Scale simulated end to end: scale, camera, backend and phone app, running in the browser before the hardware exists.',
+};
+
+# The prototype, simulated
+
+The scale, the camera, the backend and the phone, working together in one page, before
+any of the hardware exists. Put a plate down, tare it, serve a dish, press the button,
+and watch the meal arrive on the phone.
+
+<Simulator />
+
+## How to drive it
+
+1. **Put an empty plate on the scale.** The display shows the plate's own mass.
+2. **Press TARE.** The display goes to zero. From here on it shows food only.
+3. **Choose a dish and a portion, and put the food on.** The reading settles on the portion.
+4. **Press PHOTO.** Node A takes twelve readings and keeps the median, hands the grams
+   to Node B, Node B lights the plate and takes one frame, and the two travel to the
+   backend together.
+5. **Look at the phone.** The meal is in today's log, with its mass, its calories, and
+   a note that the nutrient values are estimates.
+
+Open **On the wire** under the pipeline to see what each stage actually sent: the twelve
+samples, the request, and the backend's JSON reply.
+
+## Things worth breaking
+
+The interesting behaviour of a measuring instrument is what it does when it is used
+badly. Each of these is a mistake a real user will make.
+
+| Try this | What happens | Why it matters |
+| --- | --- | --- |
+| Skip TARE, then capture | The plate's mass is logged as food | Nothing downstream can tell. The backend receives a plausible number. |
+| Press TARE with food already on | The reading drops to zero and the backend refuses it | Its 422 names the cause: not tared, or the plate was lifted. |
+| Untick **Recogniser knows the dish** | The backend answers 422 and lists the dishes it does know | "I don't know" is a real answer. The mass is still good, so the meal can be added by hand. |
+| Untick **Wi-Fi reachable** | Node B keeps the frame and the grams on its microSD card | Tick it again and the buffered capture is posted. |
+| Ceramic plate, 600 g portion | Node A refuses: past the 1 kg cell | The plate's own mass comes out of the cell's range before any food does. |
+| Take the plate off after taring | A negative reading | The same 422 as an untared scale: the backend cannot tell them apart, and says so. |
+
+## What is real here, and what is not
+
+A simulation that looks finished is easy to mistake for a product. This one is exact
+about some things and invented about others, and the two should not be confused.
+
+| Piece | In this simulation | In the project |
+| --- | --- | --- |
+| Arithmetic, limits, error wording, JSON shapes | The backend's own, re-implemented line for line | **Built and tested** — 145 tests |
+| The 18 dishes and their nutrient values | Copied from the backend's food table by a script | **Built.** Every value is an estimate, flagged as one |
+| The reading: 12 samples at 10 SPS, median | The documented configuration, with a little noise added | Planned. No hardware has been measured |
+| Capture order: weigh, hand over, photograph, upload | As documented | Firmware **not written** beyond its build file |
+| The ESP-NOW message | A stand-in | Packet format not designed yet |
+| The photograph | Does not exist. Node B's view is a diagram | No camera in hand |
+| Recognising the dish | Told what is on the plate | **Not built.** The backend ships a stub that says it is a stub |
+| The phone app | Follows the four planned screens | **Not started** |
+
+<Callout type="caution" title="The recognition step is the one to be sceptical of">
+
+Here the recogniser is correct whenever its box is ticked, because it is handed the
+answer. Nothing in this page says how often a real vision model will name a plate of
+mloukhia correctly. That number does not exist yet, and the simulation reports no
+confidence value rather than inventing one.
+
+</Callout>
+
+## What building this exposed
+
+Wiring every stage to the next, even in a browser, turned up three things the written
+plan had not settled.
+
+**Nothing tells the phone that a capture failed.** When the backend cannot name the
+dish it answers the camera node, not the app. The plan says the app then offers manual
+entry, but the app has no way to know there is anything to enter. In the simulation the
+person reads the mass off the display and types it into the app, which is what would
+have to happen today. A small "pending capture" record on the backend, holding the mass
+until someone names the dish, would close the gap.
+
+**The plate has to be tared empty, before the food.** The architecture page describes
+the capture as "tare, then weigh". Read literally, with a loaded plate, that zeroes the
+meal away. The order that works is: empty plate, tare, add food, capture. The firmware
+should not tare as part of a capture at all.
+
+**The plate spends the cell's range.** A 1 kg cell carrying a 420 g ceramic plate has
+580 g left for food. That is not a problem in itself, but it has to be a decision: see
+the plate and cell rows in the [component request](/project/component-request).

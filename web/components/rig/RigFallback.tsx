@@ -1,5 +1,8 @@
 // This diagram is ordinary HTML/SVG: it is also rendered before JS loads.
-export function RigFallback({ message = 'Loading the interactive model…' }: { message?: string }) {
+export function RigFallback({
+  message = 'Loading the interactive model…',
+  note = 'The assembly description and dimension table below remain available.',
+}: { message?: string; note?: string }) {
   return <div className="rig-fallback">
     <svg viewBox="0 0 620 390" role="img" aria-labelledby="rig-fallback-title rig-fallback-description">
       <title id="rig-fallback-title">Side view of the proposed food scale</title>
@@ -19,6 +22,6 @@ export function RigFallback({ message = 'Loading the interactive model…' }: { 
       </g>
       <g stroke="var(--ink-faint)" strokeWidth="1"><path d="M186 88 H286 M100 257 H212 M121 286 H258" /></g>
     </svg>
-    <p role="status">{message}</p><p>The assembly description and dimension table below remain available.</p>
+    <p role="status">{message}</p><p>{note}</p>
   </div>;
 }

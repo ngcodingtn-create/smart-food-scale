@@ -154,6 +154,17 @@ function Plate({ selected }: { selected: boolean }) {
   return <mesh castShadow receiveShadow><latheGeometry args={[profile, 96]} /><meshStandardMaterial color="#efeee4" roughness={.26} metalness={.04} side={THREE.DoubleSide} emissive={selected ? ACCENT : '#000000'} emissiveIntensity={.08} /></mesh>;
 }
 
+// Simulator only. A plain mound whose size hints at the portion — it is not a
+// model of any dish, and it is the one thing in this scene that is not to scale.
+function Food({ color, amount }: { color: string; amount: number }) {
+  const radius = 26 + 30 * Math.cbrt(amount); // stays inside the plate's 59 mm well
+  const height = 7 + 20 * amount;
+  return <mesh position={[0, 3, 0]} scale={[radius, height, radius]} castShadow>
+    <sphereGeometry args={[1, 40, 16, 0, Math.PI * 2, 0, Math.PI / 2]} />
+    <meshStandardMaterial color={color} roughness={.85} />
+  </mesh>;
+}
+
 function Ring({ selected, lights }: { selected: boolean; lights: boolean }) {
   const geometry = useMemo(() => {
     const shape = new THREE.Shape(); shape.absarc(0, 0, DIM.ring.outer / 2, 0, Math.PI * 2, false);
@@ -187,7 +198,7 @@ function CameraBoard({ selected }: { selected: boolean }) {
 }
 
 function Rig(props: SceneProps) {
-  const { selected, onSelect, exploded, reducedMotion, dark, dimensions, lights, preset } = props;
+  const { selected, onSelect, exploded, reducedMotion, dark, dimensions, lights, preset, sim } = props;
   const e = exploded ? 1 : 0;
   const shell = dark ? '#87867e' : '#d7d5c9';
   return <>
@@ -210,7 +221,10 @@ function Rig(props: SceneProps) {
           <Box size={[7, 18, 12]} position={[20, 57, DIM.plate.z]} color={ALUMINIUM} metal={.7} />
           <Cylinder radius={DIM.platform.diameter / 2} height={DIM.platform.height} position={[0, DIM.platform.y, DIM.plate.z]} color={ALUMINIUM} metal={.65} selected={selected === 'plate'} />
         </Moving>
-        <Moving target={[0, DIM.plate.bottom + e * 125, DIM.plate.z]} reduced={reducedMotion}><Plate selected={selected === 'plate'} /></Moving>
+        <Moving target={[0, DIM.plate.bottom + e * 125, DIM.plate.z]} reduced={reducedMotion}>
+          {(sim?.plate ?? true) && <Plate selected={selected === 'plate'} />}
+          {sim?.plate && sim.food && <Food color={sim.food.color} amount={sim.food.amount} />}
+        </Moving>
       </Part>
       <Part id="devkit" onSelect={onSelect}><Moving target={[-72 - e * 18, 20 + e * 50, -22]} reduced={reducedMotion}><Devkit selected={selected === 'devkit'} /></Moving></Part>
       <Part id="hx711" onSelect={onSelect}><Moving target={[67 + e * 18, 20 + e * 50, -22]} reduced={reducedMotion}><HX711 selected={selected === 'hx711'} /></Moving></Part>
@@ -220,7 +234,7 @@ function Rig(props: SceneProps) {
       </Moving></Part>
       <Part id="oled" onSelect={onSelect}><Moving target={[-33, 38 + e * 20, 101]} reduced={reducedMotion}>
         <Box size={[DIM.oled.width, DIM.oled.height, DIM.oled.length]} position={[0, DIM.oled.height / 2, 0]} color="#1e3940" selected={selected === 'oled'} />
-        <Printing text="143.2 g" size={[26.6, 19]} position={[0, DIM.oled.height + .1, 0]} color="#bfe6dd" background="#102321" />
+        <Printing text={sim?.oled ?? '143.2 g'} size={[26.6, 19]} position={[0, DIM.oled.height + .1, 0]} color="#bfe6dd" background="#102321" />
       </Moving></Part>
       <Part id="buttons" onSelect={onSelect}><Moving target={[0, e * 24, 0]} reduced={reducedMotion}>
         {[14, 40].map((x, i) => <group key={x} position={[x, 38, 101]}>
@@ -334,7 +348,7 @@ export default function Scene(props: SceneProps) {
       shadow-camera-top={.5} shadow-camera-bottom={-.3} shadow-camera-near={.01} shadow-camera-far={2}
       shadow-bias={-.0001} shadow-normalBias={.0002} />
     <directionalLight position={[-.4, .5, -.3]} intensity={1.4} color="#d4e2ef" />
-    {props.lights && <pointLight position={[0, .315, -.015]} intensity={.04} color="#ffe1ac" distance={.5} decay={2} />}
+    {props.lights && <pointLight position={[0, .315, -.015]} intensity={props.sim?.flash ? .32 : .04} color="#ffe1ac" distance={.5} decay={2} />}
     <Rig {...props} /><Controls {...props} />
   </Canvas>;
 }

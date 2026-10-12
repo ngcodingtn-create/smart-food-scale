@@ -11,12 +11,22 @@ import './rig.css';
 const Scene = dynamic(() => import('./Scene'), { ssr: false, loading: () => <RigFallback /> });
 
 export type ViewPreset = 'perspective' | 'front' | 'top';
+// Live state for the /prototype simulator. Absent on /rig, where the model is a
+// static reference: plate on, nothing on it, the OLED showing its sample reading.
+export interface SimView {
+  oled: string;
+  plate: boolean;
+  // `amount` is 0..1 of the largest portion. The mound only hints at quantity.
+  food: { color: string; amount: number } | null;
+  flash: boolean;
+}
 export interface SceneProps {
   exploded: boolean; dimensions: boolean; lights: boolean; dark: boolean;
   reducedMotion: boolean; rotating: boolean; selected: PartId | null;
   onSelect: (id: PartId) => void; preset: ViewPreset; reset: number;
   onUnavailable: () => void;
   focusRequest: { part: PartId; serial: number } | null;
+  sim?: SimView;
 }
 
 class SceneBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {

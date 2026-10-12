@@ -45,8 +45,8 @@ export function Hero() {
         <Link href="/project/component-request" className="btn btn-secondary">
           Component request
         </Link>
-        <Link href="/rig" className="btn btn-quiet">
-          Explore the rig in 3D
+        <Link href="/prototype" className="btn btn-quiet">
+          Try the simulated prototype
           <Icon name="arrow-right" size={16} />
         </Link>
       </div>

@@ -33,6 +33,7 @@ export const NAV: NavGroup[] = [
       { label: 'Component request', href: '/project/component-request', icon: 'clipboard' },
       { label: 'Architecture', href: '/project/architecture', icon: 'nodes' },
       { label: 'The rig in 3D', href: '/rig', icon: 'cube' },
+      { label: 'Prototype', href: '/prototype', icon: 'play' },
       { label: 'Wiring & pin map', href: '/project/wiring', icon: 'chip' },
       { label: 'Risks', href: '/project/risks', icon: 'alert' },
     ],
