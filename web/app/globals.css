@@ -1,63 +1,148 @@
 @import 'tailwindcss';
 
+/* The theme is a class on <html>, set by the boot script in app/layout.tsx.
+   Without this line Tailwind's `dark:` variant follows the OS media query
+   instead, and ignores the toggle. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* ---------------------------------------------------------------------------
    Design tokens.
 
-   Warm accent rather than the default docs-site blue: the project is about
-   food, and the demo photography will be warm-toned. Everything else is
-   near-neutral so the accent stays the only loud thing on the page.
+   The whole site is built on one idea, the project's own: the camera answers
+   WHAT the food is, the load cell answers HOW MUCH. So there are two voices.
+
+     what      a warm serif and a terracotta accent — the cookbook
+     how much  a monospace and a teal "measure" colour — the datasheet
+
+   Everything else is a near-neutral warm paper so those two stay legible as a
+   pair. Colours are declared once as plain custom properties (so rig.css and
+   inline SVG can use them) and mirrored into Tailwind's theme below.
 --------------------------------------------------------------------------- */
-@theme {
-  --color-ink: oklch(0.21 0.012 65);
-  --color-ink-soft: oklch(0.46 0.012 65);
-  --color-ink-faint: oklch(0.62 0.01 65);
+@theme inline {
+  --font-sans: var(--font-body), ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display: var(--font-display-face), 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+  --font-mono: var(--font-label), ui-monospace, 'SF Mono', 'Cascadia Code', Consolas, monospace;
 
-  --color-paper: oklch(0.995 0.003 85);
-  --color-paper-raised: oklch(1 0 0);
-  --color-rule: oklch(0.9 0.007 75);
-
-  --color-accent: oklch(0.55 0.16 45);
-  --color-accent-soft: oklch(0.95 0.035 62);
-  --color-accent-strong: oklch(0.44 0.15 42);
-
-  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: ui-monospace, 'SF Mono', 'Cascadia Code', Consolas, monospace;
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-faint: var(--ink-faint);
+  --color-paper: var(--paper);
+  --color-paper-raised: var(--paper-raised);
+  --color-paper-sunken: var(--paper-sunken);
+  --color-rule: var(--rule);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-ink: var(--accent-ink);
+  --color-measure: var(--measure);
+  --color-measure-soft: var(--measure-soft);
+  --color-measure-ink: var(--measure-ink);
 }
 
 @layer base {
   :root {
-    --ink: oklch(0.21 0.012 65);
-    --ink-soft: oklch(0.46 0.012 65);
-    --ink-faint: oklch(0.6 0.01 65);
-    --paper: oklch(0.995 0.003 85);
+    --ink: oklch(0.2 0.012 60);
+    --ink-soft: oklch(0.42 0.014 62);
+    --ink-faint: oklch(0.54 0.012 65);
+
+    --paper: oklch(0.985 0.006 85);
     --paper-raised: oklch(1 0 0);
-    --paper-sunken: oklch(0.975 0.005 80);
-    --rule: oklch(0.9 0.007 75);
-    --accent: oklch(0.55 0.16 45);
-    --accent-soft: oklch(0.96 0.03 62);
-    --accent-ink: oklch(0.43 0.15 42);
+    --paper-sunken: oklch(0.964 0.008 82);
+    --rule: oklch(0.905 0.008 78);
+    --rule-strong: oklch(0.83 0.01 75);
+
+    --accent: oklch(0.56 0.16 42);
+    --accent-strong: oklch(0.5 0.16 40);
+    --accent-soft: oklch(0.955 0.03 60);
+    --accent-ink: oklch(0.45 0.15 40);
+    --on-accent: oklch(1 0 0);
+
+    --measure: oklch(0.52 0.085 188);
+    --measure-soft: oklch(0.95 0.025 188);
+    --measure-ink: oklch(0.4 0.075 190);
+
+    /* Callout tones: a line colour, a title colour, a wash. */
+    --note: oklch(0.56 0.05 250);
+    --note-ink: oklch(0.4 0.06 250);
+    --note-wash: oklch(0.967 0.01 250);
+    --tip: oklch(0.56 0.11 155);
+    --tip-ink: oklch(0.39 0.09 155);
+    --tip-wash: oklch(0.965 0.025 155);
+    --caution: oklch(0.68 0.14 75);
+    --caution-ink: oklch(0.44 0.1 68);
+    --caution-wash: oklch(0.968 0.035 90);
+    --danger: oklch(0.58 0.19 25);
+    --danger-ink: oklch(0.44 0.17 25);
+    --danger-wash: oklch(0.965 0.02 25);
+
+    --shadow-sm: 0 1px 2px oklch(0.2 0.02 60 / 0.07);
+    --shadow-md: 0 1px 2px oklch(0.2 0.02 60 / 0.05), 0 10px 28px -14px oklch(0.2 0.02 60 / 0.22);
+    --shadow-lg: 0 24px 60px -20px oklch(0.2 0.02 60 / 0.35);
+
+    /* Code and ASCII diagrams use the SYSTEM monospace on purpose. The
+       architecture diagram is drawn with box-drawing characters, which a
+       subsetted web font does not carry — the browser would fall back glyph by
+       glyph to a face with a different advance width and shear the boxes. */
+    --font-code: ui-monospace, 'Cascadia Code', 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+
+    --sidebar-w: 17.5rem;
+    --topbar-h: 3.5rem;
+    --radius: 0.8rem;
   }
 
   :root.dark {
-    --ink: oklch(0.93 0.006 80);
-    --ink-soft: oklch(0.72 0.008 75);
-    --ink-faint: oklch(0.56 0.008 75);
-    --paper: oklch(0.175 0.008 70);
-    --paper-raised: oklch(0.215 0.009 70);
+    --ink: oklch(0.94 0.008 80);
+    --ink-soft: oklch(0.77 0.01 75);
+    --ink-faint: oklch(0.63 0.01 75);
+
+    --paper: oklch(0.17 0.008 70);
+    --paper-raised: oklch(0.212 0.009 70);
     --paper-sunken: oklch(0.145 0.008 70);
-    --rule: oklch(0.31 0.01 70);
-    --accent: oklch(0.72 0.14 52);
-    --accent-soft: oklch(0.29 0.045 48);
-    --accent-ink: oklch(0.8 0.12 60);
+    --rule: oklch(0.275 0.01 70);
+    --rule-strong: oklch(0.37 0.012 70);
+
+    --accent: oklch(0.73 0.14 50);
+    --accent-strong: oklch(0.79 0.13 54);
+    --accent-soft: oklch(0.275 0.045 48);
+    --accent-ink: oklch(0.81 0.115 58);
+    --on-accent: oklch(0.18 0.03 50);
+
+    --measure: oklch(0.76 0.09 182);
+    --measure-soft: oklch(0.255 0.03 188);
+    --measure-ink: oklch(0.83 0.08 180);
+
+    --note: oklch(0.7 0.06 250);
+    --note-ink: oklch(0.83 0.05 250);
+    --note-wash: oklch(0.225 0.018 250);
+    --tip: oklch(0.72 0.12 155);
+    --tip-ink: oklch(0.84 0.1 155);
+    --tip-wash: oklch(0.225 0.03 155);
+    --caution: oklch(0.78 0.13 80);
+    --caution-ink: oklch(0.86 0.11 85);
+    --caution-wash: oklch(0.24 0.035 80);
+    --danger: oklch(0.7 0.16 25);
+    --danger-ink: oklch(0.83 0.1 25);
+    --danger-wash: oklch(0.235 0.035 25);
+
+    --shadow-sm: 0 1px 2px oklch(0 0 0 / 0.3);
+    --shadow-md: 0 1px 2px oklch(0 0 0 / 0.3), 0 10px 28px -14px oklch(0 0 0 / 0.6);
+    --shadow-lg: 0 24px 60px -20px oklch(0 0 0 / 0.75);
   }
 
   html {
     scroll-behavior: smooth;
-    scroll-padding-top: 5rem;
+    /* Clears the sticky top bar on small screens; there is none on desktop. */
+    scroll-padding-top: calc(var(--topbar-h) + 1.25rem);
     color-scheme: light;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
   html.dark {
     color-scheme: dark;
+  }
+  @media (min-width: 64rem) {
+    html {
+      scroll-padding-top: 2rem;
+    }
   }
 
   body {
@@ -65,55 +150,700 @@
     color: var(--ink);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    /* A wide table or diagram scrolls inside its own box, never the page. */
+    overflow-x: clip;
   }
 
   ::selection {
     background: var(--accent-soft);
     color: var(--accent-ink);
   }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 0.3rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+    }
+  }
 }
 
-/* ---------------------------------------------------------------------------
-   Prose. Hand-rolled rather than @tailwindcss/typography, so the docs tables —
-   which carry most of the information on this site — get real attention.
---------------------------------------------------------------------------- */
 @layer components {
-  .prose {
-    font-size: 1rem;
-    line-height: 1.7;
+  /* -------------------------------------------------------------------------
+     Small shared pieces.
+  ------------------------------------------------------------------------- */
+
+  /* The "datasheet" voice: small monospace capitals. */
+  .label {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .skip-link {
+    position: fixed;
+    top: 0.75rem;
+    left: 0.75rem;
+    z-index: 100;
+    padding: 0.6rem 0.9rem;
+    border-radius: 0.6rem;
+    background: var(--ink);
+    color: var(--paper);
+    font-size: 0.9rem;
+    font-weight: 600;
+    translate: 0 -200%;
+  }
+  .skip-link:focus-visible {
+    translate: 0 0;
+  }
+
+  .icon-btn {
+    display: grid;
+    place-items: center;
+    width: 2.6rem;
+    height: 2.6rem;
+    flex: none;
+    border: 1px solid var(--rule);
+    border-radius: 0.7rem;
+    background: var(--paper-raised);
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s, background-color 0.15s;
+  }
+  .icon-btn:hover {
+    color: var(--ink);
+    border-color: var(--rule-strong);
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.75rem;
+    padding: 0.55rem 1.1rem;
+    border: 1px solid transparent;
+    border-radius: 0.7rem;
+    font-size: 0.93rem;
+    font-weight: 600;
+    line-height: 1.2;
+    text-decoration: none;
+    transition: background-color 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s;
+  }
+  .btn svg {
+    transition: translate 0.2s;
+  }
+  .btn:hover svg {
+    translate: 3px 0;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: var(--on-accent);
+    box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.2), var(--shadow-sm);
+  }
+  .btn-primary:hover {
+    background: var(--accent-strong);
+  }
+  .btn-secondary {
+    background: var(--paper-raised);
+    color: var(--ink);
+    border-color: var(--rule-strong);
+  }
+  .btn-secondary:hover {
+    border-color: var(--ink-faint);
+    background: var(--paper-sunken);
+  }
+  .btn-quiet {
+    padding-inline: 0.5rem;
+    color: var(--accent-ink);
+  }
+  .btn-quiet:hover {
+    background: var(--accent-soft);
+  }
+
+  /* -------------------------------------------------------------------------
+     Shell: a full-height sidebar on desktop, a top bar and drawer below 64rem.
+  ------------------------------------------------------------------------- */
+  .shell {
+    min-height: 100dvh;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    min-width: 0;
+    color: var(--ink);
+  }
+  .brand-mark {
+    display: grid;
+    place-items: center;
+    width: 2.15rem;
+    height: 2.15rem;
+    flex: none;
+    border-radius: 0.65rem;
+    background: var(--accent);
+    color: var(--on-accent);
+    box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.22), var(--shadow-sm);
+  }
+  .brand-text {
+    display: grid;
+    min-width: 0;
+    line-height: 1.15;
+  }
+  .brand-name {
+    font-family: var(--font-display);
+    font-size: 1.08rem;
+    font-weight: 600;
+    letter-spacing: -0.012em;
+    white-space: nowrap;
+  }
+  .brand-sub {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    white-space: nowrap;
+  }
+
+  .sidebar {
+    display: none;
+  }
+  @media (min-width: 64rem) {
+    .sidebar {
+      position: fixed;
+      inset: 0 auto 0 0;
+      z-index: 30;
+      display: flex;
+      flex-direction: column;
+      width: var(--sidebar-w);
+      background: var(--paper-sunken);
+      border-right: 1px solid var(--rule);
+    }
+    .shell-main {
+      margin-left: var(--sidebar-w);
+    }
+  }
+  .sidebar-head {
+    padding: 1.35rem 1.15rem 1.1rem;
+  }
+  .sidebar-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 0.6rem 0.75rem 1.5rem;
+    scrollbar-width: thin;
+    scrollbar-color: var(--rule-strong) transparent;
+  }
+  .sidebar-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.8rem 1.15rem;
+    padding-bottom: max(0.8rem, env(safe-area-inset-bottom));
+    border-top: 1px solid var(--rule);
+  }
+  .repo-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 2.25rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--ink-soft);
+    transition: color 0.15s;
+  }
+  .repo-link:hover {
     color: var(--ink);
   }
 
+  /* --- navigation list (shared by the sidebar and the drawer) --- */
+  .nav-group + .nav-group {
+    margin-top: 1.6rem;
+  }
+  .nav-label {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.4rem;
+    padding: 0 0.75rem;
+  }
+  .nav-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--rule);
+  }
+  .nav-list {
+    display: grid;
+    gap: 2px;
+  }
+  .nav-link {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    min-height: 2.4rem;
+    padding: 0.4rem 0.75rem;
+    border-radius: 0.6rem;
+    font-size: 0.9rem;
+    line-height: 1.3;
+    color: var(--ink-soft);
+    transition: background-color 0.15s, color 0.15s;
+  }
+  .nav-link svg {
+    flex: none;
+    color: var(--ink-faint);
+    transition: color 0.15s;
+  }
+  .nav-link:hover {
+    background: color-mix(in oklch, var(--ink) 6%, transparent);
+    color: var(--ink);
+  }
+  .nav-link:hover svg {
+    color: var(--ink-soft);
+  }
+  .nav-link[aria-current='page'] {
+    background: var(--paper-raised);
+    color: var(--ink);
+    font-weight: 600;
+    box-shadow: 0 0 0 1px var(--rule), var(--shadow-sm);
+  }
+  .nav-link[aria-current='page'] svg {
+    color: var(--accent);
+  }
+  /* The active marker sits flush against the sidebar's outer edge. */
+  .nav-link[aria-current='page']::before {
+    content: '';
+    position: absolute;
+    left: -0.75rem;
+    top: 0.5rem;
+    bottom: 0.5rem;
+    width: 3px;
+    border-radius: 0 3px 3px 0;
+    background: var(--accent);
+  }
+  .nav-text {
+    flex: 1;
+    min-width: 0;
+  }
+  .nav-badge {
+    flex: none;
+    padding: 0.1rem 0.4rem;
+    border: 1px solid color-mix(in oklch, var(--badge) 35%, transparent);
+    border-radius: 0.35rem;
+    background: color-mix(in oklch, var(--badge) 10%, transparent);
+    color: var(--badge-ink);
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .nav-badge[data-tone='done'] {
+    --badge: var(--tip);
+    --badge-ink: var(--tip-ink);
+  }
+  .nav-badge[data-tone='wip'] {
+    --badge: var(--caution);
+    --badge-ink: var(--caution-ink);
+  }
+  .nav-badge[data-tone='todo'] {
+    --badge: var(--note);
+    --badge-ink: var(--note-ink);
+  }
+  .nav-badge[data-tone='alert'] {
+    --badge: var(--danger);
+    --badge-ink: var(--danger-ink);
+  }
+
+  /* --- theme switch --- */
+  .theme-switch {
+    display: inline-flex;
+    gap: 2px;
+    padding: 3px;
+    border: 1px solid var(--rule);
+    border-radius: 0.65rem;
+    background: color-mix(in oklch, var(--ink) 5%, transparent);
+  }
+  .theme-switch button {
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 1.75rem;
+    border-radius: 0.42rem;
+    color: var(--ink-faint);
+    cursor: pointer;
+    transition: color 0.15s, background-color 0.15s;
+  }
+  .theme-switch button:hover {
+    color: var(--ink);
+  }
+  .theme-switch button[aria-pressed='true'] {
+    background: var(--paper-raised);
+    color: var(--ink);
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* --- top bar (small screens only) --- */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    height: var(--topbar-h);
+    padding-inline: max(1rem, env(safe-area-inset-left)) max(1rem, env(safe-area-inset-right));
+    border-bottom: 1px solid var(--rule);
+    background: color-mix(in oklch, var(--paper) 92%, transparent);
+    backdrop-filter: blur(16px) saturate(1.5);
+    -webkit-backdrop-filter: blur(16px) saturate(1.5);
+  }
+  .topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  @media (min-width: 64rem) {
+    .topbar {
+      display: none;
+    }
+  }
+
+  /* --- drawer: a native modal <dialog>, so focus trapping, Esc and making
+         the page behind it inert all come from the browser --- */
+  .drawer {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: min(20rem, 86vw);
+    height: 100dvh;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-right: 1px solid var(--rule);
+    background: var(--paper-sunken);
+    color: var(--ink);
+    box-shadow: var(--shadow-lg);
+    translate: -105% 0;
+    transition:
+      translate 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
+      overlay 0.3s allow-discrete,
+      display 0.3s allow-discrete;
+  }
+  .drawer[open] {
+    translate: 0 0;
+  }
+  @starting-style {
+    .drawer[open] {
+      translate: -105% 0;
+    }
+  }
+  .drawer::backdrop {
+    background: oklch(0.16 0.01 70 / 0);
+    backdrop-filter: blur(0);
+    transition:
+      background-color 0.3s,
+      backdrop-filter 0.3s,
+      overlay 0.3s allow-discrete,
+      display 0.3s allow-discrete;
+  }
+  .drawer[open]::backdrop {
+    background: oklch(0.16 0.01 70 / 0.5);
+    backdrop-filter: blur(3px);
+  }
+  @starting-style {
+    .drawer[open]::backdrop {
+      background: oklch(0.16 0.01 70 / 0);
+      backdrop-filter: blur(0);
+    }
+  }
+  .drawer-panel {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  .drawer-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.7rem 0.75rem 0.7rem 1.15rem;
+    padding-top: max(0.7rem, env(safe-area-inset-top));
+    border-bottom: 1px solid var(--rule);
+  }
+  /* Fingers, not cursors: every target in the drawer is at least 44px tall. */
+  .drawer .sidebar-scroll {
+    padding-top: 1.1rem;
+  }
+  .drawer .nav-link {
+    min-height: 2.75rem;
+    font-size: 0.96rem;
+  }
+  .drawer .theme-switch button {
+    width: 2.6rem;
+    height: 2.25rem;
+  }
+  /* The page behind an open drawer must not scroll. */
+  html:has(.drawer[open]) {
+    overflow: hidden;
+  }
+
+  /* --- content column, plus an outline on wide screens --- */
+  .page {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 48.2rem;
+    margin-inline: auto;
+    padding: 1.75rem 1.1rem 0;
+  }
+  @media (min-width: 40rem) {
+    .page {
+      max-width: 49.5rem;
+      padding: 2.5rem 1.75rem 0;
+    }
+  }
+  @media (min-width: 64rem) {
+    .page {
+      max-width: 51rem;
+      padding: 3.75rem 2.5rem 0;
+    }
+  }
+  @media (min-width: 86rem) {
+    .page {
+      grid-template-columns: minmax(0, 46rem) 13rem;
+      column-gap: 3.5rem;
+      max-width: 67.5rem;
+    }
+  }
+
+  .crumbs {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.1rem;
+  }
+  .crumbs li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .crumbs li + li::before {
+    content: '/';
+    color: var(--rule-strong);
+  }
+  .crumbs a {
+    transition: color 0.15s;
+  }
+  .crumbs a:hover {
+    color: var(--accent-ink);
+  }
+  .crumbs li:last-child {
+    color: var(--accent-ink);
+  }
+
+  .toc {
+    display: none;
+  }
+  @media (min-width: 86rem) {
+    .toc {
+      display: block;
+      position: sticky;
+      top: 3.75rem;
+      align-self: start;
+      max-height: calc(100dvh - 5.5rem);
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--rule-strong) transparent;
+    }
+  }
+  .toc-title {
+    margin-bottom: 0.75rem;
+  }
+  .toc-list {
+    border-left: 1px solid var(--rule);
+  }
+  .toc-link {
+    display: block;
+    margin-left: -1px;
+    padding: 0.3rem 0 0.3rem 0.9rem;
+    border-left: 1px solid transparent;
+    font-size: 0.82rem;
+    line-height: 1.4;
+    color: var(--ink-faint);
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .toc-link[data-level='3'] {
+    padding-left: 1.7rem;
+  }
+  .toc-link:hover {
+    color: var(--ink);
+  }
+  .toc-link[aria-current] {
+    border-left-color: var(--accent);
+    color: var(--accent-ink);
+    font-weight: 600;
+  }
+
+  .pagenav {
+    display: grid;
+    gap: 0.75rem;
+    margin-top: 4rem;
+  }
+  @media (min-width: 40rem) {
+    .pagenav {
+      grid-template-columns: 1fr 1fr;
+    }
+    .pagenav a[data-dir='next'] {
+      grid-column: 2;
+    }
+  }
+  .pagenav a {
+    display: grid;
+    gap: 0.3rem;
+    padding: 0.9rem 1.1rem;
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    background: var(--paper-raised);
+    transition: border-color 0.15s, box-shadow 0.15s, translate 0.15s;
+  }
+  .pagenav a:hover {
+    border-color: var(--accent);
+    box-shadow: var(--shadow-md);
+    translate: 0 -1px;
+  }
+  .pagenav a[data-dir='next'] {
+    justify-items: end;
+    text-align: right;
+  }
+  .pagenav-dir {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .pagenav-title {
+    font-size: 0.98rem;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .pagenav a:hover .pagenav-title {
+    color: var(--accent-ink);
+  }
+
+  .site-foot {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.5rem 1.5rem;
+    margin-top: 3.5rem;
+    padding: 1.5rem 0 2.5rem;
+    padding-bottom: max(2.5rem, env(safe-area-inset-bottom));
+    border-top: 1px solid var(--rule);
+    font-size: 0.82rem;
+    line-height: 1.6;
+    color: var(--ink-faint);
+  }
+  .site-foot a {
+    color: var(--ink-soft);
+    text-decoration: underline;
+    text-decoration-color: var(--rule-strong);
+    text-underline-offset: 3px;
+  }
+  .site-foot a:hover {
+    color: var(--accent-ink);
+  }
+
+  /* -------------------------------------------------------------------------
+     Prose. Hand-rolled rather than @tailwindcss/typography, so the docs tables —
+     which carry most of the information on this site — get real attention.
+  ------------------------------------------------------------------------- */
+  .prose {
+    font-size: 1rem;
+    line-height: 1.72;
+    color: var(--ink);
+    overflow-wrap: break-word;
+  }
+
   .prose > * + * {
-    margin-top: 1.1em;
+    margin-top: 1.15em;
   }
 
   .prose h1 {
-    font-size: clamp(2rem, 1.4rem + 2vw, 2.75rem);
-    line-height: 1.1;
-    letter-spacing: -0.025em;
-    font-weight: 700;
+    font-family: var(--font-display);
+    font-size: clamp(2.1rem, 1.5rem + 2.6vw, 3.05rem);
+    line-height: 1.06;
+    letter-spacing: -0.022em;
+    font-weight: 600;
     margin-top: 0;
-    margin-bottom: 0.2em;
     text-wrap: balance;
   }
 
+  /* The sentence under a page title reads as its standfirst. */
+  .prose > h1 + p {
+    margin-top: 0.95rem;
+    font-size: 1.14rem;
+    line-height: 1.6;
+    color: var(--ink-soft);
+    text-wrap: pretty;
+  }
+
+  /* Each section opens on a hairline with a short accent mark at its origin —
+     the zero of a ruler. */
   .prose h2 {
-    font-size: 1.5rem;
-    line-height: 1.25;
-    letter-spacing: -0.015em;
-    font-weight: 650;
-    margin-top: 2.5em;
-    padding-top: 1.2rem;
+    position: relative;
+    margin-top: 3.2rem;
+    padding-top: 1.5rem;
     border-top: 1px solid var(--rule);
+    font-family: var(--font-display);
+    font-size: clamp(1.42rem, 1.25rem + 0.75vw, 1.72rem);
+    line-height: 1.2;
+    letter-spacing: -0.014em;
+    font-weight: 600;
     text-wrap: balance;
+  }
+  .prose h2::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: 0;
+    width: 2.75rem;
+    height: 3px;
+    border-radius: 0 0 2px 2px;
+    background: var(--accent);
   }
 
   .prose h3 {
-    font-size: 1.15rem;
+    margin-top: 2.1em;
+    font-size: 1.13rem;
+    line-height: 1.35;
     font-weight: 650;
-    margin-top: 2em;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.008em;
+  }
+
+  .prose h4 {
+    margin-top: 1.8em;
+    font-size: 0.98rem;
+    font-weight: 650;
   }
 
   /* rehype-autolink-headings wraps EVERY heading, h1 included, so each one
@@ -134,16 +864,23 @@
   .prose h4 a:hover::after {
     content: ' #';
     color: var(--accent);
+    font-family: var(--font-sans);
     font-weight: 400;
   }
 
-  .prose a {
+  /* :where() keeps this at the weight of a plain `.prose a`, so the heading
+     reset above still out-ranks it. A bare :not(.btn) would add a class of
+     specificity and turn every heading orange. */
+  .prose a:where(:not(.btn)) {
     color: var(--accent-ink);
     text-decoration: underline;
+    text-decoration-color: color-mix(in oklch, var(--accent) 45%, transparent);
     text-decoration-thickness: 1px;
-    text-underline-offset: 2px;
+    text-underline-offset: 3px;
+    transition: text-decoration-color 0.15s;
   }
-  .prose a:hover {
+  .prose a:where(:not(.btn)):hover {
+    text-decoration-color: var(--accent);
     text-decoration-thickness: 2px;
   }
 
@@ -159,74 +896,203 @@
   .prose ul {
     list-style: disc;
   }
-  .prose ol {
-    list-style: decimal;
-  }
   .prose li + li {
-    margin-top: 0.35em;
+    margin-top: 0.4em;
   }
-  .prose li::marker {
-    color: var(--ink-faint);
+  .prose ul > li::marker {
+    color: var(--accent);
+  }
+
+  /* Ordered lists on this site are procedures — the capture sequence, the open
+     decisions — so the step number gets a proper seat. */
+  .prose ol {
+    list-style: none;
+    padding-left: 0;
+    counter-reset: step;
+  }
+  .prose ol > li {
+    position: relative;
+    padding-left: 2.5rem;
+    counter-increment: step;
+  }
+  .prose ol > li + li {
+    margin-top: 0.7em;
+  }
+  .prose ol > li::before {
+    content: counter(step);
+    position: absolute;
+    left: 0;
+    top: 0.08em;
+    display: grid;
+    place-items: center;
+    width: 1.65rem;
+    height: 1.65rem;
+    border: 1px solid var(--rule-strong);
+    border-radius: 50%;
+    background: var(--paper-raised);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 500;
+    line-height: 1;
+    color: var(--ink-soft);
   }
 
   .prose code {
-    font-family: var(--font-mono);
-    font-size: 0.875em;
-    background: var(--paper-sunken);
-    border: 1px solid var(--rule);
-    border-radius: 0.3rem;
-    padding: 0.1em 0.35em;
+    font-family: var(--font-code);
+    font-size: 0.86em;
+    background: color-mix(in oklch, var(--ink) 7%, transparent);
+    border-radius: 0.35rem;
+    padding: 0.12em 0.38em;
   }
 
-  .prose pre {
-    background: var(--paper-sunken);
+  .prose kbd {
+    font-family: var(--font-code);
+    font-size: 0.82em;
+    padding: 0.1em 0.4em;
+    border: 1px solid var(--rule-strong);
+    border-bottom-width: 2px;
+    border-radius: 0.35rem;
+    background: var(--paper-raised);
+  }
+
+  /* Code blocks. A fenced block with a language gets a title bar and a copy
+     button (see components/CodeBlock.tsx); a bare fence — the diagrams and
+     directory trees — stays a plain panel. */
+  .codeblock {
+    overflow: hidden;
     border: 1px solid var(--rule);
-    border-radius: 0.6rem;
-    padding: 1rem 1.1rem;
+    border-radius: var(--radius);
+    background: var(--paper-sunken);
+  }
+  .codeblock-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.3rem 0.35rem 0.3rem 1.1rem;
+    border-bottom: 1px solid var(--rule);
+  }
+  .codeblock-copy {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 2rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 0.45rem;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: color 0.15s, background-color 0.15s;
+  }
+  .codeblock-copy:hover {
+    background: color-mix(in oklch, var(--ink) 7%, transparent);
+    color: var(--ink);
+  }
+  .codeblock-copy[data-copied='true'] {
+    color: var(--tip-ink);
+  }
+  @media (pointer: coarse) {
+    .codeblock-copy {
+      min-height: 2.75rem;
+      padding-inline: 0.8rem;
+    }
+  }
+  .prose pre {
     overflow-x: auto;
-    font-size: 0.85rem;
-    line-height: 1.6;
+    padding: 1rem 1.1rem;
+    font-family: var(--font-code);
+    font-size: 0.82rem;
+    line-height: 1.65;
+    /* The ASCII architecture diagram must not wrap — it becomes unreadable. */
+    white-space: pre;
+    tab-size: 2;
+    scrollbar-width: thin;
+    scrollbar-color: var(--rule-strong) transparent;
   }
   .prose pre code {
     background: none;
-    border: 0;
+    border-radius: 0;
     padding: 0;
     font-size: inherit;
   }
+  @media (max-width: 40rem) {
+    .prose pre {
+      font-size: 0.76rem;
+    }
+  }
 
-  /* Tables carry most of this site's content, so they get the most care. */
+  /* Tables carry most of this site's content, so they get the most care. Each
+     one sits in a scroll box of its own: on a phone a five-column table slides
+     under your thumb while the page stays put, and the edge shadows show there
+     is more to see. */
+  .table-wrap,
+  .prose .rig-dimensions {
+    overflow-x: auto;
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    scrollbar-width: thin;
+    scrollbar-color: var(--rule-strong) transparent;
+    background:
+      linear-gradient(to right, var(--paper-raised) 40%, transparent) left / 2.5rem 100% no-repeat local,
+      linear-gradient(to left, var(--paper-raised) 40%, transparent) right / 2.5rem 100% no-repeat local,
+      linear-gradient(to right, oklch(0.2 0.02 60 / 0.14), transparent) left / 0.8rem 100% no-repeat scroll,
+      linear-gradient(to left, oklch(0.2 0.02 60 / 0.14), transparent) right / 0.8rem 100% no-repeat scroll,
+      var(--paper-raised);
+  }
   .prose table {
     width: 100%;
     border-collapse: collapse;
     font-size: 0.9rem;
-    display: block;
-    overflow-x: auto;
+    line-height: 1.55;
+  }
+  /* Give multi-column tables room to breathe instead of crushing every cell;
+     the wrapper scrolls when the screen is narrower than this. */
+  .table-wrap table:has(th:nth-child(3)) {
+    min-width: 31rem;
+  }
+  .table-wrap table:has(th:nth-child(4)) {
+    min-width: 38rem;
+  }
+  .table-wrap table:has(th:nth-child(5)) {
+    min-width: 46rem;
   }
   .prose thead th {
-    text-align: left;
-    font-weight: 650;
-    font-size: 0.78rem;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: var(--ink-soft);
+    padding: 0.62rem 0.95rem;
     border-bottom: 1px solid var(--rule);
-    padding: 0.5rem 0.9rem 0.5rem 0;
+    background: color-mix(in oklch, var(--ink) 4%, transparent);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-align: left;
     white-space: nowrap;
+    color: var(--ink-soft);
   }
   .prose tbody td {
+    padding: 0.68rem 0.95rem;
     border-bottom: 1px solid var(--rule);
-    padding: 0.6rem 0.9rem 0.6rem 0;
     vertical-align: top;
   }
-  .prose tbody tr:last-child td {
+  .prose tbody td:first-child {
+    font-weight: 550;
+  }
+  .prose tbody tr:last-child > * {
     border-bottom: 0;
+  }
+  .prose tbody tr {
+    transition: background-color 0.12s;
+  }
+  .prose tbody tr:hover {
+    background: color-mix(in oklch, var(--accent) 5%, transparent);
   }
   .prose th[align='right'],
   .prose td[align='right'] {
     text-align: right;
     font-variant-numeric: tabular-nums;
-    padding-right: 0;
-    padding-left: 0.9rem;
   }
   .prose th[align='center'],
   .prose td[align='center'] {
@@ -234,28 +1100,443 @@
   }
 
   .prose blockquote {
+    padding: 0.2rem 0 0.2rem 1.1rem;
     border-left: 3px solid var(--accent);
-    padding-left: 1rem;
-    color: var(--ink-soft);
+    font-family: var(--font-display);
+    font-size: 1.1rem;
     font-style: italic;
+    color: var(--ink-soft);
   }
 
   .prose hr {
     border: 0;
     border-top: 1px solid var(--rule);
-    margin: 2.5em 0;
+    margin: 2.75em 0;
   }
 
-  /* The ASCII architecture diagram must not wrap — it becomes unreadable. */
-  .prose pre:has(code:not([class])) {
-    white-space: pre;
+  .prose img {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--radius);
+  }
+
+  .prose details {
+    padding: 0 1.1rem;
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    background: var(--paper-raised);
+  }
+  .prose summary {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.9rem 0;
+    font-weight: 600;
+    cursor: pointer;
+    list-style: none;
+  }
+  .prose summary::-webkit-details-marker {
+    display: none;
+  }
+  .prose summary::before {
+    content: '+';
+    display: grid;
+    place-items: center;
+    width: 1.4rem;
+    height: 1.4rem;
+    flex: none;
+    border: 1px solid var(--rule-strong);
+    border-radius: 0.4rem;
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    font-weight: 400;
+    line-height: 1;
+    color: var(--accent-ink);
+  }
+  .prose details[open] > summary::before {
+    content: '−';
+  }
+  .prose details[open] {
+    padding-bottom: 1.1rem;
+  }
+
+  /* --- callouts --- */
+  .callout {
+    display: flex;
+    gap: 0.8rem;
+    margin-block: 1.7rem;
+    padding: 1rem 1.15rem;
+    border: 1px solid color-mix(in oklch, var(--tone) 30%, var(--rule));
+    border-radius: var(--radius);
+    background: var(--tone-wash);
+  }
+  .callout[data-tone='note'] {
+    --tone: var(--note);
+    --tone-ink: var(--note-ink);
+    --tone-wash: var(--note-wash);
+  }
+  .callout[data-tone='tip'] {
+    --tone: var(--tip);
+    --tone-ink: var(--tip-ink);
+    --tone-wash: var(--tip-wash);
+  }
+  .callout[data-tone='caution'] {
+    --tone: var(--caution);
+    --tone-ink: var(--caution-ink);
+    --tone-wash: var(--caution-wash);
+  }
+  .callout[data-tone='danger'] {
+    --tone: var(--danger);
+    --tone-ink: var(--danger-ink);
+    --tone-wash: var(--danger-wash);
+  }
+  .callout-icon {
+    flex: none;
+    margin-top: 0.14rem;
+    color: var(--tone);
+  }
+  .callout-main {
+    flex: 1;
+    min-width: 0;
+  }
+  .callout-title {
+    margin-bottom: 0.3rem;
+    font-size: 0.95rem;
+    font-weight: 650;
+    line-height: 1.45;
+    color: var(--tone-ink);
+  }
+  .callout-body {
+    font-size: 0.94rem;
+    line-height: 1.66;
+  }
+  .callout-body > * + * {
+    margin-top: 0.75rem;
+  }
+  .prose .callout-body a:where(:not(.btn)) {
+    color: var(--tone-ink);
+    text-decoration-color: color-mix(in oklch, var(--tone) 60%, transparent);
+  }
+  .prose .callout-body a:where(:not(.btn)):hover {
+    text-decoration-color: var(--tone);
+  }
+
+  /* --- cards --- */
+  .cards {
+    display: grid;
+    gap: 0.85rem;
+    margin-top: 1.5rem;
+  }
+  @media (min-width: 40rem) {
+    .cards {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .card {
+    padding: 1.15rem 1.2rem 1.25rem;
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    background: var(--paper-raised);
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .card:hover {
+    border-color: var(--rule-strong);
+    box-shadow: var(--shadow-md);
+  }
+  .card-icon {
+    display: grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    margin-bottom: 0.85rem;
+    border-radius: 0.6rem;
+    background: var(--accent-soft);
+    color: var(--accent-ink);
+  }
+  .card:nth-child(even) .card-icon {
+    background: var(--measure-soft);
+    color: var(--measure-ink);
+  }
+  .prose .card-title {
+    margin-top: 0;
+    font-size: 1.02rem;
+  }
+  .card-body {
+    margin-top: 0.35rem;
+    font-size: 0.92rem;
+    line-height: 1.62;
+    color: var(--ink-soft);
+  }
+
+  /* -------------------------------------------------------------------------
+     Home: the hero and its worked equation.
+  ------------------------------------------------------------------------- */
+  .hero-title.hero-title {
+    font-size: clamp(2.05rem, 1.35rem + 3.1vw, 3.2rem);
+    line-height: 1.07;
+    margin-top: 1rem;
+  }
+  .hero-title em {
+    font-style: italic;
+    font-weight: 500;
+  }
+  .hero-title .what {
+    color: var(--accent-ink);
+  }
+  .hero-title .how-much {
+    color: var(--measure-ink);
+  }
+  .hero-lead {
+    max-width: 38rem;
+    margin-top: 1.25rem;
+    font-size: 1.14rem;
+    line-height: 1.6;
+    color: var(--ink-soft);
+    text-wrap: pretty;
+  }
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 1.75rem;
+  }
+
+  .equation {
+    container-type: inline-size;
+    margin-top: 2.5rem;
+  }
+  .equation-row {
+    display: grid;
+    border: 1px solid var(--rule);
+    border-radius: 1rem;
+    background-color: var(--paper-raised);
+    /* Graph paper, faint enough to sit under numbers. */
+    background-image:
+      linear-gradient(color-mix(in oklch, var(--ink) 4.5%, transparent) 1px, transparent 1px),
+      linear-gradient(90deg, color-mix(in oklch, var(--ink) 4.5%, transparent) 1px, transparent 1px);
+    background-size: 1.25rem 1.25rem;
+    background-position: -1px -1px;
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+  }
+  .eq-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    min-width: 0;
+    padding: 1.15rem 1.25rem 1.25rem;
+  }
+  .eq-label {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+  }
+  .eq-label::before {
+    content: '';
+    width: 0.5rem;
+    height: 0.5rem;
+    flex: none;
+    border-radius: 50%;
+    background: var(--cell);
+    box-shadow: 0 0 0 3px color-mix(in oklch, var(--cell) 22%, transparent);
+  }
+  .eq-value {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0 0.45rem;
+    margin-top: 0.35rem;
+    font-family: var(--font-mono);
+    font-size: 2.3rem;
+    font-weight: 500;
+    line-height: 1.05;
+    letter-spacing: -0.04em;
+    font-variant-numeric: tabular-nums;
+    color: var(--cell-ink);
+  }
+  .eq-value small {
+    font-size: 0.8rem;
+    font-weight: 400;
+    letter-spacing: 0;
+    color: var(--ink-soft);
+  }
+  .eq-name {
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    font-style: italic;
+    line-height: 1.3;
+    color: var(--ink);
+  }
+  .eq-note {
+    font-size: 0.78rem;
+    line-height: 1.5;
+    color: var(--ink-soft);
+  }
+  .eq-tag {
+    display: inline-block;
+    margin-right: 0.35rem;
+    padding: 0.05rem 0.4rem;
+    border: 1px solid color-mix(in oklch, var(--caution) 45%, transparent);
+    border-radius: 0.3rem;
+    background: var(--caution-wash);
+    color: var(--caution-ink);
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    vertical-align: 0.08em;
+  }
+  .eq-measure {
+    --cell: var(--measure);
+    --cell-ink: var(--measure-ink);
+  }
+  .eq-identity {
+    --cell: var(--accent);
+    --cell-ink: var(--accent-ink);
+  }
+  /* The result is the one inverted block on the page. */
+  .eq-result {
+    --cell: var(--paper);
+    --cell-ink: var(--paper);
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .eq-result .label,
+  .eq-result .eq-value small {
+    color: color-mix(in oklch, var(--paper) 68%, transparent);
+  }
+
+  /* A 0–1000 g graduation with the reading marked on it: minor ticks every
+     20 g, major every 100 g. */
+  .eq-ruler {
+    position: relative;
+    height: 1.15rem;
+    margin: 0.55rem 0 0.1rem;
+    border-right: 1px solid var(--measure);
+    border-bottom: 1px solid var(--measure);
+    background:
+      repeating-linear-gradient(90deg, var(--measure) 0 1px, transparent 1px 10%) bottom / 100% 62% no-repeat,
+      repeating-linear-gradient(90deg, color-mix(in oklch, var(--measure) 50%, transparent) 0 1px, transparent 1px 2%)
+        bottom / 100% 30% no-repeat;
+  }
+  .eq-ruler i {
+    position: absolute;
+    bottom: -1px;
+    width: 2px;
+    height: 150%;
+    margin-left: -1px;
+    border-radius: 2px 2px 0 0;
+    background: var(--accent);
+  }
+  .eq-ruler-ends {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    color: var(--ink-faint);
+  }
+
+  .eq-macros {
+    display: grid;
+    gap: 0.15rem;
+    margin-top: 0.55rem;
+    padding-top: 0.6rem;
+    border-top: 1px solid color-mix(in oklch, var(--paper) 22%, transparent);
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .eq-macros div {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .eq-macros dt {
+    color: color-mix(in oklch, var(--paper) 68%, transparent);
+  }
+
+  /* The operator between two cells rides on the border that separates them. */
+  .eq-op {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    height: 0;
+    border-top: 1px solid var(--rule);
+  }
+  .eq-op span {
+    display: grid;
+    place-items: center;
+    width: 1.9rem;
+    height: 1.9rem;
+    border: 1px solid var(--rule-strong);
+    border-radius: 50%;
+    background: var(--paper);
+    font-family: var(--font-mono);
+    font-size: 1rem;
+    line-height: 1;
+    color: var(--ink);
+    box-shadow: var(--shadow-sm);
+  }
+  @container (min-width: 40rem) {
+    .equation-row {
+      grid-template-columns: minmax(0, 1.08fr) 0 minmax(0, 1fr) 0 minmax(0, 0.92fr);
+    }
+    .eq-op {
+      width: 0;
+      height: auto;
+      border-top: 0;
+      border-left: 1px solid var(--rule);
+    }
+    .eq-op span {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      translate: -50% -50%;
+    }
+  }
+  .equation figcaption {
+    margin-top: 0.85rem;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    color: var(--ink-faint);
+    text-wrap: pretty;
+  }
+
+  /* --- 404 --- */
+  .lost-readout {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    margin-bottom: 1.4rem;
+    padding: 0.5rem 0.95rem;
+    border: 1px solid var(--rule);
+    border-radius: 0.7rem;
+    background: var(--paper-raised);
+    font-family: var(--font-mono);
+    font-size: 1.5rem;
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    color: var(--measure-ink);
+  }
+  .lost-readout small {
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
   }
 }
 
-/* Scrollbars in the sidebar and code blocks, kept unobtrusive. */
-@layer utilities {
-  .scrollbar-slim {
-    scrollbar-width: thin;
-    scrollbar-color: var(--rule) transparent;
+@media print {
+  .sidebar,
+  .topbar,
+  .toc,
+  .pagenav,
+  .skip-link,
+  .codeblock-copy {
+    display: none !important;
+  }
+  .shell-main {
+    margin-left: 0 !important;
   }
 }

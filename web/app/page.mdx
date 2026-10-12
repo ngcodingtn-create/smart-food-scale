@@ -1,4 +1,5 @@
 import { Callout } from '@/components/Callout';
+import { Hero } from '@/components/home/Hero';
 
 export const metadata = {
   title: 'Overview',
@@ -6,33 +7,7 @@ export const metadata = {
     'An IoT kitchen scale that weighs a meal and returns its calories and macros.',
 };
 
-# Smart Food Scale
-
-{/* These wrappers are <div>, never <p>. MDX parses the children of a block-level
-    JSX element as markdown and wraps them in their own <p>, and a <p> inside a
-    <p> is invalid HTML — which React reports as a hydration failure. */}
-
-<div className="!mt-2 text-lg leading-relaxed text-[var(--ink-soft)]">
-
-The camera answers _what_ the food is. The load cell answers _how&nbsp;much_ of it
-there is.
-
-</div>
-
-<div className="!mt-7 flex flex-wrap gap-3">
-  <a
-    href="/deliverables"
-    className="rounded-lg bg-[var(--accent)] px-4 py-2 text-sm font-semibold !text-white !no-underline transition-opacity hover:opacity-90"
-  >
-    See the deliverables →
-  </a>
-  <a
-    href="/project/component-request"
-    className="rounded-lg border border-[var(--rule)] px-4 py-2 text-sm font-semibold !text-[var(--ink)] !no-underline transition-colors hover:bg-[var(--paper-sunken)]"
-  >
-    Component request
-  </a>
-</div>
+<Hero />
 
 ## The problem we're attacking
 
@@ -53,37 +28,36 @@ what the dish *is* — which is the part a camera is actually good at.
 
 ## What it is
 
-<div className="!mt-6 grid gap-4 sm:grid-cols-2">
-  <div className="rounded-xl border border-[var(--rule)] p-5">
-    <h3 className="!mt-0 !text-base">Two ESP32 nodes</h3>
-    <div className="!mt-2 text-sm text-[var(--ink-soft)]">
-      <strong>Node A</strong> carries the load cell, the screen and the buttons.{' '}
-      <strong>Node B</strong> carries the camera. They talk over ESP-NOW, which needs
-      no router.
-    </div>
-  </div>
-  <div className="rounded-xl border border-[var(--rule)] p-5">
-    <h3 className="!mt-0 !text-base">A backend that does the arithmetic</h3>
-    <div className="!mt-2 text-sm text-[var(--ink-soft)]">
-      Identifies the dish, looks up nutrients per 100 g, multiplies by the{' '}
-      <strong>measured</strong> mass, stores the meal.
-    </div>
-  </div>
-  <div className="rounded-xl border border-[var(--rule)] p-5">
-    <h3 className="!mt-0 !text-base">A phone app</h3>
-    <div className="!mt-2 text-sm text-[var(--ink-soft)]">
-      Daily log, macro totals, history, and a manual-entry fallback for when the
-      recogniser says it doesn&apos;t know.
-    </div>
-  </div>
-  <div className="rounded-xl border border-[var(--rule)] p-5">
-    <h3 className="!mt-0 !text-base">Our own food table</h3>
-    <div className="!mt-2 text-sm text-[var(--ink-soft)]">
-      Couscous, lablabi, brik, ojja and mloukhia are in <strong>no</strong> food
-      database on earth. So we built one.
-    </div>
-  </div>
-</div>
+{/* Markdown inside a <Card> needs a blank line either side, exactly as it does
+    inside a <Callout>. Without one MDX treats the text as raw JSX and the
+    **bold** markers come through as literal asterisks. */}
+
+<Cards>
+  <Card title="Two ESP32 nodes" icon="chip">
+
+  **Node A** carries the load cell, the screen and the buttons. **Node B** carries
+  the camera. They talk over ESP-NOW, which needs no router.
+
+  </Card>
+  <Card title="A backend that does the arithmetic" icon="server">
+
+  Identifies the dish, looks up nutrients per 100 g, multiplies by the
+  **measured** mass, stores the meal.
+
+  </Card>
+  <Card title="A phone app" icon="phone">
+
+  Daily log, macro totals, history, and a manual-entry fallback for when the
+  recogniser says it doesn't know.
+
+  </Card>
+  <Card title="Our own food table" icon="table">
+
+  Couscous, lablabi, brik, ojja and mloukhia are in **no** food database on earth.
+  So we built one.
+
+  </Card>
+</Cards>
 
 ## Where the project actually stands
 

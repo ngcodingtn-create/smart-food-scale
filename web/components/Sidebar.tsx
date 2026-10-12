@@ -2,15 +2,11 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { NAV } from '@/lib/nav';
-
-const BADGE_TONE: Record<string, string> = {
-  done: 'text-emerald-700 dark:text-emerald-400 border-emerald-600/25 bg-emerald-600/8',
-  wip: 'text-amber-700 dark:text-amber-400 border-amber-600/25 bg-amber-600/8',
-  todo: 'text-slate-600 dark:text-slate-400 border-slate-500/25 bg-slate-500/8',
-  alert: 'text-rose-700 dark:text-rose-400 border-rose-600/25 bg-rose-600/8',
-};
+import { useEffect, useRef, useState } from 'react';
+import { Brand } from '@/components/Brand';
+import { Icon } from '@/components/icons';
+import { ThemeSwitch, ThemeToggle } from '@/components/ThemeToggle';
+import { NAV, REPO_URL } from '@/lib/nav';
 
 function NavList({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
@@ -18,11 +14,9 @@ function NavList({ onNavigate }: { onNavigate?: () => void }) {
   return (
     <nav aria-label="Documentation">
       {NAV.map((group) => (
-        <div key={group.label} className="mb-6">
-          <h2 className="mb-2 px-3 text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-[var(--ink-faint)]">
-            {group.label}
-          </h2>
-          <ul className="space-y-px">
+        <div key={group.label} className="nav-group">
+          <h2 className="nav-label label">{group.label}</h2>
+          <ul className="nav-list">
             {group.items.map((item) => {
               const active = pathname === item.href;
               return (
@@ -31,20 +25,12 @@ function NavList({ onNavigate }: { onNavigate?: () => void }) {
                     href={item.href}
                     onClick={onNavigate}
                     aria-current={active ? 'page' : undefined}
-                    className={[
-                      'flex items-center justify-between gap-2 rounded-md px-3 py-1.5 text-sm transition-colors',
-                      active
-                        ? 'bg-[var(--accent-soft)] font-semibold text-[var(--accent-ink)]'
-                        : 'text-[var(--ink-soft)] hover:bg-[var(--paper-sunken)] hover:text-[var(--ink)]',
-                    ].join(' ')}
+                    className="nav-link"
                   >
-                    <span>{item.label}</span>
+                    {item.icon ? <Icon name={item.icon} size={17} /> : null}
+                    <span className="nav-text">{item.label}</span>
                     {item.badge ? (
-                      <span
-                        className={`shrink-0 rounded border px-1.5 py-px text-[0.62rem] font-semibold uppercase tracking-wide ${
-                          BADGE_TONE[item.badge.tone]
-                        }`}
-                      >
+                      <span className="nav-badge" data-tone={item.badge.tone}>
                         {item.badge.text}
                       </span>
                     ) : null}
@@ -59,44 +45,111 @@ function NavList({ onNavigate }: { onNavigate?: () => void }) {
   );
 }
 
+function SidebarFoot() {
+  return (
+    <div className="sidebar-foot">
+      <a href={REPO_URL} target="_blank" rel="noreferrer noopener" className="repo-link">
+        GitHub
+        <Icon name="external" size={14} />
+      </a>
+      <ThemeSwitch />
+    </div>
+  );
+}
+
+/** Desktop: fixed to the left edge, full height. Hidden below 64rem. */
 export function Sidebar() {
   return (
-    <aside className="scrollbar-slim sticky top-16 hidden h-[calc(100dvh-4rem)] w-64 shrink-0 overflow-y-auto border-r border-[var(--rule)] py-8 pr-2 lg:block">
-      <NavList />
+    <aside className="sidebar">
+      <div className="sidebar-head">
+        <Brand />
+      </div>
+      <div className="sidebar-scroll">
+        <NavList />
+      </div>
+      <SidebarFoot />
     </aside>
   );
 }
 
-export function MobileNav() {
+/**
+ * Small screens: a sticky top bar, and the same navigation in a drawer.
+ *
+ * The drawer is a native modal <dialog>. That is what traps focus inside it,
+ * closes it on Esc and makes the page behind it inert — none of it is
+ * re-implemented here.
+ */
+export function MobileBar() {
+  const drawer = useRef<HTMLDialogElement>(null);
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
-  // Close the drawer on navigation, and lock scroll while it is open.
-  useEffect(() => setOpen(false), [pathname]);
+  const close = () => drawer.current?.close();
+
+  // A link in the drawer was followed.
   useEffect(() => {
-    document.body.style.overflow = open ? 'hidden' : '';
-    return () => {
-      document.body.style.overflow = '';
+    drawer.current?.close();
+  }, [pathname]);
+
+  // The window grew past the breakpoint with the drawer open: the sidebar is
+  // on screen now, so a modal copy of it would only be in the way.
+  useEffect(() => {
+    const desktop = matchMedia('(min-width: 64rem)');
+    const onChange = () => {
+      if (desktop.matches) drawer.current?.close();
     };
-  }, [open]);
+    desktop.addEventListener('change', onChange);
+    return () => desktop.removeEventListener('change', onChange);
+  }, []);
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        aria-expanded={open}
-        aria-label={open ? 'Close navigation' : 'Open navigation'}
-        className="rounded-md border border-[var(--rule)] px-2.5 py-1.5 text-sm text-[var(--ink-soft)] hover:bg-[var(--paper-sunken)] lg:hidden"
-      >
-        {open ? '✕' : '☰'}
-      </button>
-
-      {open ? (
-        <div className="fixed inset-x-0 bottom-0 top-16 z-40 overflow-y-auto border-t border-[var(--rule)] bg-[var(--paper)] px-4 py-6 lg:hidden">
-          <NavList onNavigate={() => setOpen(false)} />
+      <header className="topbar">
+        <Brand />
+        <div className="topbar-actions">
+          <ThemeToggle />
+          <button
+            type="button"
+            className="icon-btn"
+            aria-label="Open navigation"
+            aria-haspopup="dialog"
+            aria-expanded={open}
+            aria-controls="nav-drawer"
+            onClick={() => {
+              drawer.current?.showModal();
+              setOpen(true);
+            }}
+          >
+            <Icon name="menu" />
+          </button>
         </div>
-      ) : null}
+      </header>
+
+      <dialog
+        ref={drawer}
+        id="nav-drawer"
+        className="drawer"
+        aria-label="Site navigation"
+        onClose={() => setOpen(false)}
+        // The panel fills the dialog, so a click that lands on the dialog
+        // itself can only have come from the backdrop.
+        onClick={(event) => {
+          if (event.target === event.currentTarget) close();
+        }}
+      >
+        <div className="drawer-panel">
+          <div className="drawer-head">
+            <Brand onNavigate={close} />
+            <button type="button" className="icon-btn" aria-label="Close navigation" onClick={close}>
+              <Icon name="close" />
+            </button>
+          </div>
+          <div className="sidebar-scroll">
+            <NavList onNavigate={close} />
+          </div>
+          <SidebarFoot />
+        </div>
+      </dialog>
     </>
   );
 }

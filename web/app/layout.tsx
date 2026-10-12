@@ -1,11 +1,35 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
-import Script from 'next/script';
+import { Fraunces, IBM_Plex_Mono, Instrument_Sans } from 'next/font/google';
 import './globals.css';
-import { MobileNav, Sidebar } from '@/components/Sidebar';
-import { ThemeToggle } from '@/components/ThemeToggle';
+import { Breadcrumb } from '@/components/Breadcrumb';
+import { InlineScript } from '@/components/InlineScript';
 import { PageNav } from '@/components/PageNav';
+import { MobileBar, Sidebar } from '@/components/Sidebar';
+import { Toc } from '@/components/Toc';
 import { REPO_URL } from '@/lib/nav';
+
+// Three faces, two voices (see the token notes in globals.css). next/font
+// downloads them at build time and serves them from this origin, so a reader's
+// browser never contacts Google.
+const display = Fraunces({
+  subsets: ['latin'],
+  style: ['normal', 'italic'],
+  axes: ['opsz'],
+  display: 'swap',
+  variable: '--font-display-face',
+});
+const body = Instrument_Sans({
+  subsets: ['latin'],
+  style: ['normal', 'italic'],
+  display: 'swap',
+  variable: '--font-body',
+});
+const label = IBM_Plex_Mono({
+  subsets: ['latin'],
+  weight: ['400', '500'],
+  display: 'swap',
+  variable: '--font-label',
+});
 
 export const metadata: Metadata = {
   title: {
@@ -17,12 +41,12 @@ export const metadata: Metadata = {
     'The camera answers what the food is; the load cell answers how much of it there is.',
 };
 
-// Runs before hydration so a dark-theme reader never sees a white flash.
-// Delivered via next/script with strategy="beforeInteractive": a bare <script>
-// tag rendered as a React child makes React 19 warn that it will never execute
-// on the client.
+// Runs while the HTML is being parsed, so a dark-theme reader never sees a
+// white flash. It has to be an inline script in <head> for that — see
+// components/InlineScript.tsx for why next/script is not enough.
 // Precedence: ?theme= in the URL (shareable, and how screenshots are taken),
-// then the reader's saved choice, then the OS preference.
+// then the reader's saved choice, then the OS preference. `initialDark()` in
+// components/ThemeToggle.tsx mirrors this logic; change the two together.
 const THEME_BOOT = `
 try {
   var forced = new URLSearchParams(location.search).get('theme');
@@ -36,56 +60,48 @@ try {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`${display.variable} ${body.variable} ${label.variable}`}
+      suppressHydrationWarning
+    >
+      <head>
+        <InlineScript html={THEME_BOOT} />
+      </head>
       <body>
-        <Script
-          id="theme-boot"
-          strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{ __html: THEME_BOOT }}
-        />
-        <header className="sticky top-0 z-50 h-16 border-b border-[var(--rule)] bg-[var(--paper)]/85 backdrop-blur">
-          <div className="mx-auto flex h-full max-w-7xl items-center gap-3 px-4 sm:px-6">
-            <Link href="/" className="flex items-center gap-2.5 font-semibold tracking-tight">
-              <span
-                aria-hidden="true"
-                className="grid h-7 w-7 place-items-center rounded-md bg-[var(--accent)] text-sm text-white"
-              >
-                ⚖
-              </span>
-              <span className="text-[var(--ink)]">Smart Food Scale</span>
-            </Link>
+        <a href="#content" className="skip-link">
+          Skip to content
+        </a>
 
-            <div className="ml-auto flex items-center gap-2">
-              <a
-                href={REPO_URL}
-                target="_blank"
-                rel="noreferrer noopener"
-                className="hidden rounded-md border border-[var(--rule)] px-2.5 py-1.5 text-sm text-[var(--ink-soft)] transition-colors hover:bg-[var(--paper-sunken)] hover:text-[var(--ink)] sm:block"
-              >
-                GitHub ↗
-              </a>
-              <ThemeToggle />
-              <MobileNav />
-            </div>
-          </div>
-        </header>
-
-        <div className="mx-auto flex max-w-7xl gap-10 px-4 sm:px-6">
+        <div className="shell">
           <Sidebar />
-          <main className="min-w-0 flex-1 py-10 lg:py-14">
-            <article className="prose mx-auto max-w-[46rem]">{children}</article>
-            <div className="mx-auto max-w-[46rem]">
-              <PageNav />
-            </div>
-          </main>
-        </div>
 
-        <footer className="mt-16 border-t border-[var(--rule)] py-8">
-          <div className="mx-auto max-w-7xl px-4 text-sm text-[var(--ink-faint)] sm:px-6">
-            University IoT team project · the camera answers <em>what</em>, the load cell
-            answers <em>how much</em>
+          <div className="shell-main">
+            <MobileBar />
+
+            {/* One column, or article + outline on wide screens. The footer is
+                a third grid child and lands under the article. */}
+            <div className="page">
+              <main id="content" tabIndex={-1} className="min-w-0 outline-none">
+                <Breadcrumb />
+                <article className="prose">{children}</article>
+                <PageNav />
+              </main>
+
+              <Toc />
+
+              <footer className="site-foot">
+                <span>
+                  University IoT team project · the camera answers <em>what</em>, the load cell
+                  answers <em>how much</em>
+                </span>
+                <a href={REPO_URL} target="_blank" rel="noreferrer noopener">
+                  Source on GitHub
+                </a>
+              </footer>
+            </div>
           </div>
-        </footer>
+        </div>
       </body>
     </html>
   );

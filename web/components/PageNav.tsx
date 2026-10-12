@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { Icon } from '@/components/icons';
 import { FLAT_NAV } from '@/lib/nav';
 
 /** Previous / next links in sidebar order, at the foot of every page. */
@@ -17,33 +18,24 @@ export function PageNav() {
   if (!previous && !next) return null;
 
   return (
-    <nav
-      aria-label="Previous and next page"
-      className="mt-16 grid gap-3 border-t border-[var(--rule)] pt-6 sm:grid-cols-2"
-    >
+    <nav aria-label="Previous and next page" className="pagenav">
       {previous ? (
-        <Link
-          href={previous.href}
-          className="group rounded-lg border border-[var(--rule)] px-4 py-3 transition-colors hover:border-[var(--accent)]"
-        >
-          <span className="block text-xs text-[var(--ink-faint)]">← Previous</span>
-          <span className="block text-sm font-medium text-[var(--ink)] group-hover:text-[var(--accent-ink)]">
-            {previous.label}
+        <Link href={previous.href} data-dir="previous">
+          <span className="pagenav-dir label">
+            <Icon name="arrow-left" size={13} />
+            Previous
           </span>
+          <span className="pagenav-title">{previous.label}</span>
         </Link>
-      ) : (
-        <span />
-      )}
+      ) : null}
 
       {next ? (
-        <Link
-          href={next.href}
-          className="group rounded-lg border border-[var(--rule)] px-4 py-3 text-right transition-colors hover:border-[var(--accent)] sm:col-start-2"
-        >
-          <span className="block text-xs text-[var(--ink-faint)]">Next →</span>
-          <span className="block text-sm font-medium text-[var(--ink)] group-hover:text-[var(--accent-ink)]">
-            {next.label}
+        <Link href={next.href} data-dir="next">
+          <span className="pagenav-dir label">
+            Next
+            <Icon name="arrow-right" size={13} />
           </span>
+          <span className="pagenav-title">{next.label}</span>
         </Link>
       ) : null}
     </nav>
