@@ -21,7 +21,7 @@ smart-food-scale/
 ├── docs/                     architecture, wiring, calibration, decisions
 ├── firmware/
 │   ├── node-a-scale/         ESP32 DevKit V1 — load cell, OLED, buttons, buzzer
-│   └── node-b-camera/        ESP32-CAM  — OV2640, LED ring, Wi-Fi upload
+│   └── node-b-camera/        ESP32-CAM  — OV2640, LED light, Wi-Fi upload
 ├── backend/                  FastAPI — recognition, nutrition lookup, meal store
 ├── web/                      Next.js docs & showcase site (deploys to Vercel)
 └── app/                      React Native (Expo development build)
@@ -43,7 +43,7 @@ board attached.
 | --- | --- | --- |
 | Board | ESP32 DevKit V1 (WROOM-32) | ESP32-CAM (AI-Thinker) |
 | Owns | Weight, local UI, capture trigger | JPEG capture, Wi-Fi upload |
-| Peripherals | HX711 + 1 kg load cell, SSD1306 OLED, tare + capture buttons, buzzer | OV2640, WS2812B ring, microSD |
+| Peripherals | HX711 + 1 kg load cell, SSD1306 OLED, tare + capture buttons, buzzer | OV2640, white LED light, microSD |
 | Role | **Master** | Slave |
 
 The ESP32-CAM is pin-starved, and its 3.3 V rail sags when the camera initialises

@@ -13,7 +13,7 @@ export const metadata = {
    │  ESP32 DevKit V1       │   "tared, 143.2 g,     │  ESP32-CAM (AI-Thinker)│
    │                        │    shoot now"          │                        │
    │  HX711 + 1 kg cell     │                        │  OV2640 @ SVGA         │
-   │  SSD1306 OLED          │                        │  WS2812B light ring    │
+   │  SSD1306 OLED          │                        │  6 white LEDs, diffused│
    │  tare / capture btns   │                        │  microSD fallback      │
    │  buzzer                │                        │                        │
    └────────────────────────┘                        └───────────┬────────────┘
@@ -40,7 +40,7 @@ export const metadata = {
 1. User puts the plate on the scale and presses **capture**.
 2. Node A **tares**, then takes a median-filtered weight — 10–16 samples at 10 SPS.
 3. Node A sends the gram value to Node B over **ESP-NOW**.
-4. Node B lights the WS2812B ring, captures a **JPEG at SVGA or better**.
+4. Node B switches on its white LEDs, captures a **JPEG at SVGA or better**.
 5. Node B POSTs `multipart/form-data` — the JPEG plus the gram value — over Wi-Fi.
 6. Backend identifies the dish, looks up nutrients **per 100 g**, multiplies by the
    measured mass, persists the meal.

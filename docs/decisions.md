@@ -299,3 +299,46 @@ exercised through synthetic touch pointer events; no physical phone was used.
 **What would change our mind:** a larger part catalogue or detailed supplier CAD
 may justify compressed external models. Until then procedural geometry avoids remote
 assets, font fetches and an additional loading dependency.
+
+---
+
+## D12 — The component request is built around what a faculty lab already has
+
+**Date:** 2026-10-12 · **Status:** proposed, for the team to confirm with the lab
+
+The request now has three lists: **buy** (7 lines, 85.400 TND at Tunisian shop prices
+read on 2026-10-12), **borrow** from the teaching lab, and **book** (bench instruments,
+FabLab time, calibration masses). The data lives in `web/components/request/bom.ts`;
+the page, its total and its hand-in table are generated from it. Lab availability is
+inferred from starter-kit contents and supplier partner lists. No faculty inventory
+was available.
+
+Changes from the reconstructed BOM, each from datasheet or local-availability research:
+
+- **Lighting: six white LEDs and a 2N2222 on Node B GPIO 13, replacing the WS2812B
+  ring and SN74AHCT125.** WS2812B data needs 0.7·VDD (3.5 V at 5 V); the ESP32
+  guarantees only 0.8·3.3 V. No Tunisian shop checked stocks the 74AHCT125, and the
+  locally sold BSS138 shifters are too slow for the ring's data rate. White LEDs and a
+  2N2222 are lab staples. This also settles a contradiction: the wiring page put the
+  ring on Node A GPIO 5, the architecture page on Node B. GPIO 13 is free with the SD
+  in 1-bit mode and is not a strapping pin. A BC547 cannot carry the ~110 mA.
+- **HX711 on Node A's 3V3 pin, dropping its buck converter.** It draws ~1.5 mA plus
+  ~3–4 mA for the bridge. The DevKit's linear regulator is quieter than a switching
+  converter, and at 5 V a single-supply HX711 board drives DT to 5 V, beyond the
+  ESP32's VIH max of VDD + 0.3 V. Cost: excitation drops from ~4.3 V to ~3.1 V, about
+  1.4× more noise in grams, still far below the 1 g target on a 1 kg cell.
+- **ESP32-CAM-MB base replaces the stand-alone USB-to-TTL adapter** (9.5 vs 10.5 TND,
+  with BOOT and RST buttons). The adapter stays as a backup at 3.3 V logic.
+- **1N4148 across the buzzer coil; shielded 4-core cable for the load cell** (an old
+  USB cable); **microSD becomes a borrowed, optional part**; **calibration masses move
+  from optional to booked from the physics lab** (no local retailer found).
+- **1 kg cell kept, with plate plus platform capped at 250 g.** Ceramic plates run
+  300–430 g. The research suggested a 1.5–2 kg cell instead, but only 1 kg and 5 kg
+  bars were found in stock locally, and 5 kg is 5× worse in grams.
+
+**Not yet reflected:** the 3D rig (`web/components/rig/`) still models the 12-pixel
+ring and a 250 mm lens-to-plate clearance; the research recommends 300–350 mm.
+
+**What would change our mind:** the lab having a 74AHCT125 (or an importable one) and
+a reason to want colour control would bring the ring back on Node B GPIO 13 through
+it. Plates that cannot be kept under 250 g call for a 2–3 kg cell.

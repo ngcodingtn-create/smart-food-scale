@@ -26,8 +26,11 @@ against the original workbook** when someone locates it — see
 | OLED SCL | 22 | I²C, SSD1306 at `0x3C` |
 | Tare button | 18 | `INPUT_PULLUP` |
 | Capture button | 19 | |
-| Buzzer | 23 | Through a 2N2222/BC547 with a **1 kΩ base resistor** |
-| WS2812B data | 5 | Through an **SN74AHCT125** level shifter, **330 Ω** series |
+| Buzzer | 23 | Through a 2N2222/BC547 with a **1 kΩ base resistor**, **1N4148** across the coil |
+| HX711 VCC | 3V3 pin | Not 5 V: at 5 V its DT line swings to 5 V. **10 µF + 100 nF** at the module |
+
+The light over the plate moved to Node B — see below and the
+[component request](/project/component-request#what-changed-from-the-first-draft).
 
 <Callout type="danger" title="If the board is a WROVER, not a WROOM-32">
 
@@ -60,6 +63,18 @@ looks like a dead board.
 
 </Callout>
 
+GPIO 13 drives the light: six white LEDs switched by a 2N2222.
+
+| From | Through | To |
+| --- | --- | --- |
+| GPIO 13 | 470 Ω | 2N2222 base |
+| 2N2222 base | 10 kΩ | GND, so the light stays off while the board boots |
+| 5 V | 100 Ω, then a white LED (×6, in parallel) | 2N2222 collector |
+| 2N2222 emitter | — | GND |
+
+About 110 mA from the 5 V supply, not through the ESP32-CAM. The flash LED on GPIO 4
+stays as a fallback only.
+
 ## Load cell → HX711
 
 | Wire | Terminal |
@@ -85,7 +100,8 @@ corrupt frame and a lost weight reading.
   physically possible
 - **Thick, short cables**
 - **No breadboard in the power path** — the contact resistance is enough on its own
-- **HX711 on its own buck rail**, not shared with the camera
+- **HX711 on Node A's 3V3 pin**, decoupled at the module, never on the camera's rail
+- **Star wiring**: one lead from the supply to each board, a second 1000 µF where they split
 
 ## HX711 configuration
 

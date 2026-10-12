@@ -42,7 +42,7 @@ ESP32-CAM (AI-Thinker, OV2640) on a fixed arm above the plate.
 | Item | Plan |
 | --- | --- |
 | Camera | JPEG at SVGA or better |
-| Lighting | WS2812B ring through a level shifter, for controlled illumination |
+| Lighting | Six white LEDs behind a diffuser, switched by a 2N2222 on GPIO 13 |
 | Link | ESP-NOW receive |
 | Upload | `multipart/form-data` POST with **retry** |
 | Fallback | microSD buffer when the POST fails, flushed on reconnect |
