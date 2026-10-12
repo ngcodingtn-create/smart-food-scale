@@ -2,10 +2,22 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "site",
+      "name": "web",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["--prefix", "site", "run", "dev"],
-      "port": 4321
+      "runtimeArgs": ["--prefix", "web", "run", "dev"],
+      "port": 3000,
+      "autoPort": true
+    },
+    {
+      "name": "backend",
+      "runtimeExecutable": "backend/.venv/Scripts/python.exe",
+      "runtimeArgs": [
+        "-m", "uvicorn", "app.main:app",
+        "--app-dir", "backend",
+        "--reload", "--reload-dir", "backend/app",
+        "--port", "8000"
+      ],
+      "port": 8000
     }
   ]
 }
