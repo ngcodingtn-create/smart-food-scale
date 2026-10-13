@@ -15,16 +15,39 @@ Nothing is marked done unless it has been run. Newest work first.
 | Backend API (FastAPI, SQLite) | ✅ Done | 145 tests passing, offline |
 | Tunisian food table | ✅ Done | 18 dishes, every figure sourced and flagged as an estimate |
 | Recogniser | 🟡 Stub | Interface done; the vision API is not chosen yet |
-| Component request | ✅ Done, to confirm with the lab | 90,400 TND to buy; prices read 12 Oct 2026 |
+| Component request | ✅ Final sheet, to show the lab technician | Every line with what it is for and what would do instead; 90,400 TND to buy |
 | Prototype simulation (`/prototype`) | ✅ Done | Every documented scenario driven in the browser |
-| 3D rig (`/rig`) | 🟡 Out of date | Still shows the 1 kg cell, LED ring and 250 mm lens height |
-| Docs site | ✅ Live | 17 routes, static, on Vercel |
+| Architecture (`/project/architecture`) | ✅ Rebuilt | A playable system map and three drawings |
+| 3D rig (`/rig`) | ✅ Rebuilt | 3 kg cell, six white LEDs, lens at 320 mm; four drawings computed from one dimension file |
+| Docs site | ✅ Live | 16 pages, static, on Vercel |
 | Firmware, Node A | 🚧 Started | Build config only |
 | Firmware, Node B | 📋 Not started | — |
 | Mobile app | 📋 Not started | — |
 | Hardware | 📋 Not ordered | Waiting on the component request |
 
 ---
+
+## 13 October 2026 — Architecture, rig and the request sheet rebuilt
+
+The owner asked for the Architecture and rig pages redone with minimal text, "all in 3D
+and SVGs", and for a final component request to show the lab technician.
+
+- **Component request, final form.** One sheet: two drawings (what we are building,
+  where each part goes), then all 32 lines with **what each is for** and **what would
+  do instead**, a tick box per line, and print styles. The reasoning, prices and links
+  moved to `/project/component-request/notes`.
+- **Architecture.** One system map built from the request's own part drawings, with a
+  player that steps through the eight stages of a capture. Then three drawings: who does
+  what in order, why two boards, and what travels with the number.
+- **Rig.** The 3D model now matches the design: the 3 kg cell on a proper mount with a
+  stop screw, six white LEDs with a diffuser in place of the ring, the lens 320 mm above
+  the plate. Every part is numbered; pick a number and the camera flies to it. Four
+  drawings beside it: side view, plan, load path, and what the camera sees.
+- **One dimension file** (`web/components/rig/specs.ts`) now drives the 3D model, the
+  four drawings and the dimension table, so they cannot disagree.
+- **Corrected along the way:** the capture order (tare the *empty* plate, then add the
+  food); `index.md`, which still described the LED ring and the buck converter.
+- **Notes for whoever continues**, human or AI, are in `ai-docs/`. Recorded as **D14**.
 
 ## 13 October 2026 — 3 kg load cell
 
@@ -116,7 +139,8 @@ after tare, and a ceramic plate with the largest portion (logs normally on 3 kg)
 1. **Confirm the request with the lab technician**, then order the buy list. Check
    each link first; prices and stock change.
 2. **Ask Didactico for the YZC-131 3 kg datasheet** (creep, overload, combined error).
-3. **Update the 3D rig:** 3 kg cell, white LEDs instead of the ring, lens at 300–350 mm.
+3. **Decide where the LEDs point** with a test photo: around the lens (as modelled) or
+   at an angle (as the parts list suggests, against glare).
 4. **Node A firmware:** HX711 reading, tare, median filter, OLED, buttons.
 5. **Node B firmware:** ESP-NOW receive, light, capture, upload, microSD fallback.
 6. **Choose the vision API** — see `/reference/vision-apis`.
@@ -133,12 +157,17 @@ after tare, and a ceramic plate with the largest portion (logs normally on 3 kg)
   channel silently cuts Node A off.
 - **No CI.** Tests pass locally; nothing enforces it on push.
 - **Unfinished research:** the mechanical-build report was cut off by the usage limit.
+  The two that finished are kept in `ai-docs/research/`.
+- **Unmeasured:** the size of the load cell and the field of view of the camera are
+  seller and vendor figures. The rig is drawn from them and says so.
 
 ## Where things are written down
 
 | What | Where |
 | --- | --- |
-| Every design decision, with reasoning | `docs/decisions.md` (D0–D13) |
+| Every design decision, with reasoning | `docs/decisions.md` (D0–D14) |
+| Notes for the next agent or person: handoff, runbook, project map | `ai-docs/` |
+| Rig dimensions (single source) | `web/components/rig/specs.ts` |
 | Parts list (single source) | `web/components/request/bom.ts` |
 | Pin map and wiring | `/project/wiring` |
 | Accuracy claims and calibration | `/reference/accuracy` |

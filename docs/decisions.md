@@ -336,8 +336,8 @@ Changes from the reconstructed BOM, each from datasheet or local-availability re
   300–430 g. The research suggested a 1.5–2 kg cell instead, but only 1 kg and 5 kg
   bars were found in stock locally, and 5 kg is 5× worse in grams.
 
-**Not yet reflected:** the 3D rig (`web/components/rig/`) still models the 12-pixel
-ring and a 250 mm lens-to-plate clearance; the research recommends 300–350 mm.
+**Reflected in the 3D rig by D14**, which replaced the ring with the six LEDs and raised
+the lens to 320 mm.
 
 **What would change our mind:** the lab having a 74AHCT125 (or an importable one) and
 a reason to want colour control would bring the ring back on Node B GPIO 13 through
@@ -371,8 +371,59 @@ threads. No creep, overload or combined-error figures were found for it; ask the
 for the datasheet. The backend's 5000 g ceiling (D4) stays: it is past this cell's
 range, so it still only catches a broken reading.
 
-**Not yet reflected:** the 3D rig models the TAL221 1 kg (47 × 12 × 6 mm); its stack
-heights depend on that size, so it changes with the rig rework noted in D12.
+**Reflected in the 3D rig by D14.**
 
 **What would change our mind:** a local 2 kg cell, or a measured error that misses the
 1 g target by enough to matter.
+
+---
+
+## D14 — Drawings first: the rig, the architecture page and the request sheet
+
+**Date:** 2026-10-13 · **Status:** accepted (owner request)
+
+The owner asked for the Architecture and rig pages to be redone "from start, minimal
+text, all in 3D and SVGs", and for a final component request to show the lab
+technician. Three pages changed shape, and the rig caught up with D12 and D13.
+
+**The rig.** `web/components/rig/specs.ts` is now the one source for the 3D model, four
+drawings (side, plan, load path, camera geometry) and the dimension table. Choices made
+while rebuilding it, all proposals until hardware is measured:
+
+- **Load cell drawn at 75 × 12.7 × 12.7 mm.** That is the seller-listing figure from
+  D13. The shop page we would buy from states no dimensions (checked 2026-10-13), and
+  no datasheet was found, so the table marks it an estimate.
+- **A Z-mount with a stop screw.** A spacer under the fixed end, a riser on the free
+  end, each 28 mm from the centre, and a screw standing 1 mm short of the free end. D13
+  asked for the stop screw; this is where it goes.
+- **Lens 320 mm above the surface of the plate, rig 420 mm tall.** Inside the 300–350 mm
+  the research recommended. At 250 mm an 18 cm plate barely fitted the frame.
+- **Six LEDs on a 44 mm circle around the lens**, on a 62 mm carrier, behind a 70 mm
+  diffuser.
+- **The frame of the camera is computed from a quoted 66°, taken as the diagonal.**
+  Vendors do not say which angle they quote. The diagonal reading gives the smaller
+  frame: about 330 × 250 mm at the plate, 35 mm to spare each side of the plate.
+
+The prose of the page became three collapsed sections, kept in the HTML for screen
+readers and for `scripts/check-rig.mjs`, which now expects the dimensions of the new
+cell.
+
+**The architecture page.** One system map, built from the part drawings of the
+component request, with a player that steps through a capture; then three drawings. The
+map is rendered on the server and a small client component only sets the current step.
+**The capture order was corrected**: tare the empty plate, then add the food, then
+press PHOTO. The old "tare, then weigh" on a loaded plate would have zeroed the meal
+away, which D10 and the prototype had both already noted.
+
+**The component request.** The page is now the sheet handed to the technician: two
+explainer drawings, then every line with what it is for and what would do instead.
+`bom.ts` gained a `swap` line per part and a single numbering, `REQUEST` (borrow, book,
+buy), used by the sheet, the parts map and the cost table. The reasoning moved to
+`/project/component-request/notes` unchanged.
+
+**Left open:** where the LEDs point. The model puts them around the lens. The note in
+the parts list says to put them at an angle to it, against glare on a glazed plate. A
+test photo should decide, and then the two should agree.
+
+**What would change our mind:** measured parts. Put the numbers in `specs.ts` and the
+model, drawings and table follow.

@@ -30,7 +30,7 @@ Two ESP32 nodes, talking over ESP-NOW (no router required):
    │  ESP32 DevKit V1       │   "tared, 143.2 g,     │  ESP32-CAM (AI-Thinker)│
    │                        │    shoot now"          │                        │
    │  HX711 + 3 kg cell     │                        │  OV2640 @ SVGA         │
-   │  SSD1306 OLED          │                        │  WS2812B light ring    │
+   │  SSD1306 OLED          │                        │  6 white LEDs, diffused│
    │  tare / capture btns   │                        │  microSD fallback      │
    │  buzzer                │                        │                        │
    └────────────────────────┘                        └───────────┬────────────┘
@@ -62,25 +62,30 @@ whole failure class.
 
 ## Essential bill of materials
 
+A summary. The maintained request — three lists (buy, borrow, book), Tunisian prices and a
+drawing of every part — is on the site:
+<https://web-ivory-ten-26.vercel.app/project/component-request>. Its data file is
+`web/components/request/bom.ts`.
+
 | # | Component | Qty | Notes |
 | --- | --- | --- | --- |
 | 1 | ESP32 DevKit V1 (WROOM-32) | 1 | Node A. **WROOM**, not WROVER — see wiring note below |
 | 2 | ESP32-CAM, AI-Thinker, with OV2640 | 1 | Node B |
-| 3 | USB-to-TTL programmer (CP2102 / FTDI) | 1 | ESP32-CAM has no USB; required to flash it |
+| 3 | ESP32-CAM-MB programmer base | 1 | The ESP32-CAM has no USB; this is how it is flashed |
 | 4 | Load cell, straight bar, 3 kg | 1 | Any plate plus the largest meal |
 | 5 | HX711 24-bit ADC breakout | 1 | Channel A, gain 128, 10 SPS |
 | 6 | SSD1306 OLED, 128×64, I²C | 1 | Address `0x3C` |
 | 7 | Tactile push buttons | 2 | Tare and capture |
 | 8 | Passive buzzer | 1 | Driven through a transistor, not straight off a GPIO |
-| 9 | 2N2222 or BC547 transistor | 1 | Buzzer driver |
-| 10 | Resistors: 1 kΩ, 330 Ω | 1 each | Transistor base; WS2812B data series |
-| 11 | WS2812B LED ring (12 or 16 px) | 1 | Controlled lighting over the plate |
-| 12 | SN74AHCT125 level shifter | 1 | 3.3 V → 5 V for the WS2812B data line |
+| 9 | 2N2222 transistor | 2 | One switches the buzzer, one the lights |
+| 10 | Resistors: 6 × 100 Ω, 470 Ω, 1 kΩ, 10 kΩ | 9 | One per LED; transistor bases |
+| 11 | White LED, 5 mm | 6 | Light over the plate, behind a diffuser |
+| 12 | 1N4148 diode | 1 | Across the buzzer coil |
 | 13 | 5 V / 2 A power supply | 1 | **2 A minimum** — see power discipline below |
-| 14 | Capacitor 470–1000 µF, low ESR | 1 | Across the ESP32-CAM 5 V rail |
-| 15 | Capacitor 100 nF ceramic | 2 | Decoupling, close to each board |
-| 16 | Buck converter module (5 V → 3.3 V) | 1 | Dedicated rail for the HX711 |
-| 17 | microSD card, 4–8 GB | 1 | Upload fallback buffer on Node B |
+| 14 | Capacitor 1000 µF | 2 | At the ESP32-CAM’s 5 V pin, and where the supply splits |
+| 15 | Capacitor 100 nF ceramic | 4 | Decoupling, close to each board |
+| 16 | Capacitor 10 µF | 1 | At the HX711, which runs from Node A’s 3V3 pin |
+| 17 | microSD card (optional) | 1 | Holds captures on Node B while Wi-Fi is down |
 | 18 | Mounting hardware for the camera arm | 1 set | Fixed height above the plate |
 
 An optional BOM (spare cells, a second camera, enclosure material) is kept in the
@@ -105,7 +110,7 @@ risks with software notes.
 | Tare button | 18 (`INPUT_PULLUP`) |
 | Capture button | 19 |
 | Buzzer | 23 (via transistor + 1 kΩ base) |
-| WS2812B data | 5 (via level shifter + 330 Ω) |
+| HX711 VCC | 3V3 pin, with 10 µF + 100 nF |
 
 ⚠️ **If the board turns out to be a WROVER rather than a WROOM-32, GPIO 16/17 are the
 PSRAM lines — move the HX711 to GPIO 25/26.**
@@ -114,7 +119,8 @@ PSRAM lines — move the HX711 to GPIO 25/26.**
 21, 22, 23, 25, 26, 27, 32, 34, 35, 36 or 39 (camera bus), nor 16/17 (PSRAM). GPIO 4 is
 the flash LED. With the microSD in 1-bit mode only **GPIO 4, 12 and 13** come free —
 GPIO 2, 14 and 15 stay in use by the card. **GPIO 12 is the MTDI strapping pin: never
-put a line that idles high on it.**
+put a line that idles high on it.** GPIO 13 switches the light: six white LEDs through a
+2N2222.
 
 **Load cell → HX711.** Red = E+, Black = E−, White = A−, Green = A+. If readings come
 out negative, swap White and Green.
@@ -142,7 +148,7 @@ the hardware arrives live in [docs/calibration.md](docs/calibration.md).
 
 | Risk | Mitigation |
 | --- | --- |
-| ESP32-CAM brownout during capture | 5 V / 2 A supply, 470–1000 µF + 100 nF across the rail, thick short cables, **no breadboard in the power path**, HX711 on its own buck rail |
+| ESP32-CAM brownout during capture | 5 V / 2 A supply, 470–1000 µF + 100 nF across the rail, thick short cables, **no breadboard in the power path**, HX711 on Node A’s 3V3 pin and never on the camera’s rail |
 | Campus Wi-Fi blocks the ESP32 | Captive portals block it outright. WPA2-Enterprise works but is fragile. Assume a phone hotspot or dedicated AP; SSID/password are configurable, never hard-coded |
 | Nutrition API rate limits | USDA FoodData Central is free but capped at 1,000 requests/hour per key — results are cached on disk by `fdcId` |
 | Tunisian dishes absent from every food database | We maintain our own food-composition table. See below |
