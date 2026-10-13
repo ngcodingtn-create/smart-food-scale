@@ -1,0 +1,47 @@
+import { Callout } from '@/components/Callout';
+import { CircuitFrame } from '@/components/workbench/CircuitFrame';
+
+export const metadata = {
+  title: 'Simulate it',
+  description: 'What can be simulated before any part arrives: the two transistor circuits, the scale firmware, and the whole chain as behaviour.',
+};
+
+# Simulate it
+
+Three simulations, each covering a different piece. None covers all of it, and the table says where each one stops.
+
+| Simulation | Proves | Cannot show |
+| --- | --- | --- |
+| **The two circuits**, below | The currents in the light and the buzzer stages | Anything about our actual parts |
+| **The scale's firmware**, in Wokwi | Tare, median, display, buttons, on real code | Accuracy: its load cell steps in about 2.4 g |
+| **[The prototype](/prototype)** | The whole chain as behaviour, mistakes included | Firmware: it is a model, not our code |
+
+<Callout type="caution" title="No simulator runs these two">
+
+The radio link between the two boards (ESP-NOW), and the camera. Wokwi has had both
+open as requests for years. They are tested on the real boards, or not at all.
+
+</Callout>
+
+## The two circuits
+
+<CircuitFrame id="light" />
+
+<CircuitFrame id="buzzer" />
+
+## The scale's firmware
+
+**Waiting on the firmware.** Only a build file exists so far, so there is nothing of ours to run.
+
+What is already known: on 13 October 2026 a stranger's public Wokwi project with the
+same four parts as Node A (ESP32 DevKit, HX711 with a load cell, SSD1306 display, a
+button, and the same two libraries) compiled and ran inside a frame on this site. Its
+load cell has a slider; at 0.27 kg the sketch printed 269 g.
+
+When Node A's firmware is written, it goes here in the same kind of frame, with the pins
+taken from the [wiring](/workbench/wire).
+
+## The whole chain
+
+[The prototype](/prototype) plays one meal through the scale, the camera, the backend
+and the phone. It is the behaviour the real boards have to match.

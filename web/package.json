@@ -8,6 +8,7 @@
     "start": "next start",
     "check:rig": "node scripts/check-rig.mjs",
     "sync:foods": "node scripts/sync-food-table.mjs",
+    "sync:wiring": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/sync-wiring.mjs",
     "typecheck": "tsc --noEmit",
     "lint": "npm run typecheck"
   },

@@ -1,0 +1,20 @@
+import { BuildMap } from '@/components/workbench/BuildMap';
+
+export const metadata = {
+  title: 'Build map',
+  description: 'The whole build of the Smart Food Scale on one screen: each stage, the tool that carries it, and the check that says it is done.',
+};
+
+# Build map
+
+The whole build on one screen: what to do, with which tool, and the check that says a stage is finished.
+
+<BuildMap />
+
+## What "open" means
+
+A stage is open when its page is built and works today. A waiting stage has no page
+yet, because the thing it needs does not exist: there is no firmware beyond a build
+file, no hosted backend, no app, and no parts on the bench. Nothing here is a mock-up.
+
+Every outside tool, and where each one stops, is in the [Toolbox](/workbench/toolbox).

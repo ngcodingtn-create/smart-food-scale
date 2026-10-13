@@ -5,6 +5,11 @@ const nextConfig = {
   // Routes are authored as .mdx files under app/, so Next has to treat them
   // as page extensions alongside .tsx.
   pageExtensions: ['ts', 'tsx', 'mdx'],
+
+  // The wiring page moved into the Workbench group. Old links keep working.
+  redirects() {
+    return [{ source: '/project/wiring', destination: '/workbench/wire', permanent: true }];
+  },
 };
 
 const withMDX = createMDX({

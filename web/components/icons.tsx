@@ -69,6 +69,33 @@ const PATHS = {
     </>
   ),
   // The brand mark: a weighing dial — arc, needle, base.
+  route: (
+    <>
+      <circle cx="6" cy="18.5" r="2" />
+      <circle cx="18" cy="5.5" r="2" />
+      <path d="M8 18.5h6.5a3 3 0 0 0 0-6h-5a3 3 0 0 1 0-6H16" />
+    </>
+  ),
+  plug: (
+    <>
+      <path d="M9 3.5v4M15 3.5v4" />
+      <path d="M6.5 7.5h11V11a5.5 5.5 0 0 1-11 0z" />
+      <path d="M12 16.5v4" />
+    </>
+  ),
+  scope: (
+    <>
+      <rect x="3" y="4.5" width="18" height="15" rx="2" />
+      <path d="M6 12h2.5l1.5-4 3 8 1.5-4H18" />
+    </>
+  ),
+  toolbox: (
+    <>
+      <path d="M3.5 9.5h17V19a1 1 0 0 1-1 1h-15a1 1 0 0 1-1-1z" />
+      <path d="M8.5 9.5v-3a1 1 0 0 1 1-1h5a1 1 0 0 1 1 1v3" />
+      <path d="M3.5 14h17M10.5 14v1.5h3V14" />
+    </>
+  ),
   scale: (
     <>
       <path d="M5 15a7 7 0 0 1 14 0" />

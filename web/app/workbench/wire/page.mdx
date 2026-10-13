@@ -1,0 +1,100 @@
+import { Callout } from '@/components/Callout';
+import { PinTable } from '@/components/workbench/PinTable';
+import { WireIt } from '@/components/workbench/WireIt';
+
+export const metadata = {
+  title: 'Wire it',
+  description: 'Every wire in the Smart Food Scale, one at a time, on drawings of the two boards with their pins in the real order.',
+};
+
+# Wire it
+
+Every wire in the build, one at a time. Tick each off as you make it; the ticks stay in this browser.
+
+<WireIt />
+
+Find a pin by the **name printed beside it** on your board, not by where it sits in the
+drawing. The DevKit's order was checked against a reference; the ESP32-CAM's was not.
+Wire colours are a suggestion.
+
+## Before power goes on
+
+<Callout type="danger" title="Read the metal shield on the DevKit">
+
+If it says **WROVER**, not WROOM-32, GPIO 16 and 17 belong to its memory. Move the HX711
+to **GPIO 25 and 26**. This one half-works: the board boots, the display runs, and the
+weight readings are garbage.
+
+</Callout>
+
+<Callout type="danger" title="Nothing that idles high on the camera's GPIO 12">
+
+The ESP32 reads GPIO 12 at boot to pick the flash voltage. Held high, the board does not
+start, and it looks like a dead board. The light is on GPIO 13 for this reason.
+
+</Callout>
+
+<Callout type="caution" title="Find the transistor's legs before you plug it in">
+
+2N2222s in a plastic case are sold in both leg orders, and a BC547 is the other way
+round again. Read the datasheet for the marking on yours, or find the base with a
+multimeter's diode test.
+
+</Callout>
+
+First power-up: the bench supply at 5.00 V with a 1 A current limit, so a wiring mistake
+costs nothing.
+
+## The pins, as tables
+
+Read from the same file as the drawings above, and the same file the firmware's pin
+names are generated from.
+
+**Node A, ESP32 DevKit V1**
+
+<PinTable node="a" />
+
+**Node B, ESP32-CAM**
+
+<PinTable node="b" />
+
+Almost every other pin on the ESP32-CAM is already taken:
+
+| Pins | By |
+| --- | --- |
+| 0, 5, 18, 19, 21, 22, 23, 25, 26, 27, 32, 34, 35, 36, 39 | The camera |
+| 16, 17 | Its memory |
+| 2, 14, 15 | The microSD card, in 1-bit mode |
+| 4 | The flash LED, kept as a fallback light |
+
+With the card in 1-bit mode, `SD_MMC.begin("/sdcard", true)`, only GPIO 4, 12 and 13
+come free.
+
+## Power
+
+A brownout mid-capture is a corrupt photo and a lost weight.
+
+- **5 V, 2 A or more**, into the camera's 5V pin. Not 1 A.
+- **1000 µF and 100 nF** across it, as close to the board as they will go.
+- **Short, thick leads. No breadboard** in the camera's supply.
+- **One lead from the supply to each board**, joined only at the supply, with the second 1000 µF there.
+- **The HX711 on Node A's 3V3**, never on the camera's supply.
+
+## HX711 settings
+
+| Setting | Value | Why |
+| --- | --- | --- |
+| Channel | A | The only one with gain 128 |
+| Gain | 128 | Matches the load cell's output |
+| Rate | 10 samples a second | 80 is far noisier, and the plate is not moving |
+| Averaging | Median of 10 to 16 | A median rejects a single wild sample; a mean does not |
+
+What this buys is on [Accuracy](/reference/accuracy).
+
+<Callout type="caution" title="Reconstructed, not verified">
+
+The project's original wiring sheet was never found. The pin numbers here were rebuilt
+from the brief (decision D0). Lines the brief did not cover are marked **proposed** in
+the list.
+
+</Callout>

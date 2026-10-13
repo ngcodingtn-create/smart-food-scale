@@ -34,8 +34,19 @@ export const NAV: NavGroup[] = [
       { label: 'Architecture', href: '/project/architecture', icon: 'nodes' },
       { label: 'The rig in 3D', href: '/rig', icon: 'cube' },
       { label: 'Prototype', href: '/prototype', icon: 'play' },
-      { label: 'Wiring & pin map', href: '/project/wiring', icon: 'chip' },
       { label: 'Risks', href: '/project/risks', icon: 'alert' },
+    ],
+  },
+  // The build itself, stage by stage. Stages that still wait on firmware or
+  // parts are listed on the build map, not here: a link goes in when its page exists.
+  {
+    label: 'Workbench',
+    href: '/workbench',
+    items: [
+      { label: 'Build map', href: '/workbench', icon: 'route' },
+      { label: 'Wire it', href: '/workbench/wire', icon: 'plug' },
+      { label: 'Simulate it', href: '/workbench/simulate', icon: 'scope' },
+      { label: 'Toolbox', href: '/workbench/toolbox', icon: 'toolbox' },
     ],
   },
 ];

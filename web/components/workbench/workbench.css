@@ -1,0 +1,746 @@
+/* ---------------------------------------------------------------------------
+   The Workbench pages: the wiring tool, the build map, the simulator frames
+   and the toolbox. Drawings use the shared .fig palette from ../figure.css.
+--------------------------------------------------------------------------- */
+
+/* --- Wire it: the frame --- */
+.wireit {
+  container-type: inline-size;
+  margin-top: 1.5rem;
+  border: 1px solid var(--rule);
+  border-radius: 1rem;
+  background: var(--paper-raised);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+}
+.wireit button {
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+}
+.wireit button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.wireit-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-bottom: 1px solid var(--rule);
+}
+.wireit-tabs button {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.1rem 0.5rem;
+  min-height: 3.25rem;
+  padding: 0.7rem 1rem;
+  box-shadow: inset 0 -2px 0 transparent;
+  text-align: left;
+  color: var(--ink-soft);
+}
+.wireit-tabs button + button {
+  border-left: 1px solid var(--rule);
+}
+.wireit-tabs button:hover {
+  background: var(--paper-sunken);
+}
+.wireit-tabs button[aria-pressed='true'] {
+  box-shadow: inset 0 -2px 0 var(--accent);
+  color: var(--ink);
+}
+.wireit-tabs strong {
+  font-family: var(--font-display);
+  font-size: 1.08rem;
+  font-weight: 600;
+  color: inherit;
+}
+.wireit-tabs span {
+  font-size: 0.84rem;
+}
+.wireit-tabs em {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-style: normal;
+  color: var(--ink-faint);
+}
+
+/* One column on a phone: the instruction, the drawing, then the list.
+   Two on a wide column: the drawing on the left, the rest beside it. */
+.wireit-body {
+  display: grid;
+  grid-template-areas: 'step' 'canvas' 'list';
+}
+.wireit-step {
+  grid-area: step;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  min-height: 10.5rem;
+  padding: 0.95rem 1.05rem 1.05rem;
+  border-bottom: 1px solid var(--rule);
+}
+.wireit-canvas {
+  grid-area: canvas;
+  padding: 0.4rem;
+  background-color: var(--paper-sunken);
+  /* graph paper, as under the system map */
+  background-image:
+    linear-gradient(color-mix(in oklch, var(--ink) 4%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in oklch, var(--ink) 4%, transparent) 1px, transparent 1px);
+  background-size: 1.25rem 1.25rem;
+}
+.wireit-canvas .wire-fig {
+  max-width: 27rem;
+  margin-inline: auto;
+}
+.wireit-list {
+  grid-area: list;
+  padding: 0.25rem 0.55rem 0.9rem;
+  border-top: 1px solid var(--rule);
+}
+@container (min-width: 42rem) {
+  .wireit-body {
+    grid-template-columns: minmax(0, 25rem) minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-areas:
+      'canvas step'
+      'canvas list';
+  }
+  .wireit-canvas {
+    border-right: 1px solid var(--rule);
+  }
+  /* As tall as the drawing and no taller: the list scrolls inside it. */
+  .wireit-list {
+    contain: size;
+    overflow-y: auto;
+    border-top: 0;
+  }
+}
+
+/* --- the instruction --- */
+.prose .wireit-step p {
+  margin: 0;
+}
+.wireit-count {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.03em;
+  color: var(--ink-soft);
+}
+.prose .wireit-say {
+  font-family: var(--font-display);
+  font-size: 1.22rem;
+  line-height: 1.3;
+  color: var(--ink);
+  text-wrap: pretty;
+}
+.prose .wireit-why {
+  padding-left: 0.7rem;
+  border-left: 2px solid var(--measure);
+  font-size: 0.87rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+.prose .wireit-why[data-tone='proposed'] {
+  border-left-color: var(--caution);
+}
+.wireit-why strong {
+  color: var(--caution-ink);
+}
+.wireit-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: auto;
+  padding-top: 0.35rem;
+}
+.wireit-done {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 2.6rem;
+  padding: 0 1.05rem;
+  border-radius: 0.65rem;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.wireit-done:hover {
+  background: var(--accent-strong);
+}
+.wireit-back {
+  display: grid;
+  place-items: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  border: 1px solid var(--rule);
+  border-radius: 0.65rem;
+  color: var(--ink-soft);
+}
+.wireit-back:hover:not(:disabled),
+.wireit-quiet:hover {
+  background: var(--paper-sunken);
+  color: var(--ink);
+}
+.wireit-quiet {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2.6rem;
+  margin-left: auto;
+  padding: 0 0.8rem;
+  border: 1px solid var(--rule);
+  border-radius: 0.65rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+
+/* --- the list --- */
+.prose .wireit-list .label {
+  margin: 0.85rem 0 0.2rem 0.5rem;
+}
+.prose .wireit-list ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.prose .wireit-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  margin: 0;
+  border-radius: 0.5rem;
+}
+.wireit-list li[data-current='true'] {
+  background: var(--accent-soft);
+}
+.wireit-list input {
+  flex: none;
+  width: 1.05rem;
+  height: 1.05rem;
+  margin: 0 0.3rem 0 0.5rem;
+  accent-color: var(--measure);
+  cursor: pointer;
+}
+.wireit-list li > button {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  min-height: 2.25rem;
+  padding: 0.3rem 0.5rem 0.3rem 0.2rem;
+  border-radius: 0.5rem;
+  font-size: 0.84rem;
+  line-height: 1.3;
+  text-align: left;
+  color: var(--ink);
+}
+.wireit-list li > button:hover {
+  background: color-mix(in oklch, var(--ink) 5%, transparent);
+}
+.wireit-list li[data-done='true'] > button {
+  color: var(--ink-faint);
+}
+.wireit-list em {
+  flex: none;
+  margin-left: auto;
+  padding: 0.05rem 0.4rem;
+  border: 1px solid color-mix(in oklch, var(--caution) 55%, transparent);
+  border-radius: 0.35rem;
+  background: var(--caution-wash);
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-style: normal;
+  color: var(--caution-ink);
+}
+@media (pointer: coarse) {
+  .wireit-list li > button {
+    min-height: 2.75rem;
+  }
+  .wireit-list input {
+    width: 1.3rem;
+    height: 1.3rem;
+  }
+}
+
+/* --- wire colours: the same nine in the drawing and in the list --- */
+.wire,
+.wire-swatch {
+  --w: var(--ink-soft);
+}
+[data-colour='red'] {
+  --w: oklch(0.6 0.2 27);
+}
+[data-colour='black'] {
+  --w: oklch(0.24 0.01 60);
+}
+[data-colour='yellow'] {
+  --w: oklch(0.83 0.16 96);
+}
+[data-colour='orange'] {
+  --w: oklch(0.72 0.17 58);
+}
+[data-colour='green'] {
+  --w: oklch(0.63 0.16 150);
+}
+[data-colour='blue'] {
+  --w: oklch(0.6 0.15 250);
+}
+[data-colour='violet'] {
+  --w: oklch(0.6 0.18 305);
+}
+[data-colour='grey'] {
+  --w: oklch(0.64 0.01 70);
+}
+[data-colour='white'] {
+  --w: oklch(0.98 0 0);
+}
+.wire-swatch {
+  flex: none;
+  width: 1.15rem;
+  height: 0.5rem;
+  border: 1px solid color-mix(in oklch, var(--ink) 45%, transparent);
+  border-radius: 0.25rem;
+  background: var(--w);
+}
+
+/* --- the drawing --- */
+.wire-fig text {
+  font-size: 9.5px;
+}
+.wire-fig .t-small {
+  font-size: 9px;
+}
+.wire-fig .t-inv {
+  fill: var(--paper);
+  font-size: 11px;
+  font-weight: 500;
+}
+.wire-fig .pad {
+  fill: var(--paper-raised);
+  stroke: var(--ink-soft);
+  stroke-width: 1;
+}
+/* A board's unused pins stay on the drawing, to count along, but step back. */
+.wire-fig .pin {
+  opacity: 0.45;
+}
+.wire-fig .pin-used {
+  opacity: 1;
+}
+.wire-fig .pin-used text {
+  fill: var(--ink);
+  font-weight: 500;
+}
+.wire-fig .rail {
+  fill: none;
+  stroke-width: 5;
+  stroke-linecap: round;
+  opacity: 0.55;
+}
+.wire-fig .rail-hot {
+  stroke: oklch(0.6 0.2 27);
+}
+.wire-fig .rail-warm {
+  stroke: oklch(0.72 0.17 58);
+}
+.wire-fig .rail-ground {
+  stroke: var(--ink-soft);
+}
+
+.wire {
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.wire path {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.wire-hit {
+  stroke: transparent;
+  stroke-width: 14;
+}
+/* An outline under every wire, so a white one shows on paper and a black one on slate. */
+.wire-case {
+  stroke: color-mix(in oklch, var(--ink) 55%, var(--paper));
+  stroke-width: 3.6;
+  transition: stroke-width 0.2s;
+}
+.wire-line {
+  stroke: var(--w);
+  stroke-width: 2.2;
+  transition: stroke-width 0.2s;
+}
+.wire-end {
+  fill: var(--w);
+  stroke: color-mix(in oklch, var(--ink) 55%, var(--paper));
+  stroke-width: 0.8;
+}
+.wire-chip rect {
+  fill: var(--paper-raised);
+  stroke: var(--ink-soft);
+  stroke-width: 1;
+}
+.wire-fig .wire-chip text {
+  font-size: 8.5px;
+  fill: var(--ink);
+}
+
+/* One wire at a time: the rest fade, the made ones a little less. */
+.wire-fig[data-mode='step'] .wire[data-state='todo'] {
+  opacity: 0.2;
+}
+.wire-fig[data-mode='step'] .wire[data-state='done'] {
+  opacity: 0.55;
+}
+.wire[data-state='current'] .wire-case {
+  stroke: var(--ink);
+  stroke-width: 6.4;
+}
+.wire[data-state='current'] .wire-line {
+  stroke-width: 4.4;
+}
+.wire[data-state='current'] .wire-end {
+  r: 5.5px;
+  stroke: var(--ink);
+  stroke-width: 1.4;
+  animation: wire-pulse 1.1s ease-in-out infinite;
+}
+@keyframes wire-pulse {
+  50% {
+    r: 7.5px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wire[data-state='current'] .wire-end {
+    animation: none;
+  }
+}
+
+/* --- Build map --- */
+.buildmap {
+  margin-top: 1.5rem;
+}
+.prose .buildmap p {
+  margin: 0;
+}
+.buildmap-count {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.03em;
+  color: var(--ink-soft);
+}
+.buildmap-count strong {
+  font-family: var(--font-display);
+  font-size: 1.9rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--accent-ink);
+  margin-right: 0.35rem;
+}
+.lane {
+  margin-top: 1.6rem;
+}
+.prose .lane-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.2rem 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--rule-strong);
+  font-family: var(--font-display);
+  font-size: 1.22rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+.lane-title span {
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: var(--ink-soft);
+}
+.prose .lane ol {
+  display: grid;
+  gap: 0.7rem;
+  margin: 0.8rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+@media (min-width: 44rem) {
+  .prose .lane ol {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+/* .prose numbers its ordered lists with a counter; the stage number does that job here. */
+.prose .lane ol > li {
+  margin: 0;
+  padding: 0;
+}
+.prose .lane ol > li::before {
+  content: none;
+}
+.prose .lane ol > li.stage {
+  display: flex;
+  gap: 0.8rem;
+  padding: 0.95rem 1rem 1rem;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--paper-raised);
+}
+.stage[data-state='waiting'] {
+  background: transparent !important;
+  border-style: dashed !important;
+}
+.stage-n {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+.stage[data-state='waiting'] .stage-n {
+  background: transparent;
+  box-shadow: inset 0 0 0 1.5px var(--rule-strong);
+  color: var(--ink-soft);
+}
+.stage-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+}
+.prose .stage-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem 0.6rem;
+  font-family: var(--font-display);
+  font-size: 1.12rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+.stage-state {
+  padding: 0.1rem 0.45rem;
+  border-radius: 0.35rem;
+  background: var(--tip-wash);
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--tip-ink);
+}
+.stage[data-state='partly'] .stage-state {
+  background: var(--caution-wash);
+  color: var(--caution-ink);
+}
+.stage[data-state='waiting'] .stage-state {
+  background: color-mix(in oklch, var(--ink) 6%, transparent);
+  color: var(--ink-soft);
+}
+.prose .stage-does {
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: var(--ink);
+}
+.stage-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+.stage-tools span {
+  padding: 0.1rem 0.5rem;
+  border: 1px solid color-mix(in oklch, var(--measure) 45%, var(--rule));
+  border-radius: 999px;
+  background: var(--measure-soft);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--measure-ink);
+}
+.prose .stage-done {
+  display: flex;
+  gap: 0.45rem;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: var(--ink-soft);
+}
+.stage-done svg {
+  flex: none;
+  margin-top: 0.17rem;
+  color: var(--tip);
+}
+.prose .stage-waits {
+  padding-left: 0.65rem;
+  border-left: 2px solid var(--rule-strong);
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--ink-soft);
+}
+
+/* --- Simulate it: a circuit in its frame --- */
+.circuit {
+  margin: 1.5rem 0 0;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--paper-raised);
+  overflow: hidden;
+}
+/* The simulator draws on black, like a scope. The frame is black to match, in both themes. */
+.circuit-screen {
+  aspect-ratio: 4 / 3;
+  max-height: 32rem;
+  width: 100%;
+  background: oklch(0.14 0.008 70);
+}
+.circuit-screen iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+.circuit-screen button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  width: 100%;
+  height: 100%;
+  color: oklch(0.94 0.008 80);
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+.circuit-screen button:hover {
+  background: oklch(0.2 0.01 70);
+}
+.circuit-screen button svg {
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0.75rem;
+  border-radius: 50%;
+  background: oklch(0.73 0.14 50);
+  color: oklch(0.18 0.03 50);
+}
+.circuit-screen button strong {
+  margin-top: 0.4rem;
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+.circuit-screen button span {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: oklch(0.72 0.01 75);
+}
+.prose .circuit figcaption {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0.8rem 1rem 0.95rem;
+  border-top: 1px solid var(--rule);
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--ink);
+}
+.circuit figcaption strong {
+  font-family: var(--font-display);
+  font-size: 1.08rem;
+  font-weight: 600;
+}
+.circuit figcaption em {
+  font-size: 0.84rem;
+  font-style: normal;
+  color: var(--caution-ink);
+}
+.prose .circuit figcaption a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  align-self: start;
+  font-size: 0.84rem;
+}
+
+/* --- Toolbox --- */
+.toolbox {
+  margin-top: 1.5rem;
+}
+.prose .toolbox .label {
+  margin: 1.7rem 0 0.5rem;
+}
+.prose .toolbox ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--paper-raised);
+  overflow: hidden;
+}
+.prose .toolbox li.tool {
+  margin: 0;
+  padding: 0.8rem 1rem 0.85rem;
+}
+.prose .toolbox li.tool + li.tool {
+  border-top: 1px solid var(--rule);
+}
+.prose .tool p {
+  margin: 0;
+}
+.prose .tool-name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem 0.5rem;
+  font-family: var(--font-display);
+  font-size: 1.08rem;
+  font-weight: 600;
+}
+.tool-name span {
+  padding: 0.08rem 0.45rem;
+  border-radius: 0.35rem;
+  background: color-mix(in oklch, var(--ink) 6%, transparent);
+  font-family: var(--font-mono);
+  font-size: 0.63rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  color: var(--ink-soft);
+}
+.tool-name span[data-kind='frame'] {
+  background: var(--measure-soft);
+  color: var(--measure-ink);
+}
+.tool-name span[data-kind='ran'] {
+  background: var(--tip-wash);
+  color: var(--tip-ink);
+}
+.tool-name span[data-kind='memory'] {
+  background: var(--caution-wash);
+  color: var(--caution-ink);
+}
+.prose .tool-does {
+  margin-top: 0.3rem;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+.prose .tool-limit {
+  margin-top: 0.2rem;
+  font-size: 0.84rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
