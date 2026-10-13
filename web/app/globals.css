@@ -1406,8 +1406,8 @@
     color: color-mix(in oklch, var(--paper) 68%, transparent);
   }
 
-  /* A 0–1000 g graduation with the reading marked on it: minor ticks every
-     20 g, major every 100 g. */
+  /* A 0–3000 g graduation with the reading marked on it: minor ticks every
+     60 g, major every 300 g. */
   .eq-ruler {
     position: relative;
     height: 1.15rem;

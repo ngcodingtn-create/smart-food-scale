@@ -14,7 +14,7 @@ import { Icon } from '@/components/icons';
  * typed in — change an input and the output follows.
  */
 const GRAMS = 143.2;
-const CELL_CAPACITY_GRAMS = 1000;
+const CELL_CAPACITY_GRAMS = 3000;
 const DISH = {
   name: 'Tunisian lamb couscous',
   per100g: { kcal: 167, protein: 7.5, carbohydrate: 14.7, fat: 8.6 },
@@ -64,7 +64,7 @@ export function Hero() {
             </div>
             <div className="eq-ruler-ends" aria-hidden="true">
               <span>0</span>
-              <span>1 kg cell</span>
+              <span>3 kg cell</span>
             </div>
             <span className="eq-note">Node A tares, then takes a median-filtered weight.</span>
           </div>

@@ -45,7 +45,7 @@ def _validate_grams(grams: float) -> float:
             status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=(
                 f"grams must be at most {settings.max_grams} g — got {grams}. "
-                "This is past the range of a 1 kg cell and reads as a sensor fault "
+                "This is past the range of a 3 kg cell and reads as a sensor fault "
                 "rather than a real plate of food."
             ),
         )

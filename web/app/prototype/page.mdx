@@ -40,7 +40,6 @@ badly. Each of these is a mistake a real user will make.
 | Press TARE with food already on | The reading drops to zero and the backend refuses it | Its 422 names the cause: not tared, or the plate was lifted. |
 | Untick **Recogniser knows the dish** | The backend answers 422 and lists the dishes it does know | "I don't know" is a real answer. The mass is still good, so the meal can be added by hand. |
 | Untick **Wi-Fi reachable** | Node B keeps the frame and the grams on its microSD card | Tick it again and the buffered capture is posted. |
-| Ceramic plate, 600 g portion | Node A refuses: past the 1 kg cell | The plate's own mass comes out of the cell's range before any food does. |
 | Take the plate off after taring | A negative reading | The same 422 as an untared scale: the backend cannot tell them apart, and says so. |
 
 ## What is real here, and what is not
@@ -85,6 +84,8 @@ the capture as "tare, then weigh". Read literally, with a loaded plate, that zer
 meal away. The order that works is: empty plate, tare, add food, capture. The firmware
 should not tare as part of a capture at all.
 
-**The plate spends the cell's range.** A 1 kg cell carrying a 420 g ceramic plate has
-580 g left for food. That is not a problem in itself, but it has to be a decision: see
-the plate and cell rows in the [component request](/project/component-request).
+**The plate spends the cell's range.** A 1 kg cell carrying a 420 g ceramic plate had
+580 g left for food, and a large portion went past it. That is why the request now
+specifies a 3 kg cell: see [how precise it is](/project/component-request#how-precise-is-it).
+Node A still refuses anything past 3 kg, but no plate and portion in this simulation
+reach it.

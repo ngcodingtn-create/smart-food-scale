@@ -8,6 +8,8 @@ their dominant source of error. This device removes it by physically weighing th
 food. **The camera answers _what_ the food is; the load cell answers _how much_ of
 it there is.** Every design decision in this repo protects that split.
 
+**Where it stands:** [PROGRESS.md](PROGRESS.md) · **Live site:** https://web-ivory-ten-26.vercel.app
+
 ---
 
 ## Repository layout
@@ -43,7 +45,7 @@ board attached.
 | --- | --- | --- |
 | Board | ESP32 DevKit V1 (WROOM-32) | ESP32-CAM (AI-Thinker) |
 | Owns | Weight, local UI, capture trigger | JPEG capture, Wi-Fi upload |
-| Peripherals | HX711 + 1 kg load cell, SSD1306 OLED, tare + capture buttons, buzzer | OV2640, white LED light, microSD |
+| Peripherals | HX711 + 3 kg load cell, SSD1306 OLED, tare + capture buttons, buzzer | OV2640, white LED light, microSD |
 | Role | **Master** | Slave |
 
 The ESP32-CAM is pin-starved, and its 3.3 V rail sags when the camera initialises
@@ -103,7 +105,8 @@ load cell arrives.
 
 Realistic load-cell performance is **~0.01–0.02 % of full scale** readable with
 averaging, and **~0.05–0.1 % FS absolute** once creep and temperature drift are
-included. On a 1 kg cell that is roughly **0.1–0.2 g readable, 0.5–1 g absolute**.
+included. On the 3 kg cell that is roughly **0.3–0.6 g readable, 1.5–3 g absolute**,
+with about 1 g the target after five-point calibration.
 
 The HX711 runs at 10 SPS, channel A, gain 128, averaging 10–16 samples. Do not claim
 better than the figures above. `docs/calibration.md` carries the measurement

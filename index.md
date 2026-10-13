@@ -29,7 +29,7 @@ Two ESP32 nodes, talking over ESP-NOW (no router required):
    │  Node A — SCALE        │ ─────────────────────► │  Node B — CAMERA       │
    │  ESP32 DevKit V1       │   "tared, 143.2 g,     │  ESP32-CAM (AI-Thinker)│
    │                        │    shoot now"          │                        │
-   │  HX711 + 1 kg cell     │                        │  OV2640 @ SVGA         │
+   │  HX711 + 3 kg cell     │                        │  OV2640 @ SVGA         │
    │  SSD1306 OLED          │                        │  WS2812B light ring    │
    │  tare / capture btns   │                        │  microSD fallback      │
    │  buzzer                │                        │                        │
@@ -67,7 +67,7 @@ whole failure class.
 | 1 | ESP32 DevKit V1 (WROOM-32) | 1 | Node A. **WROOM**, not WROVER — see wiring note below |
 | 2 | ESP32-CAM, AI-Thinker, with OV2640 | 1 | Node B |
 | 3 | USB-to-TTL programmer (CP2102 / FTDI) | 1 | ESP32-CAM has no USB; required to flash it |
-| 4 | Load cell, straight bar, 1 kg | 1 | Full scale sized to a plate of food |
+| 4 | Load cell, straight bar, 3 kg | 1 | Any plate plus the largest meal |
 | 5 | HX711 24-bit ADC breakout | 1 | Channel A, gain 128, 10 SPS |
 | 6 | SSD1306 OLED, 128×64, I²C | 1 | Address `0x3C` |
 | 7 | Tactile push buttons | 2 | Tare and capture |
@@ -128,10 +128,10 @@ Full detail, including the reasoning behind each conflict, is in
 
 Realistic load-cell performance is **~0.01–0.02 % of full scale** readable with
 averaging, and **~0.05–0.1 % FS absolute** once creep and temperature drift are
-included. On a 1 kg cell that is roughly:
+included. On the 3 kg cell that is roughly:
 
-- **0.1–0.2 g** readable
-- **0.5–1 g** absolute
+- **0.3–0.6 g** readable
+- **1.5–3 g** absolute, with about 1 g the target after five-point calibration
 
 We do not claim better. The calibration procedure and a results table to fill in once
 the hardware arrives live in [docs/calibration.md](docs/calibration.md).

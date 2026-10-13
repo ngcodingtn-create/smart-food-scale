@@ -332,7 +332,7 @@ Changes from the reconstructed BOM, each from datasheet or local-availability re
 - **1N4148 across the buzzer coil; shielded 4-core cable for the load cell** (an old
   USB cable); **microSD becomes a borrowed, optional part**; **calibration masses move
   from optional to booked from the physics lab** (no local retailer found).
-- **1 kg cell kept, with plate plus platform capped at 250 g.** Ceramic plates run
+- *(Superseded by D13.)* **1 kg cell kept, with plate plus platform capped at 250 g.** Ceramic plates run
   300–430 g. The research suggested a 1.5–2 kg cell instead, but only 1 kg and 5 kg
   bars were found in stock locally, and 5 kg is 5× worse in grams.
 
@@ -342,3 +342,37 @@ ring and a 250 mm lens-to-plate clearance; the research recommends 300–350 mm.
 **What would change our mind:** the lab having a 74AHCT125 (or an importable one) and
 a reason to want colour control would bring the ring back on Node B GPIO 13 through
 it. Plates that cannot be kept under 250 g call for a 2–3 kg cell.
+
+---
+
+## D13 — A 3 kg load cell, with five-point calibration
+
+**Date:** 2026-10-12 · **Status:** accepted (owner request)
+
+The owner asked for 2 or 3 kg and as precise as possible. The cell is now the **3 kg
+YZC-131 from Didactico, 13.000 TND, in stock** (variant prices read from the product
+page's data). No 2 kg bar was listed by Didactico, Tuni Smart or CoThings; a 2 kg cell
+means an import.
+
+The trade-off is explicit on the component request page. Errors scale with full scale,
+so the 3 kg cell is 3× coarser in grams than the 1 kg: 0.3–0.6 g readable and 1.5–3 g
+absolute by the accuracy page's rule, against 0.5–1 g on 1 kg. In exchange a 420 g
+ceramic plate leaves about 2.5 kg for food instead of about 480 g, and overload by a
+hand on the platform is much less likely. Worst case, 3 g on 350 g of lamb couscous
+is 5 kcal of 585, well inside the food table's own estimate error.
+
+Precision is recovered by method rather than rating: five-point calibration (100 g to
+2 kg) with interpolation between points, tare before every capture, a proper Z mount
+with a stop screw, warm-up, and a median of 12 samples at 10 SPS. The target is ~1 g,
+to be replaced by the measured figure.
+
+Seller listings give the YZC-131 3 kg as 75 × 12.7 × 12.7 mm, 1.0 ± 0.1 mV/V, M4
+threads. No creep, overload or combined-error figures were found for it; ask the seller
+for the datasheet. The backend's 5000 g ceiling (D4) stays: it is past this cell's
+range, so it still only catches a broken reading.
+
+**Not yet reflected:** the 3D rig models the TAL221 1 kg (47 × 12 × 6 mm); its stack
+heights depend on that size, so it changes with the rig rework noted in D12.
+
+**What would change our mind:** a local 2 kg cell, or a measured error that misses the
+1 g target by enough to matter.

@@ -190,7 +190,7 @@ export function postMeal(db: Db, request: MealRequest, now: Date = new Date()): 
   if (grams > LIMITS.max_grams) {
     return reject(
       `grams must be at most ${pyFloat(LIMITS.max_grams)} g — got ${pyFloat(grams)}. ` +
-        'This is past the range of a 1 kg cell and reads as a sensor fault rather than a real plate of food.',
+        'This is past the range of a 3 kg cell and reads as a sensor fault rather than a real plate of food.',
     );
   }
 

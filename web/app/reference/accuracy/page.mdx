@@ -9,10 +9,13 @@ export const metadata = {
 
 Realistic load-cell performance:
 
-| | Of full scale | On a 1 kg cell |
+| | Of full scale | On the 3 kg cell |
 | --- | --- | --- |
-| **Readable** (with averaging) | 0.01–0.02 % FS | **0.1–0.2 g** |
-| **Absolute** (incl. creep + temperature drift) | 0.05–0.1 % FS | **0.5–1 g** |
+| **Readable** (with averaging) | 0.01–0.02 % FS | **0.3–0.6 g** |
+| **Absolute** (incl. creep + temperature drift) | 0.05–0.1 % FS | **1.5–3 g** |
+
+The target after five-point calibration is about **1 g**. That is a target, not a claim,
+until the tables below are filled in.
 
 **We do not claim better than this.** The gap between the two rows is the interesting
 part: "readable" is what the display can resolve, "absolute" is how close it is to
@@ -24,8 +27,8 @@ A scale that *displays* 0.1 g and is *accurate* to 1 g will show a stable, preci
 wrong number. That is the same failure mode as a photo-estimating app showing
 "247 kcal" — precision that implies an accuracy it does not have.
 
-For food logging the absolute figure is what matters, and **0.5–1 g on a 350 g plate
-is ~0.2 % error** — against the 20–30 % a photo-only estimate can carry.
+For food logging the absolute figure is what matters, and **even 3 g on a 350 g plate
+is under 1 % error** — against the 20–30 % a photo-only estimate can carry.
 
 ## Reading configuration
 
@@ -44,10 +47,12 @@ Needs known masses. Kitchen items are not accurate enough.
 1. Power the scale and let it **warm up for 10 minutes**. Drift is worst in the first
    few minutes.
 2. With nothing on the pan, record the raw HX711 reading — this is `offset`.
-3. Place a known mass (500 g is a good choice on a 1 kg cell) and record the raw
-   reading.
-4. `scale = (raw_loaded − offset) / known_mass_g`
-5. Store `offset` and `scale` in NVS so they survive a reboot.
+3. Place each known mass in turn — 100 g, 200 g, 500 g, 1 kg, 2 kg — and record the raw
+   reading for each.
+4. `scale = (raw_loaded − offset) / known_mass_g` for each point. Between two points,
+   interpolate between their scales. One mass and a straight line leaves the cell's
+   non-linearity in every reading; five points take most of it out.
+5. Store `offset` and the five points in NVS so they survive a reboot.
 6. Verify with a **different** mass than you calibrated with. Calibrating and
    verifying on the same mass proves nothing.
 
@@ -65,6 +70,7 @@ numbers would be exactly the dishonesty this project is built against.
 | 200 | | | | | | |
 | 500 | | | | | | |
 | 1000 | | | | | | |
+| 2000 | | | | | | |
 
 ### Repeatability
 
@@ -95,4 +101,4 @@ Total drift: ____ g
 ## How to report this
 
 State **both** figures, and say which one the app displays. If the measured absolute
-error comes out worse than 1 g, report the measured number — not the spec.
+error comes out worse than the target, report the measured number — not the spec.

@@ -72,13 +72,14 @@ export const PARTS: Part[] = [
   },
   {
     art: 'load-cell',
-    name: 'Bar load cell, 1 kg, 4-wire',
+    name: 'Bar load cell, 3 kg (YZC-131), 4-wire',
     qty: 1,
     where: 'Node A',
     source: 'buy',
     role: 'The scale itself. Bends a few microns under the plate.',
-    note: 'Keep plate plus platform under 250 g so a full meal stays inside the rating. Match the screws to the cell that arrives: M3 on a TAL221-size bar, M4/M5 on the common 80 mm bar.',
-    price: { tnd: 8, shop: TUNISMART, href: 'https://tuni-smart-innovation.com/products/capteur-de-poids-1kg', seen: 'page' },
+    note: 'Pick the 3 kg variant on the page; it also sells 1, 5 and 10 kg. Sellers give 75 × 12.7 × 12.7 mm with M4 threads: measure yours before buying screws.',
+    changed: 'Was 1 kg: a ceramic plate and a large meal went past it.',
+    price: { tnd: 13, shop: DIDACTICO, href: 'https://didactico.tn/produit/capteur-de-pesage-3kg-yzc-131/', seen: 'page' },
   },
   {
     art: 'hx711',
@@ -295,12 +296,12 @@ export const PARTS: Part[] = [
   },
   {
     art: 'weights',
-    name: 'Calibration masses: 100, 200, 500 g',
+    name: 'Calibration masses: 100 g to 2 kg',
     qty: 1,
     unit: '1 set',
     where: 'Bench',
     source: 'bench',
-    role: 'Calibrate the scale and prove its accuracy.',
+    role: 'Calibrate at several points across the range, then prove the accuracy with masses not used to calibrate.',
     note: 'Not sold by any Tunisian shop we found. Borrow a set from the physics or chemistry lab, with time on their balance.',
   },
   {
@@ -332,12 +333,12 @@ export const PARTS: Part[] = [
   },
   {
     art: 'plate',
-    name: 'Light plate, melamine or plastic, ~18 cm',
+    name: 'Plate, ~18 cm',
     qty: 1,
     where: 'Build',
     source: 'bench',
     role: 'The plate every meal is weighed on.',
-    note: 'A ceramic plate can weigh 300–430 g, which eats into a 1 kg cell. Keep plate plus platform under 250 g.',
+    note: 'Ceramic is fine with the 3 kg cell. Use the same plate every time: it is what gets tared.',
   },
   {
     art: 'laptop',

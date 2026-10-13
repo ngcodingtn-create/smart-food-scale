@@ -34,9 +34,9 @@ import './sim.css';
 
 // --- the bench ---------------------------------------------------------------
 
-const CELL_CAPACITY_G = 1000;
+const CELL_CAPACITY_G = 3000;
 
-/** Two plates, to make one point: the plate's own mass comes out of the cell's range. */
+/** Two plates: the plate's own mass comes out of the cell's range, and is what gets tared. */
 const PLATES = {
   light: { label: 'Melamine plate', grams: 150 },
   heavy: { label: 'Ceramic plate', grams: 420 },
@@ -397,7 +397,7 @@ export function Simulator() {
       patch({ busy: false, note: 'OVERLOAD', stages: { ...IDLE, scale: 'failed' } });
       say(
         'Node A',
-        `Refused: ${round1(rawNow)} g is past the 1 kg cell. The plate alone is ${plateG} g of that.`,
+        `Refused: ${round1(rawNow)} g is past the 3 kg cell. The plate alone is ${plateG} g of that.`,
         'bad',
       );
       return;
@@ -557,7 +557,7 @@ export function Simulator() {
     tare: `The display shows the plate’s own ${plateGrams} g. Press TARE to zero it.`,
     food: 'Zeroed. Choose a dish and a portion, then put the food on the plate.',
     capture: overload
-      ? `Plate plus food is ${round1(raw)} g, past the 1 kg cell. Take some off, or use the lighter plate.`
+      ? `Plate plus food is ${round1(raw)} g, past the 3 kg cell. Take some off.`
       : tareMatches
         ? 'Press PHOTO. Node A weighs, Node B photographs, the backend does the arithmetic.'
         : 'Not tared: the display includes the plate. Capture anyway to see what that does, or take the food off and tare.',

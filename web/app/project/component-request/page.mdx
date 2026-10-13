@@ -25,7 +25,7 @@ inventory: ask the lab technician first, and buy only what they can't hand over.
 </Callout>
 
 If the budget allows, add one spare ESP32-CAM (33,500 TND) and one spare load cell
-(8,000 TND). They are the two parts most likely to be damaged: the camera board by a
+(13,000 TND). They are the two parts most likely to be damaged: the camera board by a
 brownout, the cell by someone leaning on the platform.
 
 ## What we buy
@@ -61,21 +61,57 @@ against what can be found locally changed these lines.
 | Buzzer | 2N2222 + 1 kΩ | Same, plus a 1N4148 across the coil | Kit buzzers are coils, and a coil switched off by a transistor needs a diode. |
 | Load-cell wiring | Not listed | Shielded 4-core cable | The cell's own leads are thin and short. An old USB cable is the right cable. |
 | Calibration masses | Optional | Booked from the physics lab | No local shop sells them, and the accuracy figures can't be checked without them. |
-| Load cell | 1 kg | 1 kg, with plate + platform under 250 g | A ceramic plate alone can weigh 300–430 g. A light plate keeps a full meal inside the rating. |
+| Load cell | 1 kg | 3 kg (YZC-131) | A ceramic plate alone can weigh 300–430 g; with a large meal that passes 1 kg. No 2 kg cell is stocked locally — see [how precise it is](#how-precise-is-it). |
 
 ## Check when the parts arrive
 
 1. **Read the DevKit's module marking.** WROOM-32 is what the pin map assumes. A WROVER uses
    GPIO 16 and 17 for its memory, so the HX711 moves to 25 and 26 —
    [wiring](/project/wiring).
-2. **Measure the load cell's holes** before buying screws. A TAL221-size bar takes M3; the
-   common 80 mm bar takes M4 and M5.
+2. **Measure the load cell's holes** before buying screws. Sellers list M4 for the 3 kg
+   YZC-131; batches vary.
 3. **On the HX711, check E− is connected to GND**, and measure E+ to E− once powered.
    Many cheap boards leave E− floating, and the readings wander.
-4. **Weigh the plate and platform together.** Over 250 g, find a lighter plate.
+4. **Check the arrow on the cell** points the way the load pushes, and that the platform
+   touches nothing but the cell.
 5. **Refocus the camera lens** at the real mounting height, on a printed target. The
    [3D rig](/rig) places the lens 250 mm above the plate; 300–350 mm leaves margin around
    an 18 cm plate.
+
+## How precise is it?
+
+A load cell's errors are a fixed fraction of its **full scale**, so a bigger cell is
+coarser in grams. The trade is headroom against resolution:
+
+| Cell | Room for food on a 420 g ceramic plate | Readable, with averaging | Absolute, spec | In Tunisia |
+| --- | ---: | ---: | ---: | --- |
+| 1 kg | about 480 g | 0.1–0.2 g | 0.5–1 g | 8,000 TND, Tuni Smart |
+| 2 kg | about 1.5 kg | 0.2–0.4 g | 1–2 g | Not stocked by the shops we checked |
+| **3 kg** | **about 2.5 kg** | **0.3–0.6 g** | **1.5–3 g** | **13,000 TND, Didactico, in stock** |
+
+"Readable" is 0.01–0.02 % of full scale and "absolute" 0.05–0.1 %, the same rule the
+[accuracy page](/reference/accuracy) uses; the plate column allows 100 g for the platform.
+
+**Why 3 kg is still precise enough.** Even the worst case, 3 g on a 350 g portion of
+lamb couscous, is 5 kcal out of 585. The nutrient values in the food table are
+estimates with far wider error than that. The camera and the table limit this system;
+at 3 kg, the scale does not.
+
+**What actually makes it precise**, more than the cell's rating:
+
+- **Calibrate at five points** (100 g, 200 g, 500 g, 1 kg, 2 kg) and correct between them,
+  rather than one mass and a straight line. That removes most of the non-linearity, the
+  largest term in the spec.
+- **Tare immediately before every capture**, which cancels zero drift and creep.
+- **Mount the cell properly**: one end on the base, the other under the platform, a gap
+  on both sides, the arrow pointing the way the load pushes, and a stop screw under the
+  platform so nobody can press it past its limit.
+- **Ten minutes' warm-up, 10 samples/s, median of 12.**
+
+Done this way, aim for about 1 g. The [accuracy page](/reference/accuracy) is where the
+measured figure goes; report that, not the target.
+
+A 2 kg cell would cut the error by a third, at the cost of an import and a few weeks.
 
 ## The light, on Node B
 
