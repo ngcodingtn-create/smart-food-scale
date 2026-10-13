@@ -169,6 +169,6 @@ after tare, and a ceramic plate with the largest portion (logs normally on 3 kg)
 | Notes for the next agent or person: handoff, runbook, project map | `ai-docs/` |
 | Rig dimensions (single source) | `web/components/rig/specs.ts` |
 | Parts list (single source) | `web/components/request/bom.ts` |
-| Pin map and wiring | `/project/wiring` |
+| Pin map and wiring | `/workbench/wire` |
 | Accuracy claims and calibration | `/reference/accuracy` |
 | Deliverable status | `/deliverables` |

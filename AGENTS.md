@@ -12,9 +12,9 @@ The rules that matter most here:
   looks precise and is not is the failure this project exists to prevent. Hold your own
   writing to it.
 - **Change the source, not the copy.** Parts live in `web/components/request/bom.ts`,
-  rig dimensions in `web/components/rig/specs.ts`, dishes in
-  `backend/data/tunisian_foods.json`, navigation in `web/lib/nav.ts`. Pages are generated
-  from them.
+  rig dimensions in `web/components/rig/specs.ts`, wiring and GPIO numbers in
+  `web/components/workbench/wiring.ts`, dishes in `backend/data/tunisian_foods.json`,
+  navigation in `web/lib/nav.ts`. Pages are generated from them.
 - **`web/` runs a Next.js newer than you may remember.** Read `web/AGENTS.md`, and the
   docs bundled in `web/node_modules/next/dist/docs/`, before writing Next-specific code.
 - **One Next.js dev server at a time.** Next refuses a second in the same folder. Never

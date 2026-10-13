@@ -136,3 +136,37 @@ phone.
 
 **Also written:** these docs, a root `AGENTS.md`, decision **D14**, an updated
 `PROGRESS.md`.
+
+**After the push: where to host the backend**
+
+- Asked for: a free server instead of the owner's PC, with Gemini as the vision API.
+- Read the backend for what it needs from a host, then the providers' own pages for
+  Vercel, Render, Neon, Hugging Face, PythonAnywhere, Cloud Run and Gemini.
+- Recommended Vercel (second project, root `backend`) with Neon for the meal log and a
+  Gemini Flash-Lite model, all in a US region. Report:
+  [research/2026-10-13-free-backend-hosting.md](research/2026-10-13-free-backend-hosting.md).
+- Two findings worth remembering: Hugging Face's Docker Spaces are no longer free, and
+  no free host keeps a disk, so the SQLite file has to go whichever host is picked.
+- Nothing was built, deployed or measured.
+
+**After the push: web tools for the build, and a "Workbench" category**
+
+- Asked for: research the online tools first, then a sidebar category that maps the
+  whole build with real wiring and simulation.
+- Tested in the browser, on the production address, with temporary frames: Wokwi,
+  Falstad, Expo Snack and Lopaka all load inside one of our pages. A public Wokwi
+  project with Node A's parts compiled and ran there; its load-cell slider at 0.27 kg
+  printed 269.05 g.
+- Found the limits: no simulator runs the ESP-NOW link or the camera, and Wokwi's load
+  cell steps in about 2.4 g, so it proves logic and not accuracy.
+- Proposed nine pages and one wiring source file feeding the page, Wokwi's
+  `diagram.json` and the firmware's pin header. Report:
+  [research/2026-10-13-web-tools-for-the-build.md](research/2026-10-13-web-tools-for-the-build.md).
+- Then built, on "build it": the wiring as one source file, "Wire it" (a stepper over
+  drawings of both boards, ticks kept in the browser), the build map, the toolbox, and
+  "Simulate it" with the light and buzzer circuits running in Falstad. Measured there:
+  18.2 mA per LED and 109 mA in all; the buzzer's switch-off spike held to 5.7 V by the
+  diode. `npm run sync:wiring` writes the firmware's pin header from the same file.
+- Verified: `tsc`, both sync checks, production build, `check:rig` on 19 routes, the
+  old wiring address redirecting, no sideways scroll at 375 and desktop widths, both
+  themes on "Wire it". Not verified: any of it against real boards.

@@ -5,9 +5,13 @@ stop**; history belongs in [WORK-LOG.md](WORK-LOG.md).
 
 ## Where things stand
 
-Everything below is committed and pushed to `main`, which is production
-(<https://web-ivory-ten-26.vercel.app>). The working tree was clean at handoff. If
-`git status` shows changes, someone has worked since this was written.
+The site and the code are committed and pushed to `main`, which is production
+(<https://web-ivory-ten-26.vercel.app>). If `git status` shows changes, someone has
+worked since.
+
+This file was last rewritten in full at `0dced01`. The Workbench lines below were
+corrected when that category shipped; the owner asked for no new handoff that day, so
+the rest is as it stood.
 
 | Piece | State |
 | --- | --- |
@@ -32,9 +36,30 @@ In the order the project needs them:
    buzzer, ESP-NOW send. The simulator and the system map are the behaviour to match.
 3. **Node B firmware**: ESP-NOW receive, light on GPIO 13, capture, multipart POST with
    retry, microSD buffer.
-4. **Choose the vision API** (`/reference/vision-apis`, decision D3). Until then the
-   backend's recogniser is a stub and the simulator's is handed the answer.
-5. **When the parts arrive**: measure the load cell and the camera's field of view and
+4. **Move the backend off the owner's PC, with Gemini doing the recognition.** On
+   13 October the owner said: "i want to not use my pc but a server" and "we are using
+   gemini api to get the data". That settles D3's open choice (Gemini), though
+   `docs/decisions.md` and `/reference/vision-apis` do not say so yet, and no
+   `GeminiRecogniser` exists. The research and a recommendation (Vercel + Neon + Gemini
+   Flash-Lite, all free, no bank card) are in
+   [research/2026-10-13-free-backend-hosting.md](research/2026-10-13-free-backend-hosting.md),
+   with the six code changes it needs. **Nothing is built or deployed.** The owner has
+   seen the recommendation and not yet answered it. Three steps are theirs alone:
+   the Gemini key, the Neon database, the second Vercel project.
+5. **Finish the "Workbench" sidebar category.** Four pages are built and live:
+   `/workbench` (build map), `/workbench/wire`, `/workbench/simulate` and
+   `/workbench/toolbox`. The wiring lives in one file,
+   `web/components/workbench/wiring.ts`; the page, its pin tables and
+   `firmware/node-a-scale/include/pins.h` (`npm run sync:wiring`) are made from it. The
+   old `/project/wiring` redirects to `/workbench/wire`. Still to build, each waiting on
+   something that does not exist yet: flash, test each part, calibrate, try the backend,
+   the app, and Node A running in Wokwi (needs the firmware, and the owner's own Wokwi
+   sign-in). The plan is in
+   [research/2026-10-13-web-tools-for-the-build.md](research/2026-10-13-web-tools-for-the-build.md).
+   Two choices were made while writing the wiring and are marked "proposed" on the
+   page: the buzzer takes its supply from 5 V (VIN), and the breadboard carries a
+   separate 5 V rail for it. The ESP32-CAM's pin order was not confirmed on a board.
+6. **When the parts arrive**: measure the load cell and the camera's field of view and
    put the real numbers in `web/components/rig/specs.ts`. Then calibrate, and fill the
    empty tables on `/reference/accuracy`.
 

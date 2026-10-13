@@ -22,7 +22,9 @@ Human-facing status lives elsewhere and stays the source of truth for it:
    that are the single source of truth for something.
 4. **[WORK-LOG.md](WORK-LOG.md)** — what each session did, in order, with commit hashes.
 5. **[research/](research/)** — two research reports recovered verbatim from subagents.
-   The component request and decisions D12 and D13 were made from them.
+   The component request and decisions D12 and D13 were made from them. Two more: free
+   hosting for the backend (not acted on yet), and web tools for the build (the
+   Workbench pages came from it).
 
 ## Rules for whoever updates these
 

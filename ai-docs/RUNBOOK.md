@@ -94,7 +94,7 @@ Most of the site's value is visual, so look at it. Things that mislead:
   320, 390, 820, 1024 and 1440 px for horizontal overflow.
 
 Pages worth opening after any change to shared CSS: `/`, `/project/component-request`,
-`/project/architecture`, `/rig`, `/prototype`, `/project/wiring` (tables and callouts).
+`/project/architecture`, `/rig`, `/prototype`, `/workbench/wire` (the stepper, tables and callouts).
 Check both themes (`?theme=dark`, `?theme=light`) and a phone width.
 
 ## Known noise
