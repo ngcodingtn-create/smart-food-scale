@@ -19,6 +19,19 @@ const ART: Record<string, ReactNode> = {
 
 export const ART_IDS = Object.keys(ART);
 
+/**
+ * The same drawing as a group, for placing inside a larger <svg> — the system
+ * map on the Architecture page is built from these. `width` is in the outer
+ * drawing's units; the height follows at 4:3.
+ */
+export function PartGlyph({ id, x, y, width }: { id: string; x: number; y: number; width: number }) {
+  return (
+    <g className="part-art" transform={`translate(${x} ${y}) scale(${width / 120})`}>
+      {ART[id]}
+    </g>
+  );
+}
+
 export function PartArt({ id, title }: { id: string; title: string }) {
   return (
     <svg className="part-art" viewBox="0 0 120 90" role="img" aria-label={title}>

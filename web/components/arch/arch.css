@@ -1,0 +1,315 @@
+/* ---------------------------------------------------------------------------
+   The Architecture page's system map and its stepper.
+
+   The map is a server-drawn SVG. The stepper sets `data-step` on .map; the
+   rules at the end of this file light up whatever lists that step in its
+   `data-on` attribute. Step 0 is the overview: everything lit, nothing moving.
+--------------------------------------------------------------------------- */
+.map {
+  container-type: inline-size;
+  margin-top: 1.5rem;
+  border: 1px solid var(--rule);
+  border-radius: 1rem;
+  background: var(--paper-raised);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+}
+.map-canvas {
+  padding: 0.5rem;
+  background-color: var(--paper-sunken);
+  /* graph paper, as under the home page's equation */
+  background-image:
+    linear-gradient(color-mix(in oklch, var(--ink) 4%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in oklch, var(--ink) 4%, transparent) 1px, transparent 1px);
+  background-size: 1.25rem 1.25rem;
+}
+/* Two drawings of the same map; the container's width picks one. */
+.map-wide {
+  display: none;
+}
+.map-tall {
+  max-width: 24rem;
+  margin-inline: auto;
+}
+@container (min-width: 40rem) {
+  .map-wide {
+    display: block;
+  }
+  .map-tall {
+    display: none;
+  }
+}
+
+.map-card {
+  fill: var(--paper-raised);
+  stroke: var(--rule-strong);
+  stroke-width: 1.2;
+  transition: stroke 0.25s, stroke-width 0.25s;
+}
+.fig .map-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.09em;
+  fill: var(--ink-faint);
+}
+.fig .map-line {
+  font-family: var(--font-sans);
+  font-size: 10.5px;
+  fill: var(--ink-soft);
+}
+.map-group {
+  fill: none;
+  stroke: var(--rule-strong);
+  stroke-width: 1;
+  stroke-dasharray: 5 5;
+}
+.map-wire,
+.map-head {
+  fill: none;
+  stroke: var(--ink-soft);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke 0.25s;
+}
+/* A dotted line is radio; a broken one is only a line of sight. */
+.map-edge[data-kind='radio'] .map-wire {
+  stroke-dasharray: 1.5 5;
+}
+.map-edge[data-kind='sight'] .map-wire {
+  stroke-dasharray: 6 5;
+  stroke-width: 1.1;
+}
+/* A halo in the canvas colour keeps a label readable where a line runs under it. */
+.fig .map-edge-label {
+  font-size: 10px;
+  fill: var(--ink-soft);
+  paint-order: stroke;
+  stroke: var(--paper-sunken);
+  stroke-width: 5px;
+  stroke-linejoin: round;
+}
+
+.map-node,
+.map-edge {
+  transition: opacity 0.25s;
+}
+
+/* --- stepper --- */
+.map-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem 0.9rem;
+  padding: 0.7rem 0.9rem;
+  border-top: 1px solid var(--rule);
+}
+.map-bar button {
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+}
+.map-bar button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.map-play {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 2.5rem;
+  padding: 0 0.95rem;
+  border-radius: 0.65rem;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+.map-play:hover {
+  background: var(--accent-strong);
+}
+.map-steps {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 3px;
+}
+.map-steps button {
+  display: grid;
+  place-items: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: 50%;
+  color: var(--ink-soft);
+}
+.map-steps button:hover:not(:disabled) {
+  background: var(--paper-sunken);
+  color: var(--ink);
+}
+.map-dot {
+  border: 1.5px solid var(--rule-strong);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+.map-steps .map-dot[aria-pressed='true'] {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.map-all {
+  min-height: 2.25rem;
+  margin-left: auto;
+  padding: 0 0.75rem;
+  border: 1px solid var(--rule);
+  border-radius: 0.55rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+.map-all[aria-pressed='true'] {
+  border-color: color-mix(in oklch, var(--measure) 55%, var(--rule));
+  background: var(--measure-soft);
+  color: var(--measure-ink);
+}
+.prose .map-caption {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  min-height: 3.6rem;
+  margin: 0;
+  padding: 0.2rem 1rem 0.95rem;
+  font-family: var(--font-display);
+  font-size: 1.12rem;
+  line-height: 1.35;
+  color: var(--ink);
+}
+.map-caption-n {
+  display: inline-grid;
+  place-items: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  flex: none;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+  translate: 0 -0.1rem;
+}
+@media (pointer: coarse) {
+  .map-steps button {
+    width: 2.6rem;
+    height: 2.6rem;
+  }
+}
+
+/* --- the highlighting: during a step, everything fades except what it uses --- */
+.map:not([data-step='0']) :is(.map-node, .map-edge) {
+  opacity: 0.3;
+}
+.map[data-step='1'] [data-on~='1'],
+.map[data-step='2'] [data-on~='2'],
+.map[data-step='3'] [data-on~='3'],
+.map[data-step='4'] [data-on~='4'],
+.map[data-step='5'] [data-on~='5'],
+.map[data-step='6'] [data-on~='6'],
+.map[data-step='7'] [data-on~='7'],
+.map[data-step='8'] [data-on~='8'] {
+  opacity: 1;
+
+  & .map-card {
+    stroke: var(--accent);
+    stroke-width: 2.2;
+  }
+  & :is(.map-wire, .map-head) {
+    stroke: var(--accent);
+    stroke-width: 2.2;
+  }
+  /* The link in use "flows" towards its arrowhead. */
+  & .map-wire {
+    stroke-dasharray: 7 6;
+    animation: map-flow 0.7s linear infinite;
+  }
+  & .map-edge-label {
+    fill: var(--accent-ink);
+  }
+}
+@keyframes map-flow {
+  to {
+    stroke-dashoffset: -13;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .map-wire {
+    animation: none !important;
+  }
+}
+
+/* --- the three smaller diagrams --- */
+@media (min-width: 48rem) {
+  .figure-tall {
+    grid-row: span 2;
+  }
+}
+.fig .lane {
+  fill: var(--paper-sunken);
+  stroke: var(--rule-strong);
+  stroke-width: 1;
+}
+.fig .life {
+  stroke: var(--rule-strong);
+  stroke-width: 1;
+  stroke-dasharray: 2 4;
+  fill: none;
+}
+.fig .act {
+  fill: var(--paper-raised);
+  stroke-width: 1.3;
+}
+.fig .act-a {
+  stroke: var(--measure);
+}
+.fig .act-b {
+  stroke: var(--accent);
+}
+.fig .act-s {
+  stroke: var(--ink-soft);
+}
+.fig .bad-ln {
+  fill: none;
+  stroke: var(--danger);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.fig .t-bad {
+  fill: var(--danger-ink);
+}
+.fig .t-big {
+  font-size: 19px;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  fill: var(--ink);
+}
+.fig .chip-cool {
+  fill: var(--measure-soft);
+  stroke: var(--measure);
+  stroke-width: 1.3;
+}
+.fig .chip-hot {
+  fill: var(--accent-soft);
+  stroke: var(--accent);
+  stroke-width: 1.3;
+}
+.fig .chip-ink {
+  fill: var(--ink);
+}
+.fig .t-inv {
+  fill: var(--paper);
+}
+.fig .tag-est {
+  fill: var(--caution-wash);
+  stroke: color-mix(in oklch, var(--caution) 55%, transparent);
+  stroke-width: 1;
+}
