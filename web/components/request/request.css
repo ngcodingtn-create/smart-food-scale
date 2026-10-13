@@ -267,3 +267,181 @@
   font-weight: 600;
   border-top: 2px solid var(--rule-strong);
 }
+
+/* ---------------------------------------------------------------------------
+   The request sheet: the page handed to the lab technician. Small type and
+   one row per line, so the whole request can be read at a glance and printed
+   on two sides of A4. Columns on a wide screen; on a phone each row stacks,
+   and the two answer columns label themselves.
+--------------------------------------------------------------------------- */
+.prose .sheet-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1.4rem;
+  margin-top: 1rem;
+  font-size: 0.86rem;
+  color: var(--ink-soft);
+}
+.sheet-counts strong {
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: var(--accent-ink);
+}
+
+.sheet {
+  margin-top: 0.9rem;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--paper-raised);
+  font-size: 0.78rem;
+  line-height: 1.45;
+  overflow: hidden;
+}
+.sheet-row {
+  display: grid;
+  grid-template-columns: 1.5rem 2.9rem minmax(0, 1.05fr) minmax(0, 1.25fr) minmax(0, 1.45fr) 1.15rem;
+  gap: 0.2rem 0.7rem;
+  align-items: start;
+  padding: 0.5rem 0.75rem;
+  border-top: 1px solid var(--rule);
+}
+.sheet-head {
+  border-top: 0;
+  background: color-mix(in oklch, var(--ink) 4%, transparent);
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.sheet-n {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--accent-ink);
+}
+.sheet-art {
+  padding: 0.15rem;
+  border-radius: 0.4rem;
+  background: var(--paper-sunken);
+}
+.sheet-part {
+  display: grid;
+  gap: 0.05rem;
+}
+.sheet-part strong {
+  font-weight: 600;
+  color: var(--ink);
+}
+.sheet-part em,
+.sheet-part small {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-style: normal;
+}
+.sheet-part em {
+  color: var(--accent-ink);
+}
+.sheet-part small {
+  color: var(--ink-faint);
+}
+.sheet-for {
+  color: var(--ink);
+}
+.sheet-swap {
+  color: var(--ink-soft);
+}
+/* The box the technician ticks. */
+.sheet-row:not(.sheet-head) .sheet-tick {
+  width: 1rem;
+  height: 1rem;
+  margin-top: 0.1rem;
+  border: 1.5px solid var(--rule-strong);
+  border-radius: 0.2rem;
+}
+
+@media (max-width: 47.99rem) {
+  .sheet-head {
+    display: none;
+  }
+  .sheet-row {
+    grid-template-columns: 1.5rem 2.9rem minmax(0, 1fr) 1.15rem;
+    grid-template-areas:
+      'n art part tick'
+      '. for for for'
+      '. swap swap swap';
+  }
+  .sheet-row:first-child + .sheet-row {
+    border-top: 0;
+  }
+  .sheet-n { grid-area: n; }
+  .sheet-art { grid-area: art; }
+  .sheet-part { grid-area: part; }
+  .sheet-tick { grid-area: tick; }
+  .sheet-for { grid-area: for; }
+  .sheet-swap { grid-area: swap; }
+  .sheet-for::before,
+  .sheet-swap::before {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+  .sheet-for::before {
+    content: 'For';
+  }
+  .sheet-swap::before {
+    content: 'If you don’t have it';
+  }
+}
+
+.sheet-sign {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-top: 2.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.sheet-sign span {
+  padding-top: 0.4rem;
+  border-top: 1px solid var(--rule-strong);
+}
+
+/* Printed: black on white, nothing but the sheet, no row split across pages. */
+@media print {
+  @page {
+    margin: 12mm;
+  }
+  .sheet {
+    font-size: 8pt;
+    border-color: #999;
+    background: none;
+  }
+  .sheet-row {
+    break-inside: avoid;
+    padding: 0.3rem 0.5rem;
+    border-color: #bbb;
+  }
+  .sheet-row:not(.sheet-head) .sheet-tick {
+    border-color: #555;
+  }
+  .figure-grid {
+    grid-template-columns: 1fr 1fr;
+    break-inside: avoid;
+  }
+  .prose h2 {
+    margin-top: 1.2rem;
+    break-after: avoid;
+  }
+  .site-foot,
+  .crumbs,
+  .no-print {
+    display: none !important;
+  }
+}

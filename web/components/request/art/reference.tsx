@@ -61,7 +61,7 @@ export const ART_REFERENCE: Record<string, ReactNode> = {
       <path className="w-grn" d="M12 54c-9 0-12-20-2-27" />
       {/* the load */}
       <path className="hot-ln" d="M80 14v18M75 26l5 6 5-6" />
-      <text x="88" y="20">1 kg</text>
+      <text x="88" y="20">3 kg</text>
       {/* the fixed end rests on a spacer */}
       <rect className="wash" x="16" y="58" width="18" height="7" rx="1" />
       <path className="ln-thin" d="M10 65h100" />

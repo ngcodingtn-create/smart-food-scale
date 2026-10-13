@@ -32,6 +32,8 @@ export type Part = {
   source: Source;
   /** What it does in the build, one line. */
   role: string;
+  /** What to hand over instead if the lab has none. Written for the technician. */
+  swap?: string;
   /** The non-obvious part: why this choice, or what goes wrong without it. */
   note?: string;
   /** Lab parts: what to buy if the lab hasn't got one. */
@@ -56,6 +58,7 @@ export const PARTS: Part[] = [
     where: 'Node B',
     source: 'buy',
     role: 'Takes the photo and posts it with the grams over Wi-Fi.',
+    swap: 'Nothing in a teaching lab replaces it. If you have another ESP32 camera board, tell us: the pins change.',
     note: 'No starter kit ships one. Focus the lens by hand for the mounting height; the factory focus is set far.',
     price: { tnd: 33.5, shop: DIDACTICO, href: 'https://didactico.tn/produit/camera-espcam-ov2640/', seen: 'page' },
   },
@@ -66,6 +69,7 @@ export const PARTS: Part[] = [
     where: 'Node B',
     source: 'buy',
     role: 'Plugs under the ESP32-CAM: USB, serial and the BOOT/RST buttons.',
+    swap: 'An FT232RL or CP2102 USB-to-TTL adapter set to 3.3 V. Last resort: an Arduino Uno used as a serial bridge.',
     note: 'The camera board has no USB port. This is the cheapest way to flash it and the least fiddly.',
     changed: 'Replaces the stand-alone USB-to-TTL adapter.',
     price: { tnd: 9.5, shop: DIDACTICO, href: 'https://didactico.tn/produit/module-shield-esp32-cam-mb/', seen: 'page' },
@@ -77,6 +81,7 @@ export const PARTS: Part[] = [
     where: 'Node A',
     source: 'buy',
     role: 'The scale itself. Bends a few microns under the plate.',
+    swap: 'A 1 kg or 5 kg bar cell of the same kind: less range, or less precision. Not a 50 kg bathroom-scale sensor.',
     note: 'Pick the 3 kg variant on the page; it also sells 1, 5 and 10 kg. Sellers give 75 × 12.7 × 12.7 mm with M4 threads: measure yours before buying screws.',
     changed: 'Was 1 kg: a ceramic plate and a large meal went past it.',
     price: { tnd: 13, shop: DIDACTICO, href: 'https://didactico.tn/produit/capteur-de-pesage-3kg-yzc-131/', seen: 'page' },
@@ -88,6 +93,7 @@ export const PARTS: Part[] = [
     where: 'Node A',
     source: 'buy',
     role: '24-bit converter that reads the bridge. Gain 128, 10 samples/s.',
+    swap: 'None. This is the one part with no stand-in.',
     note: 'Power it from the DevKit’s 3V3 pin. At 5 V its data pin swings to 5 V, which the ESP32 is not rated for.',
     price: { tnd: 7, shop: DIDACTICO, href: 'https://didactico.tn/produit/capteur-pesage-hx711/', seen: 'page' },
   },
@@ -98,6 +104,7 @@ export const PARTS: Part[] = [
     where: 'Node A',
     source: 'buy',
     role: 'Shows the live weight and what the scale is doing.',
+    swap: 'A 16 × 2 LCD with an I²C backpack (it needs 5 V). Or none at first: the weight can be read over USB.',
     note: 'Ask the lab first: some ESP32 kits include one. Runs at 3.3 V directly, unlike a 16 × 2 LCD.',
     price: { tnd: 18, shop: DIDACTICO, href: 'https://didactico.tn/produit/ecran-oled-0-96-i2c/', seen: 'page' },
   },
@@ -108,6 +115,7 @@ export const PARTS: Part[] = [
     where: 'Both nodes',
     source: 'buy',
     role: 'Powers the finished scale away from the bench.',
+    swap: 'Any phone charger rated 2 A or more, or the bench supply set to 5.0 V. Not a power bank.',
     note: 'Any phone charger rated 2 A or more will do, so bring one before buying. Not a power bank.',
     price: {
       tnd: 7.6,
@@ -123,6 +131,7 @@ export const PARTS: Part[] = [
     where: 'Both nodes',
     source: 'buy',
     role: 'Bulk reservoir on the 5 V rail: one at the ESP32-CAM’s 5 V pin, one where the supply splits to the two boards.',
+    swap: 'Anything from 470 to 2200 µF, 10 V or more. Two 470 µF side by side do the same job.',
     note: 'Teaching kits stop around 100 µF. Without this the camera resets when Wi-Fi and the sensor start together.',
     price: { tnd: 0.9, shop: TUNISMART, href: 'https://tuni-smart-innovation.com/search?q=condensateur+1000uf&type=product', seen: 'listing' },
   },
@@ -135,6 +144,7 @@ export const PARTS: Part[] = [
     where: 'Node A',
     source: 'lab',
     role: 'Runs the scale: HX711, display, buttons, buzzer, and tells Node B when to shoot.',
+    swap: 'Any ESP32-WROOM dev board; the 38-pin kind works. Not an ESP8266, not an Arduino.',
     note: 'Read the metal shield before wiring. If it says WROVER, GPIO 16/17 are taken and the HX711 moves to 25/26.',
     fallback: { tnd: 28.5, shop: DIDACTICO, href: 'https://didactico.tn/produit/carte-developpement-esp-wroom-32/', seen: 'page' },
   },
@@ -145,6 +155,7 @@ export const PARTS: Part[] = [
     where: 'Node A',
     source: 'lab',
     role: 'Tare and capture.',
+    swap: 'Any push button that springs back.',
     note: 'No resistors: the ESP32’s internal pull-ups do the job.',
   },
   {
@@ -154,6 +165,7 @@ export const PARTS: Part[] = [
     where: 'Node A',
     source: 'lab',
     role: 'A beep for tare, capture and errors.',
+    swap: 'An active buzzer (one fixed tone), or an LED. It only has to confirm a press.',
     note: 'The common kit module is a coil, so it goes through a transistor with a diode across it.',
   },
   {
@@ -163,6 +175,7 @@ export const PARTS: Part[] = [
     where: 'Both nodes',
     source: 'lab',
     role: 'One switches the buzzer (Node A), one switches the lights (Node B).',
+    swap: 'PN2222 or BC337 for either job (check the pin order). A BC547 for the buzzer only: the lights draw too much for it.',
     note: 'A BC547 is fine for the buzzer but not the lights: it is rated 100 mA and six LEDs draw about 110 mA.',
   },
   {
@@ -172,6 +185,7 @@ export const PARTS: Part[] = [
     where: 'Node A',
     source: 'lab',
     role: 'Across the buzzer coil, to absorb the switch-off spike.',
+    swap: 'Any small diode, 1N4001 to 1N4007.',
     changed: 'Added.',
   },
   {
@@ -181,6 +195,7 @@ export const PARTS: Part[] = [
     where: 'Node B',
     source: 'lab',
     role: 'Even light over the plate, so the photo does not depend on the room.',
+    swap: 'Warm-white LEDs, or a small USB lamp aimed at the plate. Coloured LEDs will not do.',
     note: 'Behind a sheet of tracing paper or frosted plastic, at an angle to the lens, so a glazed plate does not glare.',
     changed: 'Replaces the WS2812B ring and its level shifter.',
   },
@@ -192,6 +207,7 @@ export const PARTS: Part[] = [
     where: 'Both nodes',
     source: 'lab',
     role: '100 Ω per LED; 470 Ω and 10 kΩ on the light transistor’s base; 1 kΩ on the buzzer’s.',
+    swap: 'Near values are fine: 82–150 Ω for the LEDs, 330–680 Ω, 680 Ω–2.2 kΩ and 4.7–47 kΩ for the other three.',
   },
   {
     art: 'cap-ceramic',
@@ -200,6 +216,7 @@ export const PARTS: Part[] = [
     where: 'Both nodes',
     source: 'lab',
     role: 'Decoupling, one at each board: DevKit, ESP32-CAM, HX711 and the light driver.',
+    swap: 'Any ceramic from 47 to 220 nF.',
   },
   {
     art: 'cap-electrolytic',
@@ -208,6 +225,7 @@ export const PARTS: Part[] = [
     where: 'Node A',
     source: 'lab',
     role: 'Next to the HX711, with a 100 nF, to keep its supply quiet.',
+    swap: 'Anything from 4.7 to 47 µF.',
     changed: 'Replaces the HX711’s dedicated buck converter.',
   },
   {
@@ -217,6 +235,7 @@ export const PARTS: Part[] = [
     where: 'Node A',
     source: 'lab',
     role: 'Extends the load cell’s thin 4 wires to the HX711.',
+    swap: 'A cut-off USB cable. Or four jumper wires twisted together and kept under 15 cm.',
     note: 'A cut-off old USB cable is exactly this: four cores and a braid. Ground the braid at the HX711 end only.',
     changed: 'Added.',
   },
@@ -228,6 +247,7 @@ export const PARTS: Part[] = [
     where: 'Bench',
     source: 'lab',
     role: 'Prototype the signal wiring.',
+    swap: 'Perfboard and soldered wire.',
     note: 'Signals only. The 5 V supply goes on short soldered leads: breadboard contacts alone can brown the camera out.',
   },
   {
@@ -238,6 +258,7 @@ export const PARTS: Part[] = [
     where: 'Build',
     source: 'lab',
     role: 'For the HX711 and OLED if they arrive with loose pins.',
+    swap: 'None needed if we solder wires straight to the boards.',
   },
   {
     art: 'screws',
@@ -247,6 +268,7 @@ export const PARTS: Part[] = [
     where: 'Build',
     source: 'lab',
     role: 'Fix the load cell between base and platform with a gap on both sides.',
+    swap: 'A stack of nuts or washers makes a spacer. Glue does not replace the screws in the load cell.',
     note: 'Screw sizes depend on the cell; buy nothing until it is in hand.',
   },
   {
@@ -256,6 +278,7 @@ export const PARTS: Part[] = [
     where: 'Node B',
     source: 'lab',
     role: 'Holds a photo and its weight when the upload fails, until Wi-Fi returns.',
+    swap: 'Leave it out. The scale still works; it only cannot hold captures while Wi-Fi is down.',
     note: 'Use a spare from a phone; formatted FAT32. The scale works without it, it just loses offline captures.',
   },
   {
@@ -266,6 +289,7 @@ export const PARTS: Part[] = [
     where: 'Bench',
     source: 'lab',
     role: 'Flashing and serial logs.',
+    swap: 'A phone’s data cable. A charge-only cable will not work.',
     note: 'Charge-only cables are the most common reason "the board isn’t detected". Check the DevKit’s socket: micro-USB or USB-C.',
   },
 
@@ -277,6 +301,7 @@ export const PARTS: Part[] = [
     where: 'Bench',
     source: 'bench',
     role: 'First power-up at 5.00 V with a 1 A current limit, so a wiring mistake costs nothing.',
+    swap: 'A 5 V / 2 A phone charger also powers it, but with no current limit to forgive a wiring mistake.',
   },
   {
     art: 'multimeter',
@@ -285,6 +310,7 @@ export const PARTS: Part[] = [
     where: 'Bench',
     source: 'bench',
     role: 'Check the 5 V rail under load, and the HX711’s excitation voltage across E+ and E−.',
+    swap: 'None. We cannot check the supply without one.',
   },
   {
     art: 'soldering-iron',
@@ -293,6 +319,7 @@ export const PARTS: Part[] = [
     where: 'Bench',
     source: 'bench',
     role: 'Headers, the LED board, the load-cell splice and the power leads.',
+    swap: 'Any fine-tipped soldering iron.',
   },
   {
     art: 'weights',
@@ -302,6 +329,7 @@ export const PARTS: Part[] = [
     where: 'Bench',
     source: 'bench',
     role: 'Calibrate at several points across the range, then prove the accuracy with masses not used to calibrate.',
+    swap: 'Any objects weighed first on the lab’s balance: water bottles, bags of sugar. We write the mass on each.',
     note: 'Not sold by any Tunisian shop we found. Borrow a set from the physics or chemistry lab, with time on their balance.',
   },
   {
@@ -312,6 +340,7 @@ export const PARTS: Part[] = [
     where: 'Build',
     source: 'bench',
     role: 'Cut the base, platform and camera arm.',
+    swap: 'A hand saw and a drill.',
   },
   {
     art: 'sheet-material',
@@ -321,6 +350,7 @@ export const PARTS: Part[] = [
     where: 'Build',
     source: 'bench',
     role: 'Base and platform. Workshop offcuts are big enough.',
+    swap: 'Any stiff flat offcut. Not cardboard: it flexes, and the scale reads the flex.',
   },
   {
     art: 'camera-arm',
@@ -329,6 +359,7 @@ export const PARTS: Part[] = [
     where: 'Build',
     source: 'bench',
     role: 'Holds the ESP32-CAM pointing straight down at the plate.',
+    swap: 'A retort stand and clamp, a desk-lamp arm, or a wooden batten screwed to the base.',
     note: 'Aim for 300–350 mm from lens to table. At 250 mm an 18 cm plate barely fits the frame.',
   },
   {
@@ -338,6 +369,7 @@ export const PARTS: Part[] = [
     where: 'Build',
     source: 'bench',
     role: 'The plate every meal is weighed on.',
+    swap: 'Any plate, as long as it is the same one every time.',
     note: 'Ceramic is fine with the 3 kg cell. Use the same plate every time: it is what gets tared.',
   },
   {
@@ -347,6 +379,7 @@ export const PARTS: Part[] = [
     where: 'Bench',
     source: 'bench',
     role: 'Flashes both boards and runs the backend during the demo.',
+    swap: 'We bring our own.',
   },
   {
     art: 'phone-hotspot',
@@ -355,6 +388,7 @@ export const PARTS: Part[] = [
     where: 'Bench',
     source: 'bench',
     role: 'The network for the demo, and the app.',
+    swap: 'A spare Wi-Fi router. Not the campus network: its login page blocks the boards.',
     note: 'ESP-NOW only works when both boards share the Wi-Fi channel. If the hotspot changes channel, the scale goes quiet.',
   },
 
@@ -433,6 +467,16 @@ export const PARTS: Part[] = [
     optional: true,
   },
 ];
+
+/**
+ * The request in the order it is asked for: what we borrow, what we book, then
+ * what we buy ourselves. Line numbers everywhere on the site come from this.
+ */
+export const REQUEST: Part[] = (['lab', 'bench', 'buy'] as const).flatMap((source) =>
+  PARTS.filter((part) => part.source === source),
+);
+
+export const lineNumber = (part: Part) => REQUEST.indexOf(part) + 1;
 
 /** Dinars spent on the required buy list, rounded to the millime. */
 export function buyTotal(parts: Part[] = PARTS) {

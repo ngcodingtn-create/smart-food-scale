@@ -1,0 +1,139 @@
+import { Callout } from '@/components/Callout';
+import { PartList, RequestSummary, RequestTable } from '@/components/request/PartList';
+
+export const metadata = {
+  title: "Why these parts",
+  description: "The reasoning behind the component request: prices, what changed from the first draft, precision, and the alternatives.",
+};
+
+# Why these parts
+
+The [component request](/project/component-request) is the sheet handed to the lab.
+This page is the working behind it: where the prices come from, what changed and why,
+how precise the scale can be, and what to reach for if the plan can't be followed.
+
+<RequestSummary />
+
+<Callout type="note" title="Where the figures come from">
+
+Prices were read from Tunisian shop pages on **12 October 2026** (Didactico, Tuni Smart,
+CoThings, Tunisianet) and are written the way those shops write them: 33,500 TND is
+thirty-three and a half dinars. Prices change and stock runs out, so check each link before ordering.
+"Borrow" is based on what teaching kits and lab suppliers ship, not on this faculty's
+inventory: ask the lab technician first, and buy only what they can't hand over.
+
+</Callout>
+
+If the budget allows, add one spare ESP32-CAM (33,500 TND) and one spare load cell
+(13,000 TND). They are the two parts most likely to be damaged: the camera board by a
+brownout, the cell by someone leaning on the platform.
+
+## What we buy
+
+None of these is in a standard teaching kit. All were listed by a Tunisian shop on the date above.
+
+<PartList source="buy" />
+
+## What changed from the first draft
+
+The first draft was rebuilt from the project brief. Checking it against datasheets and
+against what can be found locally changed these lines.
+
+| Line | First draft | Now | Why |
+| --- | --- | --- | --- |
+| Programmer | USB-to-TTL adapter (CP2102 / FTDI) | ESP32-CAM-MB base | Cheaper (9,500 vs 10,500 TND), has BOOT and RESET buttons, and plugs straight in. The adapter stays as a backup. |
+| Lighting | WS2812B ring, SN74AHCT125 level shifter, 330 Ω | 6 white LEDs behind a diffuser, one 2N2222 | No Tunisian shop we checked stocks the 74AHCT125. The ring's data line needs 3.5 V at 5 V and the ESP32 only guarantees 2.6 V. White LEDs and a 2N2222 are in every lab. |
+| Who drives the light | Node A, GPIO 5 (wiring page) / Node B (architecture page) | Node B, GPIO 13 | The two pages disagreed. The camera node lights its own photo. GPIO 13 is free with the microSD in 1-bit mode and is not a strapping pin. |
+| HX711 supply | Its own 5 V → 3.3 V buck converter | The DevKit's 3V3 pin, with 10 µF and 100 nF | It draws about 5 mA with the cell. The DevKit's linear regulator is already quieter than a switching converter, and at 3.3 V the data pin stays within what the ESP32 accepts. |
+| microSD | Required, 4–8 GB | Borrowed, optional | Any spare card up to 32 GB works. The scale runs without one; it just can't hold captures while Wi-Fi is down. |
+| Buzzer | 2N2222 + 1 kΩ | Same, plus a 1N4148 across the coil | Kit buzzers are coils, and a coil switched off by a transistor needs a diode. |
+| Load-cell wiring | Not listed | Shielded 4-core cable | The cell's own leads are thin and short. An old USB cable is the right cable. |
+| Calibration masses | Optional | Booked from the physics lab | No local shop sells them, and the accuracy figures can't be checked without them. |
+| Load cell | 1 kg | 3 kg (YZC-131) | A ceramic plate alone can weigh 300–430 g; with a large meal that passes 1 kg. No 2 kg cell is stocked locally — see [how precise it is](#how-precise-is-it). |
+
+## Check when the parts arrive
+
+1. **Read the DevKit's module marking.** WROOM-32 is what the pin map assumes. A WROVER uses
+   GPIO 16 and 17 for its memory, so the HX711 moves to 25 and 26 —
+   [wiring](/project/wiring).
+2. **Measure the load cell** before buying screws or drilling. Sellers list 75 to 80 mm and
+   M4 for the 3 kg YZC-131; batches vary, and the [3D rig](/rig) is drawn from the seller's figure.
+3. **On the HX711, check E− is connected to GND**, and measure E+ to E− once powered.
+   Many cheap boards leave E− floating, and the readings wander.
+4. **Check the arrow on the cell** points the way the load pushes, and that the platform
+   touches nothing but the cell.
+5. **Refocus the camera lens** at the real mounting height, on a printed target. The
+   [3D rig](/rig) places the lens 320 mm above the plate, which leaves margin around an
+   18 cm plate.
+
+## How precise is it?
+
+A load cell's errors are a fixed fraction of its **full scale**, so a bigger cell is
+coarser in grams. The trade is headroom against resolution:
+
+| Cell | Room for food on a 420 g ceramic plate | Readable, with averaging | Absolute, spec | In Tunisia |
+| --- | ---: | ---: | ---: | --- |
+| 1 kg | about 480 g | 0.1–0.2 g | 0.5–1 g | 8,000 TND, Tuni Smart |
+| 2 kg | about 1.5 kg | 0.2–0.4 g | 1–2 g | Not stocked by the shops we checked |
+| **3 kg** | **about 2.5 kg** | **0.3–0.6 g** | **1.5–3 g** | **13,000 TND, Didactico, in stock** |
+
+"Readable" is 0.01–0.02 % of full scale and "absolute" 0.05–0.1 %, the same rule the
+[accuracy page](/reference/accuracy) uses; the plate column allows 100 g for the platform.
+
+**Why 3 kg is still precise enough.** Even the worst case, 3 g on a 350 g portion of
+lamb couscous, is 5 kcal out of 585. The nutrient values in the food table are
+estimates with far wider error than that. The camera and the table limit this system;
+at 3 kg, the scale does not.
+
+**What actually makes it precise**, more than the cell's rating:
+
+- **Calibrate at five points** (100 g, 200 g, 500 g, 1 kg, 2 kg) and correct between them,
+  rather than one mass and a straight line. That removes most of the non-linearity, the
+  largest term in the spec.
+- **Tare immediately before every capture**, which cancels zero drift and creep.
+- **Mount the cell properly**: one end on the base, the other under the platform, a gap
+  on both sides, the arrow pointing the way the load pushes, and a stop screw under the
+  platform so nobody can press it past its limit.
+- **Ten minutes' warm-up, 10 samples/s, median of 12.**
+
+Done this way, aim for about 1 g. The [accuracy page](/reference/accuracy) is where the
+measured figure goes; report that, not the target.
+
+A 2 kg cell would cut the error by a third, at the cost of an import and a few weeks.
+
+## The light, on Node B
+
+The one circuit that is new in this revision. Six LEDs in parallel, each with its own
+resistor, switched on the low side:
+
+| From | Through | To |
+| --- | --- | --- |
+| GPIO 13 | 470 Ω | 2N2222 base |
+| 2N2222 base | 10 kΩ | GND, so the light stays off while the board boots |
+| 5 V | 100 Ω, then a white LED (×6, in parallel) | 2N2222 collector |
+| 2N2222 emitter | — | GND |
+
+About 18 mA per LED, 110 mA in total, drawn from the 5 V supply rather than through the
+ESP32-CAM. The firmware switches it on, waits for the camera's exposure to settle, takes
+the frame and switches it off. The on-board flash LED on GPIO 4 stays as a fallback, not
+the main light: it is a single point beside the lens and glares on a glazed plate.
+
+## Alternatives on the shelf
+
+What to reach for when the plan can't be followed, and two things to avoid.
+
+<PartList source="alt" />
+
+<Callout type="tip" title="The cheapest calibration that still means something">
+
+Borrow the physics lab's masses and ten minutes on its balance. Kitchen scales and coins
+are fine for spot checks between calibrations, but only after they have been checked
+against a real reference. The [accuracy page](/reference/accuracy) explains why.
+
+</Callout>
+
+## The request, with costs
+
+The same lines as the request sheet, in the same order, with what each costs.
+
+<RequestTable />

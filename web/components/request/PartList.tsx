@@ -1,5 +1,5 @@
 import { PartArt } from './PartArt';
-import { PARTS, buyTotal, formatTnd, type Part, type Source } from './bom';
+import { PARTS, REQUEST, buyTotal, formatTnd, lineNumber, type Part, type Source } from './bom';
 import './request.css';
 
 /**
@@ -104,9 +104,9 @@ const SOURCE_LABEL: Record<Source, string> = {
   alt: 'Alternative',
 };
 
-/** One row per line of the request, in the order a technician fills a tray. */
+/** One row per line of the request, numbered as on the request sheet. */
 export function RequestTable() {
-  const rows = PARTS.filter((part) => part.source !== 'alt');
+  const rows = REQUEST;
   return (
     <div className="table-wrap">
       <table className="request-table">
@@ -121,9 +121,9 @@ export function RequestTable() {
           </tr>
         </thead>
         <tbody>
-          {rows.map((part, index) => (
+          {rows.map((part) => (
             <tr key={`${part.art}-${part.name}`}>
-              <td>{index + 1}</td>
+              <td>{lineNumber(part)}</td>
               <td>{part.name}</td>
               <td>{part.unit ?? part.qty}</td>
               <td>{part.where}</td>

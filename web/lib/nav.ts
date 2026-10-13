@@ -52,6 +52,11 @@ export const NAV: NavGroup[] = [
  */
 export const UNLISTED: NavGroup[] = [
   {
+    label: 'Component request',
+    href: '/project/component-request',
+    items: [{ label: 'Why these parts', href: '/project/component-request/notes' }],
+  },
+  {
     label: 'Deliverables',
     href: '/deliverables',
     items: [
