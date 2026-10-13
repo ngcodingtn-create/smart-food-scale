@@ -123,6 +123,7 @@ procedure and an empty results table to fill in once the hardware exists.
 | [docs/calibration.md](docs/calibration.md) | Calibration procedure and the honest accuracy table |
 | [docs/setup.md](docs/setup.md) | Toolchain setup for all four sub-projects |
 | [docs/decisions.md](docs/decisions.md) | Every judgement call made while building, with reasoning |
+| [ai-docs/](ai-docs/README.md) | Notes for whoever continues the work, human or AI: handoff, runbook, project map |
 
 ### The docs site
 
