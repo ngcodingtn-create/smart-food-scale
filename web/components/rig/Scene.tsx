@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef, type ReactNode } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
-import { DIM, type PartId } from './specs';
+import { DIM, PARTS, type PartId } from './specs';
 import type { SceneProps } from './RigViewer';
 import { RigFallback } from './RigFallback';
 
@@ -14,6 +14,12 @@ const INK = '#252a2b';
 const ALUMINIUM = '#bac2c4';
 const ACCENT = '#ba653d';
 const PCB = '#173e37';
+
+// Heights of the weighing stack, derived once from the dimension table.
+const CELL_Y = DIM.cell.bottom + DIM.cell.height / 2;
+const CELL_TOP = DIM.cell.bottom + DIM.cell.height;
+const RISER = DIM.platform.y - DIM.platform.height / 2 - CELL_TOP;
+const BASE_TOP = 12;
 
 function Box({ size, position = [0, 0, 0], color = INK, radius = 0, metal = 0, selected = false, rotation, children }: {
   size: V3; position?: V3; color?: string; radius?: number; metal?: number;
@@ -130,21 +136,25 @@ function HX711({ selected }: { selected: boolean }) {
 }
 
 function LoadCell({ selected }: { selected: boolean }) {
+  const { length, height, width } = DIM.cell;
   const geometry = useMemo(() => {
-    const shape = new THREE.Shape(); const { length, height, width } = DIM.cell;
+    const shape = new THREE.Shape();
     shape.moveTo(-length / 2, -height / 2); shape.lineTo(length / 2, -height / 2);
     shape.lineTo(length / 2, height / 2); shape.lineTo(-length / 2, height / 2); shape.closePath();
-    const hole = new THREE.Path(); hole.moveTo(-10, -2.15); hole.lineTo(10, -2.15);
-    hole.absarc(10, 0, 2.15, -Math.PI / 2, Math.PI / 2, false); hole.lineTo(-10, 2.15);
-    hole.absarc(-10, 0, 2.15, Math.PI / 2, Math.PI * 1.5, false); shape.holes.push(hole);
+    // The "binocular" cut-out: two bores joined by a slot. The metal left above and below it is what bends.
+    const bore = height * .27, half = length * .13;
+    const hole = new THREE.Path(); hole.moveTo(-half, -bore); hole.lineTo(half, -bore);
+    hole.absarc(half, 0, bore, -Math.PI / 2, Math.PI / 2, false); hole.lineTo(-half, bore);
+    hole.absarc(-half, 0, bore, Math.PI / 2, Math.PI * 1.5, false); shape.holes.push(hole);
     const g = new THREE.ExtrudeGeometry(shape, { depth: width, bevelEnabled: false, curveSegments: 16 });
     g.translate(0, 0, -width / 2); return g;
-  }, []);
+  }, [length, height, width]);
   useEffect(() => () => geometry.dispose(), [geometry]);
   return <>
     <mesh geometry={geometry} castShadow receiveShadow><meshStandardMaterial color={ALUMINIUM} roughness={.3} metalness={.75} emissive={selected ? ACCENT : '#000000'} emissiveIntensity={.22} /></mesh>
-    {[-20, 20].flatMap((x) => [-3, 3].map((z) => <Cylinder key={`${x}-${z}`} radius={1.6} height={.3} position={[x, 3.12, z]} color="#4d5554" />))}
-    <Box size={[20, .3, 7]} position={[0, 3.2, 0]} color="#eeeee6" />
+    {/* Two screws each end: down into the spacer on the fixed side, up into the riser on the loaded side. */}
+    {[-1, 1].flatMap((side) => [6, 15].map((inset) => <Cylinder key={`${side}-${inset}`} radius={2} height={.4} position={[side * (length / 2 - inset), height / 2 + .2, 0]} color="#4d5554" />))}
+    <Box size={[length * .28, .3, width * .6]} position={[0, height / 2 + .2, 0]} color="#eeeee6" />
   </>;
 }
 
@@ -165,25 +175,68 @@ function Food({ color, amount }: { color: string; amount: number }) {
   </mesh>;
 }
 
-function Ring({ selected, lights }: { selected: boolean; lights: boolean }) {
-  const geometry = useMemo(() => {
-    const shape = new THREE.Shape(); shape.absarc(0, 0, DIM.ring.outer / 2, 0, Math.PI * 2, false);
-    const hole = new THREE.Path(); hole.absarc(0, 0, DIM.ring.inner / 2, 0, Math.PI * 2, true); shape.holes.push(hole);
-    const g = new THREE.ExtrudeGeometry(shape, { depth: 1.6, bevelEnabled: false, curveSegments: 48 });
-    g.rotateX(Math.PI / 2); g.translate(0, .8, 0); return g;
-  }, []);
-  useEffect(() => () => geometry.dispose(), [geometry]);
+function annulus(inner: number, outer: number, depth: number) {
+  const shape = new THREE.Shape(); shape.absarc(0, 0, outer, 0, Math.PI * 2, false);
+  const hole = new THREE.Path(); hole.absarc(0, 0, inner, 0, Math.PI * 2, true); shape.holes.push(hole);
+  const g = new THREE.ExtrudeGeometry(shape, { depth, bevelEnabled: false, curveSegments: 48 });
+  g.rotateX(Math.PI / 2); g.translate(0, depth / 2, 0); return g;
+}
+
+// Six plain white 5 mm LEDs on a carrier around the lens, behind a diffuser (decision D12).
+function Light({ selected, lights }: { selected: boolean; lights: boolean }) {
+  const { count, led, ledLength, circle, carrier, diffuser } = DIM.light;
+  const board = useMemo(() => annulus(7, carrier / 2, 1.6), [carrier]);
+  const screen = useMemo(() => annulus(9, diffuser / 2, 1), [diffuser]);
+  useEffect(() => () => { board.dispose(); screen.dispose(); }, [board, screen]);
   return <>
-    <mesh geometry={geometry} castShadow><meshStandardMaterial color={selected ? '#5f4634' : '#192c27'} roughness={.6} /></mesh>
-    {Array.from({ length: DIM.ring.count }, (_, i) => {
-      const angle = i * Math.PI * 2 / DIM.ring.count;
-      return <group key={i} position={[Math.cos(angle) * 15, -3.35, Math.sin(angle) * 15]} rotation={[0, -angle, 0]}>
-        <Box size={[5, 5.1, 5]} color="#d8d5c5" />
-        <mesh position={[0, -2.56, 0]} rotation={[Math.PI / 2, 0, 0]}><circleGeometry args={[1.8, 16]} /><meshStandardMaterial color={lights ? '#fff2bf' : '#9a9583'} emissive="#ffdda0" emissiveIntensity={lights ? 2.5 : 0} toneMapped={false} /></mesh>
-      </group>;
+    <mesh geometry={board} castShadow><meshStandardMaterial color={selected ? '#8a5a3a' : '#b79f6c'} roughness={.8} /></mesh>
+    {Array.from({ length: count }, (_, i) => {
+      const angle = (i + .5) * Math.PI * 2 / count;
+      return <mesh key={i} position={[Math.cos(angle) * circle / 2, -.8 - ledLength / 2, Math.sin(angle) * circle / 2]}>
+        <capsuleGeometry args={[led / 2, ledLength - led, 6, 16]} />
+        <meshStandardMaterial color={lights ? '#fffbe8' : '#e9ece6'} emissive="#fff0c2" emissiveIntensity={lights ? 2.4 : 0} roughness={.25} toneMapped={!lights} />
+      </mesh>;
     })}
+    <mesh geometry={screen} position={[0, -.8 - ledLength - 3, 0]}>
+      <meshStandardMaterial color="#ffffff" transparent opacity={lights ? .62 : .4} roughness={.95} emissive="#fff3cf" emissiveIntensity={lights ? .7 : 0} side={THREE.DoubleSide} />
+    </mesh>
   </>;
 }
+
+// A numbered marker beside a part. The list under the viewer uses the same numbers, so the
+// model needs no words on it. Drawn over everything: it marks the parts inside the base too.
+function Pin({ index, position, active, onPick }: { index: number; position: V3; active: boolean; onPick: () => void }) {
+  const texture = useMemo(() => {
+    const canvas = document.createElement('canvas'); canvas.width = canvas.height = 128;
+    const ctx = canvas.getContext('2d')!;
+    ctx.beginPath(); ctx.arc(64, 64, 56, 0, Math.PI * 2); ctx.fillStyle = active ? ACCENT : '#fbf8f1'; ctx.fill();
+    ctx.lineWidth = 9; ctx.strokeStyle = active ? '#fbf8f1' : ACCENT; ctx.stroke();
+    ctx.fillStyle = active ? '#ffffff' : '#7a3d1f'; ctx.font = '600 66px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(String(index), 64, 69);
+    const map = new THREE.CanvasTexture(canvas); map.colorSpace = THREE.SRGBColorSpace; return map;
+  }, [index, active]);
+  useEffect(() => () => texture.dispose(), [texture]);
+  const size = active ? 30 : 24;
+  return <sprite position={position} scale={[size, size, 1]} onClick={(event: ThreeEvent<MouseEvent>) => { event.stopPropagation(); onPick(); }}>
+    <spriteMaterial map={texture} depthTest={false} toneMapped={false} />
+  </sprite>;
+}
+
+// Where each part is, and where its marker floats. `e` is 1 in the exploded view.
+const partCentre = (e: number): Record<PartId, V3> => ({
+  plate: [0, 82 + e * 125, -15], cell: [0, CELL_Y + e * 49, -15],
+  devkit: [-72 - e * 18, 20 + e * 50, -22], hx711: [67 + e * 18, 20 + e * 50, -22],
+  oled: [-33, 44 + e * 20, 101], buttons: [27, 42 + e * 24, 101],
+  buzzer: [-67, 22 + e * 24, 53], camera: [0, DIM.camera.y + e * 55, -15],
+  light: [0, DIM.light.y - 6 - e * 40, -15], arm: [0, 250, -107],
+});
+const pinAt = (e: number): Record<PartId, V3> => ({
+  plate: [-72, 98 + e * 125, -15], cell: [0, CELL_Y + e * 49, 22],
+  devkit: [-72 - e * 18, 36 + e * 50, -22], hx711: [67 + e * 18, 36 + e * 50, -22],
+  oled: [-33, 58 + e * 20, 101], buttons: [27, 58 + e * 24, 101],
+  buzzer: [-67, 38 + e * 24, 53], camera: [36, DIM.camera.y + 10 + e * 55, -15],
+  light: [-46, DIM.light.y - 12 - e * 40, -15], arm: [24, 250, -107],
+});
 
 function CameraBoard({ selected }: { selected: boolean }) {
   return <>
@@ -198,7 +251,7 @@ function CameraBoard({ selected }: { selected: boolean }) {
 }
 
 function Rig(props: SceneProps) {
-  const { selected, onSelect, exploded, reducedMotion, dark, dimensions, lights, preset, sim } = props;
+  const { selected, onSelect, exploded, reducedMotion, dark, dimensions, lights, preset, sim, pins } = props;
   const e = exploded ? 1 : 0;
   const shell = dark ? '#87867e' : '#d7d5c9';
   return <>
@@ -213,12 +266,14 @@ function Rig(props: SceneProps) {
       <Box size={[240, 26, 5]} position={[0, 25, -117.5]} radius={2} color={shell} />
       <Box size={[240, 26, 38]} position={[0, 25, 101]} radius={3} color={shell} />
       <Box size={[244, 1.2, 36]} position={[0, 38.5, 101]} color={dark ? '#4d504a' : '#acaea2'} radius={.5} />
-      {/* Fixed mount only under the left end; moving end has clear space below. */}
-      <Box size={[7, 30, 14]} position={[-20, 27, DIM.plate.z]} color={ALUMINIUM} metal={.65} />
-      <Part id="cell" onSelect={onSelect}><Moving target={[0, 45 + e * 49, DIM.plate.z]} reduced={reducedMotion}><LoadCell selected={selected === 'cell'} /></Moving></Part>
+      {/* The Z-mount. A spacer holds up the fixed end only; the loaded end hangs free over a
+          stop screw that stands 1 mm short of it, so a hand on the platform cannot over-bend the cell. */}
+      <Box size={[16, DIM.cell.bottom - BASE_TOP, 14]} position={[-DIM.cell.mount, (DIM.cell.bottom + BASE_TOP) / 2, DIM.plate.z]} color={ALUMINIUM} metal={.65} />
+      <Cylinder radius={2.4} height={DIM.cell.bottom - 1 - BASE_TOP} position={[DIM.cell.mount, (DIM.cell.bottom - 1 + BASE_TOP) / 2, DIM.plate.z]} color="#5c6565" metal={.7} />
+      <Part id="cell" onSelect={onSelect}><Moving target={[0, CELL_Y + e * 49, DIM.plate.z]} reduced={reducedMotion}><LoadCell selected={selected === 'cell'} /></Moving></Part>
       <Part id="plate" onSelect={onSelect}>
         <Moving target={[0, e * 78, 0]} reduced={reducedMotion}>
-          <Box size={[7, 18, 12]} position={[20, 57, DIM.plate.z]} color={ALUMINIUM} metal={.7} />
+          <Box size={[16, RISER, 12]} position={[DIM.cell.mount, CELL_TOP + RISER / 2, DIM.plate.z]} color={ALUMINIUM} metal={.7} />
           <Cylinder radius={DIM.platform.diameter / 2} height={DIM.platform.height} position={[0, DIM.platform.y, DIM.plate.z]} color={ALUMINIUM} metal={.65} selected={selected === 'plate'} />
         </Moving>
         <Moving target={[0, DIM.plate.bottom + e * 125, DIM.plate.z]} reduced={reducedMotion}>
@@ -245,26 +300,26 @@ function Rig(props: SceneProps) {
       </Moving></Part>
       <Part id="arm" onSelect={onSelect}>
         <Box size={[34, 7, 34]} position={[0, 41.5, -107]} radius={2} color={ALUMINIUM} metal={.7} />
-        <Box size={[20, DIM.arm.postLength, 20]} position={[0, 189, -107]} radius={1.5} color={ALUMINIUM} metal={.78} selected={selected === 'arm'} />
-        <Box size={[2, 289, .5]} position={[0, 190, -96.7]} color="#6c7474" />
-        <Box size={[20, 20, DIM.arm.reach]} position={[0, 340, -61]} radius={2} color={ALUMINIUM} metal={.78} selected={selected === 'arm'} />
-        <Box size={[44, 7, 49]} position={[0, 342, DIM.plate.z]} radius={3} color={ACCENT} />
+        <Box size={[20, DIM.arm.postLength, 20]} position={[0, 38 + DIM.arm.postLength / 2, -107]} radius={1.5} color={ALUMINIUM} metal={.78} selected={selected === 'arm'} />
+        <Box size={[2, DIM.arm.postLength - 13, .5]} position={[0, 39 + DIM.arm.postLength / 2, -96.7]} color="#6c7474" />
+        <Box size={[20, 20, DIM.arm.reach]} position={[0, DIM.arm.top - 10, -61]} radius={2} color={ALUMINIUM} metal={.78} selected={selected === 'arm'} />
+        <Box size={[44, 7, 49]} position={[0, DIM.arm.top - 8, DIM.plate.z]} radius={3} color={ACCENT} />
         {[-12, 12].flatMap((x) => [-119, -95].map((z) => <Cylinder key={`${x}-${z}`} radius={2.8} height={1.5} position={[x, 45.75, z]} color="#5c6565" metal={.7} />))}
       </Part>
       <Part id="camera" onSelect={onSelect}><Moving target={[0, DIM.camera.y + e * 55, DIM.plate.z]} reduced={reducedMotion}><CameraBoard selected={selected === 'camera'} /></Moving></Part>
-      <Part id="ring" onSelect={onSelect}><Moving target={[0, 327.9 + e * 22, DIM.plate.z]} reduced={reducedMotion}><Ring selected={selected === 'ring'} lights={lights} /></Moving></Part>
+      <Part id="light" onSelect={onSelect}><Moving target={[0, DIM.light.y - e * 40, DIM.plate.z]} reduced={reducedMotion}><Light selected={selected === 'light'} lights={lights} /></Moving></Part>
       {!exploded && <>
-        {['#be4635', '#252925', '#4f8262', '#e2dfce'].map((color, index) => <Wire key={color} color={color} points={[[-23.5, 45, -18 + index], [-36, 28, -22 + index], [28, 22, -46 + index * 2], [65, 23, -33 + index * 2]]} />)}
-        <Wire color="#444941" points={[[12, 27, -100], [13, 178, -107], [13, 327, -104], [13, 328, -30]]} />
+        {['#be4635', '#252925', '#4f8262', '#e2dfce'].map((color, index) => <Wire key={color} color={color} points={[[-DIM.cell.length / 2, CELL_Y, -18 + index], [-52, 28, -22 + index], [28, 22, -46 + index * 2], [65, 23, -33 + index * 2]]} />)}
+        <Wire color="#444941" points={[[12, 27, -100], [13, 220, -107], [13, DIM.arm.top - 23, -104], [13, DIM.arm.top - 22, -30]]} />
       </>}
       {exploded && <>
         <Stroke points={[[0, 48, DIM.plate.z], [0, 195, DIM.plate.z]]} dashed color={dark ? '#ac917b' : '#ab9d86'} />
         <Label text="Plate" position={[-108, 205, DIM.plate.z]} width={36} dark={dark} />
-        <Label text="Load cell · 1 kg" position={[0, 94, 37]} width={72} dark={dark} />
+        <Label text="Load cell · 3 kg" position={[0, 98, 37]} width={72} dark={dark} />
         <Label text="Node A" position={[-99, 85, 12]} width={40} dark={dark} />
         <Label text="HX711" position={[99, 85, 12]} width={40} dark={dark} />
       </>}
-      {!exploded && (dimensions || selected === 'camera' || selected === 'ring') && <Stroke points={[[0, DIM.camera.lensBottom, DIM.plate.z], [0, DIM.plate.surface, DIM.plate.z]]} dashed />}
+      {!exploded && (dimensions || selected === 'camera' || selected === 'light') && <Stroke points={[[0, DIM.camera.lensBottom, DIM.plate.z], [0, DIM.plate.surface, DIM.plate.z]]} dashed />}
       {dimensions && <>
         {/* Plan dimensions — readable from every angle, including straight down. */}
         <Stroke points={[[-125, 1, 144], [125, 1, 144]]} />
@@ -277,22 +332,27 @@ function Rig(props: SceneProps) {
             leader line shoots off the canvas and the label ends up annotating
             empty space. */}
         {preset !== 'top' && <>
-          <Stroke points={[[155, 0, -107], [155, 350, -107]]} />
-          <Stroke points={[[149, 0, -107], [161, 0, -107]]} /><Stroke points={[[149, 350, -107], [161, 350, -107]]} />
-          <Label text="350 mm" position={[155, 175, -107]} width={51} dark={dark} />
-          {!exploded && <Label text="249 mm clearance" position={[0, 230, -15]} width={85} dark={dark} />}
+          <Stroke points={[[155, 0, -107], [155, DIM.arm.top, -107]]} />
+          <Stroke points={[[149, 0, -107], [161, 0, -107]]} /><Stroke points={[[149, DIM.arm.top, -107], [161, DIM.arm.top, -107]]} />
+          <Label text={`${DIM.arm.top} mm`} position={[155, DIM.arm.top / 2, -107]} width={51} dark={dark} />
+          {!exploded && <Label text={`${DIM.camera.lensBottom - DIM.plate.surface} mm to the plate`} position={[0, 250, -15]} width={95} dark={dark} />}
         </>}
       </>}
+      {pins && PARTS.map((part, index) => <Pin key={part.id} index={index + 1} position={pinAt(e)[part.id]} active={selected === part.id} onPick={() => onSelect(part.id)} />)}
     </group>
   </>;
 }
+
+// Camera placement, in metres. The orbit centre sits at the rig's mid-height.
+const TARGET: V3 = [0, .2, -.015];
+const VIEW: Record<SceneProps['preset'], V3> = { perspective: [.5, .43, .66], front: [0, .24, .93], top: [0, 1.04, -.014] };
 
 function Controls({ preset, reset, rotating, reducedMotion, onUnavailable, focusRequest, exploded }: SceneProps) {
   const { camera, gl, invalidate } = useThree();
   const controls = useRef<OrbitControls | null>(null);
   useEffect(() => {
     const orbit = new OrbitControls(camera, gl.domElement); controls.current = orbit;
-    orbit.target.set(0, .17, -.015); orbit.minDistance = .055; orbit.maxDistance = 1.5;
+    orbit.target.set(...TARGET); orbit.minDistance = .055; orbit.maxDistance = 1.8;
     orbit.maxPolarAngle = Math.PI * .49; orbit.enablePan = false;
     orbit.enableDamping = !reducedMotion; orbit.dampingFactor = .09;
     orbit.autoRotateSpeed = .5;
@@ -302,25 +362,17 @@ function Controls({ preset, reset, rotating, reducedMotion, onUnavailable, focus
     return () => { orbit.removeEventListener('change', change); orbit.dispose(); controls.current = null; gl.domElement.removeEventListener('webglcontextlost', lost); };
   }, [camera, gl, invalidate, reducedMotion, onUnavailable]);
   useEffect(() => {
-    const positions: Record<SceneProps['preset'], V3> = { perspective: [.43, .36, .56], front: [0, .2, .77], top: [0, .87, -.014] };
-    camera.position.set(...positions[preset]); controls.current?.target.set(0, .17, -.015);
+    camera.position.set(...VIEW[preset]); controls.current?.target.set(...TARGET);
     if (controls.current) controls.current.maxPolarAngle = Math.PI * .49;
     controls.current?.update(); invalidate();
   }, [preset, reset, camera, invalidate]);
   useEffect(() => {
     if (!focusRequest || !controls.current) return;
     const e = exploded ? 1 : 0;
-    const positions: Record<PartId, V3> = {
-      plate: [0, 82 + e * 125, -15], cell: [0, 45 + e * 49, -15],
-      devkit: [-72 - e * 18, 20 + e * 50, -22], hx711: [67 + e * 18, 20 + e * 50, -22],
-      oled: [-33, 44 + e * 20, 101], buttons: [27, 42 + e * 24, 101],
-      buzzer: [-67, 22 + e * 24, 53], camera: [0, 334 + e * 55, -15],
-      ring: [0, 327.9 + e * 22, -15], arm: [0, 220, -107],
-    };
-    const target = new THREE.Vector3(...positions[focusRequest.part]).multiplyScalar(.001);
+    const target = new THREE.Vector3(...partCentre(e)[focusRequest.part]).multiplyScalar(.001);
     const distance = focusRequest.part === 'plate' || focusRequest.part === 'arm' ? .33 : .12;
-    // Camera/ring close-ups look upward slightly so the downward optics stay visible.
-    const below = focusRequest.part === 'camera' || focusRequest.part === 'ring';
+    // Camera and light close-ups look upward slightly so the downward optics stay visible.
+    const below = focusRequest.part === 'camera' || focusRequest.part === 'light';
     controls.current.maxPolarAngle = below ? Math.PI * .68 : Math.PI * .49;
     controls.current.target.copy(target);
     camera.position.copy(target).add(new THREE.Vector3(.55, below ? -.32 : .55, 1).normalize().multiplyScalar(distance));
@@ -337,7 +389,7 @@ function Controls({ preset, reset, rotating, reducedMotion, onUnavailable, focus
 
 export default function Scene(props: SceneProps) {
   return <Canvas shadows="percentage" dpr={[1, 1.5]} frameloop="demand"
-    camera={{ fov: 39, position: [.43, .36, .56], near: .005, far: 10 }}
+    camera={{ fov: 39, position: VIEW.perspective, near: .005, far: 10 }}
     gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
     fallback={<RigFallback message="WebGL is unavailable. Here is the assembly in side view." />}
     aria-hidden="true">
@@ -345,10 +397,10 @@ export default function Scene(props: SceneProps) {
     <hemisphereLight args={[props.dark ? '#d7dfe5' : '#fff8e7', '#807b6c', .85]} />
     <directionalLight position={[.5, .8, .4]} intensity={2.2} color="#fff4df" castShadow
       shadow-mapSize={[1024, 1024]} shadow-camera-left={-.4} shadow-camera-right={.4}
-      shadow-camera-top={.5} shadow-camera-bottom={-.3} shadow-camera-near={.01} shadow-camera-far={2}
+      shadow-camera-top={.6} shadow-camera-bottom={-.3} shadow-camera-near={.01} shadow-camera-far={2}
       shadow-bias={-.0001} shadow-normalBias={.0002} />
     <directionalLight position={[-.4, .5, -.3]} intensity={1.4} color="#d4e2ef" />
-    {props.lights && <pointLight position={[0, .315, -.015]} intensity={props.sim?.flash ? .32 : .04} color="#ffe1ac" distance={.5} decay={2} />}
+    {props.lights && <pointLight position={[0, (DIM.light.y - 16) / 1000, -.015]} intensity={props.sim?.flash ? .4 : .05} color="#fff0cf" distance={.6} decay={2} />}
     <Rig {...props} /><Controls {...props} />
   </Canvas>;
 }

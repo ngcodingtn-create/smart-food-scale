@@ -80,6 +80,7 @@ export function SimStage({ view }: { view: SimView }) {
         reset={0}
         onUnavailable={unavailable}
         focusRequest={null}
+        pins={false}
         sim={view}
       />
     </StageBoundary>

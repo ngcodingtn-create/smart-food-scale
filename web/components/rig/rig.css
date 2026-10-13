@@ -1,53 +1,328 @@
-.rig-viewer{border:1px solid var(--rule);border-radius:1rem;overflow:hidden;background:var(--paper-raised);isolation:isolate;box-shadow:var(--shadow-md)}
-.rig-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border-bottom:1px solid var(--rule)}
-.rig-viewer button{font:inherit;font-size:.8rem;font-weight:500;cursor:pointer;border-radius:6px;padding:7px 11px;min-height:2.1rem;line-height:1.3;transition:background .15s,color .15s;color:var(--ink-soft)}
-.rig-viewer button:hover{background:var(--paper-sunken);color:var(--ink)}
-.rig-viewer button:focus-visible,.rig-viewer input:focus-visible,.rig-viewer select:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
-.rig-segmented{display:flex;gap:3px;padding:3px;background:var(--paper-sunken);border:1px solid var(--rule);border-radius:8px}
-.rig-segmented button[aria-pressed=true]{background:var(--paper-raised);color:var(--accent-ink);box-shadow:var(--shadow-sm)}
-.rig-stage{height:490px;position:relative;background:var(--paper-sunken);overflow:hidden}
-.rig-stage canvas{display:block;touch-action:none;outline:none}
-.rig-stage-caption{position:absolute;z-index:1;top:19px;left:22px;pointer-events:none;line-height:1.4}
-.rig-stage-caption span{font-family:var(--font-display);font-size:.98rem;font-weight:600;color:var(--ink)}
-.rig-stage-caption small{display:block;font-family:var(--font-mono);font-size:.64rem;letter-spacing:.04em;color:var(--ink-soft);margin-top:3px}
-.rig-view-presets{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:3px;background:var(--paper-raised);border:1px solid var(--rule);padding:3px;border-radius:8px;box-shadow:var(--shadow-md)}
-.rig-view-presets button[aria-pressed=true]{color:var(--accent-ink);background:var(--accent-soft)}
-.rig-options{display:flex;flex-wrap:wrap;gap:12px 24px;padding:14px 20px 0;border-top:1px solid var(--rule)}
-.rig-options label{font-size:.78rem;display:flex;gap:7px;align-items:center;color:var(--ink-soft);cursor:pointer}
-.rig-options input{accent-color:var(--accent);width:14px;height:14px}
-.rig-options label:has(input:disabled){opacity:.6;cursor:default}
-.rig-viewer .rig-help{font-size:.72rem;color:var(--ink-soft);line-height:1.6;margin:9px 20px 15px}
-.rig-inspector{padding:20px;border-top:1px solid var(--rule);display:grid;grid-template-columns:180px 1fr;gap:24px}
-.rig-part-picker{font-size:.72rem;font-weight:600;color:var(--ink-soft)}
-.rig-part-picker select{display:block;width:100%;min-height:40px;margin-top:7px;border:1px solid var(--rule);border-radius:6px;padding:7px;background:var(--paper);color:var(--ink);font:inherit;font-size:.8rem}
-.rig-viewer .rig-focus{border:1px solid var(--rule);margin-top:8px;color:var(--accent-ink);font-size:.75rem;width:100%;min-height:36px}
-.rig-part-heading{display:flex;flex-wrap:wrap;align-items:center;gap:7px 12px;font-size:.9rem}
-.rig-part-heading span{font-family:var(--font-mono);font-size:.64rem;letter-spacing:.05em;text-transform:uppercase;color:var(--accent-ink);padding:2px 7px;background:var(--accent-soft);border-radius:4px}
-.rig-part-detail p{font-size:.8rem;line-height:1.6;margin:8px 0 0;color:var(--ink-soft)}
-.rig-part-size{font-family:var(--font-mono);font-size:.76rem;font-variant-numeric:tabular-nums;font-weight:500;margin-top:10px;color:var(--measure-ink)}
-.rig-part-detail .rig-part-note{font-size:.72rem;color:var(--ink-soft)}
-.rig-signal-path{border-top:1px solid var(--rule);background:var(--paper-sunken);display:flex;flex-wrap:wrap;justify-content:center;gap:6px 9px;padding:12px 14px;font-family:var(--font-mono);font-size:.64rem;letter-spacing:.03em;color:var(--ink-soft)}
-.rig-signal-path span:nth-child(2n){color:var(--accent)}
-.rig-fallback{height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;color:var(--ink-soft);padding:45px 20px 30px}
-.rig-fallback svg{width:100%;max-height:310px;flex:1;min-height:0}
-.rig-fallback p{font-size:.78rem;text-align:center;max-width:380px;margin:8px 0 0}
-.rig-fallback p+p{font-size:.72rem}
-.rig-assembly{padding:20px 22px;background:var(--paper-sunken);border:1px solid var(--rule);border-radius:var(--radius)}
-.rig-assembly p{font-size:.9rem;line-height:1.75}
-.rig-assembly p+p{margin-top:12px}
-.rig-dimensions table{min-width:600px}
+/* ---------------------------------------------------------------------------
+   The 3D viewer (/rig) and the pieces of it the /prototype simulator reuses.
+--------------------------------------------------------------------------- */
+.rig-viewer {
+  border: 1px solid var(--rule);
+  border-radius: 1rem;
+  background: var(--paper-raised);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  isolation: isolate;
+}
+.rig-viewer button {
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 500;
+  line-height: 1.3;
+  min-height: 2.25rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 0.5rem;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+}
+.rig-viewer button:hover:not(:disabled) {
+  background: var(--paper-sunken);
+  color: var(--ink);
+}
+.rig-viewer button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.rig-viewer button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* --- stage --- */
+.rig-stage {
+  position: relative;
+  height: 30rem;
+  background: var(--paper-sunken);
+  overflow: hidden;
+}
+@media (min-width: 80rem) {
+  .rig-stage {
+    height: 34rem;
+  }
+}
+@media (max-width: 40rem) {
+  .rig-stage {
+    height: 26rem;
+  }
+}
+.rig-stage canvas {
+  display: block;
+  touch-action: none;
+  outline: none;
+}
+.rig-view-presets {
+  position: absolute;
+  bottom: 0.9rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 3px;
+  padding: 3px;
+  border: 1px solid var(--rule);
+  border-radius: 0.6rem;
+  background: var(--paper-raised);
+  box-shadow: var(--shadow-md);
+}
+.rig-view-presets button[aria-pressed='true'] {
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+}
+
+/* --- controls --- */
+.rig-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem 1rem;
+  padding: 0.75rem 0.9rem;
+  border-top: 1px solid var(--rule);
+}
+.rig-segmented,
+.rig-toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+.rig-segmented {
+  padding: 3px;
+  border: 1px solid var(--rule);
+  border-radius: 0.6rem;
+  background: var(--paper-sunken);
+}
+.rig-segmented button[aria-pressed='true'] {
+  background: var(--paper-raised);
+  color: var(--accent-ink);
+  box-shadow: var(--shadow-sm);
+}
+/* On/off chips: a dot that fills in when the layer is showing. */
+.rig-toggles button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: 1px solid var(--rule);
+}
+.rig-toggles button::before {
+  content: '';
+  width: 0.5rem;
+  height: 0.5rem;
+  border: 1.5px solid var(--ink-faint);
+  border-radius: 50%;
+}
+.rig-toggles button[aria-pressed='true'] {
+  border-color: color-mix(in oklch, var(--measure) 55%, var(--rule));
+  background: var(--measure-soft);
+  color: var(--measure-ink);
+}
+.rig-toggles button[aria-pressed='true']::before {
+  border-color: var(--measure);
+  background: var(--measure);
+}
+
+/* --- the legend: one numbered chip per part --- */
+.rig-parts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  padding: 0.8rem 0.9rem;
+  border-top: 1px solid var(--rule);
+  background: var(--paper-sunken);
+}
+.rig-parts button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.3rem 0.7rem 0.3rem 0.3rem;
+  border: 1px solid var(--rule);
+  border-radius: 2rem;
+  background: var(--paper-raised);
+  color: var(--ink);
+}
+.rig-parts button[aria-pressed='true'] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+}
+.rig-number {
+  display: inline-grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  flex: none;
+  border: 1.5px solid var(--accent);
+  border-radius: 50%;
+  background: var(--paper-raised);
+  color: var(--accent-ink);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1;
+}
+[aria-pressed='true'] > .rig-number,
+.rig-part-heading .rig-number {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.rig-part-detail {
+  padding: 0.9rem 1rem 0.2rem;
+  border-top: 1px solid var(--rule);
+}
+.rig-part-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.6rem;
+  font-size: 1rem;
+}
+.rig-node {
+  padding: 0.1rem 0.45rem;
+  border-radius: 0.35rem;
+  background: var(--measure-soft);
+  color: var(--measure-ink);
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.rig-part-detail p {
+  margin: 0.4rem 0 0;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--ink);
+}
+.rig-part-detail .rig-part-size {
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  color: var(--measure-ink);
+}
+.rig-part-detail .rig-part-note {
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+}
+.rig-viewer .rig-help {
+  margin: 0.7rem 1rem 0.9rem;
+  font-size: 0.76rem;
+  line-height: 1.5;
+  color: var(--ink-faint);
+}
+
+/* --- fallback drawing: before JavaScript, or without WebGL --- */
+.rig-fallback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 2.5rem 1.25rem 1.75rem;
+  color: var(--ink-soft);
+}
+.rig-fallback svg {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  max-height: 19rem;
+}
+.rig-fallback p {
+  max-width: 24rem;
+  margin: 0.5rem 0 0;
+  font-size: 0.78rem;
+  text-align: center;
+}
+.rig-fallback p + p {
+  font-size: 0.72rem;
+}
+
+/* --- the written description and the dimension table, kept for anyone who
+       cannot use the model or the drawings --- */
+.rig-assembly p {
+  font-size: 0.92rem;
+  line-height: 1.7;
+}
+.rig-assembly p + p {
+  margin-top: 0.75rem;
+}
 /* The table is wider than a phone and scrolls sideways; the caption must not
    scroll away with it, so it is capped to the visible width of the box. */
-.rig-dimensions{container-type:inline-size}
-.rig-dimensions caption{text-align:left;font-size:.78rem;line-height:1.5;color:var(--ink-soft);padding:12px 15px;max-width:100cqw;box-sizing:border-box;caption-side:top}
-.prose .rig-dimensions th[scope=row]{font-size:.82rem;font-weight:600;line-height:1.6;width:22%;text-align:left;vertical-align:top;padding:16px 14px 16px 15px;border-bottom:1px solid var(--rule)}
-.prose .rig-dimensions td{font-size:.79rem;line-height:1.65;padding-top:16px;padding-bottom:16px}
-.rig-dimensions td:nth-child(2){width:24%;font-variant-numeric:tabular-nums}
-.rig-dimensions td p{margin:7px 0}
-.rig-confidence{font-family:var(--font-mono);font-size:.62rem;letter-spacing:.06em;text-transform:uppercase;display:inline-block;border:1px solid var(--rule);border-radius:4px;padding:1px 6px;background:var(--paper-sunken);color:var(--ink-soft)}
-.rig-confidence.rig-estimate{background:var(--caution-wash);color:var(--caution-ink);border-color:color-mix(in oklch,var(--caution) 45%,transparent)}
-.rig-assumptions{font-size:.9rem}.rig-assumptions p+p{margin-top:12px}
-@media(min-width:1280px){.rig-stage{height:540px}}
-@media(max-width:600px){.rig-stage{height:440px}.rig-inspector{grid-template-columns:1fr;gap:15px}.rig-toolbar{padding:11px}.rig-stage-caption{left:16px;top:16px}.rig-options{padding-left:16px;gap:10px 16px}.rig-inspector{padding:16px}.rig-viewer .rig-help{margin-left:16px;margin-right:16px}.rig-signal-path{font-size:.62rem}.rig-part-picker select{max-width:none}}
-@media(pointer:coarse){.rig-viewer button{min-height:2.75rem}.rig-options label{min-height:2.5rem}.rig-options input{width:18px;height:18px}.rig-part-picker select{min-height:2.75rem}.rig-viewer .rig-focus{min-height:2.75rem}}
-@media(prefers-reduced-motion:reduce){.rig-viewer button{transition:none}}
+.rig-dimensions {
+  container-type: inline-size;
+}
+.rig-dimensions table {
+  min-width: 600px;
+}
+.rig-dimensions caption {
+  max-width: 100cqw;
+  box-sizing: border-box;
+  padding: 12px 15px;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  text-align: left;
+  color: var(--ink-soft);
+  caption-side: top;
+}
+.prose .rig-dimensions th[scope='row'] {
+  width: 22%;
+  padding: 16px 14px 16px 15px;
+  border-bottom: 1px solid var(--rule);
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.6;
+  text-align: left;
+  vertical-align: top;
+}
+.prose .rig-dimensions td {
+  padding-top: 16px;
+  padding-bottom: 16px;
+  font-size: 0.79rem;
+  line-height: 1.65;
+}
+.rig-dimensions td:nth-child(2) {
+  width: 24%;
+  font-variant-numeric: tabular-nums;
+}
+.rig-dimensions td p {
+  margin: 7px 0;
+}
+.rig-confidence {
+  display: inline-block;
+  padding: 1px 6px;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  background: var(--paper-sunken);
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.rig-confidence.rig-estimate {
+  border-color: color-mix(in oklch, var(--caution) 45%, transparent);
+  background: var(--caution-wash);
+  color: var(--caution-ink);
+}
+.rig-more {
+  font-size: 0.9rem;
+}
+.rig-more > :not(summary) + * {
+  margin-top: 0.75rem;
+}
+.prose .rig-more + .rig-more {
+  margin-top: 0.6rem;
+}
+
+@media (pointer: coarse) {
+  .rig-viewer button {
+    min-height: 2.75rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rig-viewer button {
+    transition: none;
+  }
+}

@@ -1,52 +1,77 @@
-// One dimension source for the model and the page. All values are millimetres.
+// One dimension source for the 3D model, the drawings and the table. Millimetres.
 // Supplier footprints are reference variants, not measurements of our hardware.
+//
+// Heights are measured up from the bench. The stack, bottom to top:
+//   0–6 feet · 6–12 base plate · 12–42 fixed spacer · 42–54.7 load cell ·
+//   54.7–66 riser · 66–70 platform · 70–82 plate (eating surface at 73).
 export const DIM = {
   base: { width: 250, depth: 240, height: 32, bottom: 6 },
   plate: { diameter: 180, height: 12, bottom: 70, surface: 73, z: -15 },
   platform: { diameter: 130, height: 4, y: 68 },
-  cell: { length: 47, width: 12, height: 6, y: 45 },
+  // 3 kg YZC-131 (decision D13). `bottom` is the top of the spacer its fixed end
+  // is screwed to; `mount` is how far each mounting block sits from the centre.
+  cell: { length: 75, width: 12.7, height: 12.7, bottom: 42, mount: 28 },
   devkit: { length: 51.5, width: 28.5, pcb: 1.6 },
   wroom: { length: 25.5, width: 18, height: 3.1 },
   hx711: { length: 30.48, width: 22.86, pcb: 1.6 },
   oled: { width: 29.2, length: 26.7, height: 6.2 },
   button: { width: 6, height: 4.3 },
   buzzer: { diameter: 11.9, height: 6.53 },
-  camera: { length: 40.5, width: 27, height: 4.5, y: 334, lensBottom: 322 },
-  ring: { outer: 36.8, inner: 23.3, height: 6.7, count: 12 },
-  arm: { section: 20, top: 350, postLength: 302, reach: 112 },
+  camera: { length: 40.5, width: 27, height: 4.5, y: 405, lensBottom: 393 },
+  // Six white 5 mm LEDs on a carrier around the lens, behind a diffuser (D12).
+  light: { count: 6, led: 5, ledLength: 8.6, circle: 44, carrier: 62, diffuser: 70, y: 400 },
+  arm: { section: 20, top: 420, postLength: 372, reach: 112 },
 } as const;
 
+/** Lens face to the plate's eating surface. */
+export const CLEARANCE = DIM.camera.lensBottom - DIM.plate.surface;
+
+/**
+ * The OV2640's stock lens. Vendors quote 65–68° without saying which angle that
+ * is; the drawings take the cautious reading, 66° across the DIAGONAL of the
+ * 4:3 frame, which gives the smaller picture. Measure it when the camera arrives.
+ */
+export const LENS = { quotedDeg: 66, aspect: [4, 3] as const };
+
+/** The frame's footprint on a plane `distance` mm from the lens: [long, short]. */
+export function frameAt(distance: number): [number, number] {
+  const halfDiagonal = distance * Math.tan(((LENS.quotedDeg / 2) * Math.PI) / 180);
+  const [w, h] = LENS.aspect;
+  const diagonal = Math.hypot(w, h);
+  return [(2 * halfDiagonal * w) / diagonal, (2 * halfDiagonal * h) / diagonal];
+}
+
 export const PARTS = [
-  { id: 'plate', name: 'Plate & platform', size: 'Ø180 × 12 mm', node: 'Measured mass',
-    description: 'The plate rests on a separate platform. Its only load path is through the moving end of the load cell; the camera arm attaches to the stationary base.',
-    detail: 'Proposed plate size. Tare the empty plate, add food, then capture the net mass.' },
-  { id: 'cell', name: '1 kg load cell', size: '47 × 12 × 6 mm', node: 'Node A',
-    description: 'A TAL221 straight-bar reference. The left end is fixed to the base; the right end supports the platform. The thin centre section flexes under the load.',
-    detail: 'Supplier drawing, 1000 g variant. Deflection is too small to show at this scale and is not exaggerated.' },
+  { id: 'plate', name: 'Plate & platform', size: 'Ø180 × 12 mm plate · Ø130 platform', node: 'Measured mass',
+    description: 'The plate rests on a platform that touches nothing but the load cell.',
+    detail: 'Proposed sizes. Tare the empty plate, add the food, then capture.' },
+  { id: 'cell', name: '3 kg load cell', size: '75 × 12.7 × 12.7 mm · seller listing', node: 'Node A',
+    description: 'One end is screwed to the base, the other carries the platform. The thin middle bends.',
+    detail: 'YZC-131. The size is from seller listings, not a datasheet: measure the bar that arrives.' },
   { id: 'devkit', name: 'ESP32 DevKit V1', size: '51.5 × 28.5 mm · estimated board', node: 'Node A',
-    description: 'The scale controller reads the HX711, drives the OLED and buttons, then sends the measured grams to the camera over ESP-NOW.',
-    detail: '30-pin outline estimated around the documented 18 × 25.5 × 3.1 mm WROOM-32 module. Confirm the supplied board before fabricating.' },
+    description: 'Reads the HX711, runs the display and buttons, sends the grams over ESP-NOW.',
+    detail: 'Outline estimated around the documented WROOM-32 module. Check the board that arrives.' },
   { id: 'hx711', name: 'HX711 amplifier', size: '30.48 × 22.86 mm', node: 'Node A',
-    description: 'Converts the load cell’s tiny bridge signal into a digital weight reading. Four coloured wires show the load-cell connection.',
-    detail: 'SparkFun v1.1 PCB footprint. The actual generic breakout may differ.' },
+    description: 'Turns the load cell’s few millivolts into a 24-bit number. Powered from the DevKit’s 3V3 pin.',
+    detail: 'SparkFun v1.1 footprint. Generic boards differ.' },
   { id: 'oled', name: 'OLED display', size: '29.2 × 26.7 × 6.2 mm', node: 'Node A',
-    description: 'The SSD1306 128 × 64 display shows the live mass. The model displays an illustrative 143.2 g; it is not connected to a sensor.',
-    detail: 'Adafruit #326 reference module. Display artwork is schematic.' },
-  { id: 'buttons', name: 'Tare & capture', size: '6 × 6 × 4.3 mm each', node: 'Node A',
-    description: 'Two tactile switches sit under the front-panel caps. Tare establishes the empty-plate zero; capture records the loaded plate.',
-    detail: 'Omron B3F-1000 reference switches; the 12 mm caps are enclosure design estimates.' },
-  { id: 'buzzer', name: 'Passive buzzer', size: 'Ø11.9 × 6.53 mm', node: 'Node A',
-    description: 'Gives short audible feedback for tare, capture and errors. In hardware it is driven through a transistor.',
-    detail: 'Adafruit #160 passive piezo reference. Model is silent.' },
+    description: 'Shows the live mass. The reading drawn here is a sample, not a sensor.',
+    detail: 'Adafruit #326 reference module.' },
+  { id: 'buttons', name: 'Tare & photo', size: '6 × 6 × 4.3 mm each', node: 'Node A',
+    description: 'Tare zeroes the empty plate. Photo starts a capture.',
+    detail: 'Omron B3F-1000 reference switches; the caps are a design estimate.' },
+  { id: 'buzzer', name: 'Buzzer', size: 'Ø11.9 × 6.53 mm', node: 'Node A',
+    description: 'A short beep for tare, capture and errors.',
+    detail: 'Adafruit #160 reference. Driven through a transistor, with a diode across it.' },
   { id: 'camera', name: 'ESP32-CAM', size: '27 × 40.5 × 4.5 mm board', node: 'Node B',
-    description: 'The AI-Thinker board holds an OV2640 camera facing vertically down at the centre of the plate. It receives grams over ESP-NOW and uploads a JPEG plus grams over Wi-Fi.',
-    detail: 'AI-Thinker board dimensions. Lens barrel Ø8 × 10 mm is an estimate; the datasheet does not specify the complete optical assembly.' },
-  { id: 'ring', name: '12-pixel light ring', size: 'Ø36.8 / Ø23.3 × 6.7 mm', node: 'Node B',
-    description: 'A WS2812B-compatible ring surrounds the lens with a clear centre opening. Its LEDs face the food to give more consistent illumination.',
-    detail: 'Adafruit #1643 mechanical reference; suppliers may use WS2812B or compatible SK6812 pixels.' },
-  { id: 'arm', name: 'Fixed camera arm', size: '20 mm section · 350 mm overall rig', node: 'Stationary structure',
-    description: 'The upright mounts to the base, not the weighing platform. The cantilever centres the camera over the plate without loading the sensor.',
-    detail: 'Proposed geometry. Lens-to-plate surface distance is 249 mm. Stiffness and field of view still need bench verification.' },
+    description: 'Looks straight down at the plate. Receives the grams, takes one JPEG, uploads both.',
+    detail: 'AI-Thinker board dimensions. The lens barrel is an estimate; refocus it for this height.' },
+  { id: 'light', name: 'Six white LEDs', size: '6 × Ø5 mm · Ø62 carrier · Ø70 diffuser', node: 'Node B',
+    description: 'Plain white LEDs around the lens, behind a diffuser, switched by one transistor.',
+    detail: 'The LEDs are standard 5 mm parts; the carrier and diffuser are a design proposal.' },
+  { id: 'arm', name: 'Camera arm', size: '20 mm section · 420 mm overall', node: 'Structure',
+    description: 'Stands on the base, not on the platform, so it never loads the scale.',
+    detail: `Proposed geometry. The lens sits ${CLEARANCE} mm above the plate. Stiffness and framing need a bench test.` },
 ] as const;
 export type PartId = typeof PARTS[number]['id'];
 
@@ -57,9 +82,9 @@ export const FOOTPRINTS = [
   { part: 'HX711 breakout', dimensions: 'PCB 30.48 × 22.86; 1.6 thickness estimate', confidence: 'High footprint',
     basis: 'Derived from layer 20 board outline in SparkFun v1.1 Eagle CAD. Selected reference variant; not every HX711 board has this outline.',
     source: 'SparkFun v1.1 board CAD', href: 'https://github.com/sparkfun/HX711-Load-Cell-Amplifier/blob/V_1.1/hardware/SparkFun_HX711_Load_Cell.brd' },
-  { part: 'TAL221 load cell, 1 kg', dimensions: '47 × 12 × 6', confidence: 'High',
-    basis: 'Mechanical drawing and 1000 g capacity column. M3 fixed end, Ø3.2 clearance holes at the loaded end; 40 mm longitudinal hole spacing.',
-    source: 'HT Sensor TAL221 drawing', href: 'https://cdn.sparkfun.com/assets/9/9/a/f/3/TAL221.pdf' },
+  { part: 'YZC-131 load cell, 3 kg', dimensions: '75 × 12.7 × 12.7', confidence: 'Estimate',
+    basis: 'Seller listings give 75 to 80 mm long with M4 threads. The shop page we buy from states no dimensions, and no datasheet was found. Measure the bar before drilling anything.',
+    source: 'Didactico product page', href: 'https://didactico.tn/produit/capteur-de-pesage-3kg-yzc-131/' },
   { part: 'SSD1306 128 × 64 OLED', dimensions: '29.2 × 26.7 × 6.2', confidence: 'High reference',
     basis: 'Adafruit #326 PCB envelope; glass 26.6 × 19. Selected module variant. Header pins omitted from the envelope.',
     source: 'Adafruit #326 technical details', href: 'https://www.adafruit.com/product/326' },
@@ -72,13 +97,13 @@ export const FOOTPRINTS = [
   { part: 'AI-Thinker ESP32-CAM / OV2640', dimensions: 'Board 27 × 40.5 × 4.5 (±0.2); lens Ø8 × 10 estimate', confidence: 'Mixed',
     basis: 'AI-Thinker board specification, mirrored by Components101. Lens, sensor carrier and connector details are illustrative estimates.',
     source: 'AI-Thinker ESP32-CAM datasheet', href: 'https://components101.com/sites/default/files/component_datasheet/ESP32-CAM_datasheet.pdf' },
-  { part: 'WS2812B-compatible 12-pixel ring', dimensions: 'Ø36.8 outer / Ø23.3 inner × 6.7', confidence: 'High reference',
-    basis: 'Adafruit #1643 mechanical envelope; a ring may ship with WS2812B or compatible SK6812 LEDs. Drawing uses twelve 5 mm pixel packages.',
-    source: 'Adafruit #1643 technical details', href: 'https://www.adafruit.com/product/1643' },
+  { part: 'Six white LEDs, carrier and diffuser', dimensions: 'LEDs Ø5 × 8.6; carrier Ø62; diffuser Ø70', confidence: 'Estimate',
+    basis: 'The LEDs are the standard 5 mm round package. The carrier, the 44 mm LED circle and the diffuser are proposed geometry, to be cut from perfboard and tracing paper or frosted acrylic.',
+    source: 'Project design decision D12', href: '#assembly-assumptions' },
   { part: 'Plate & weighing platform', dimensions: 'Plate Ø180 × 12; platform Ø130 × 4', confidence: 'Estimate',
-    basis: 'Proposed geometry, not a purchased part. Plate eating surface is 73 mm above the bench; rim is 82 mm. Only the sensor supports the platform.',
+    basis: 'Proposed geometry, not a purchased part. Plate eating surface is 73 mm above the bench; rim is 82 mm. Only the load cell supports the platform.',
     source: 'Project design decision D10', href: '#assembly-assumptions' },
-  { part: 'Base, arm & mounting hardware', dimensions: 'Base 250 × 240 × 32 on 6 mm feet; rig 350 high', confidence: 'Estimate',
-    basis: '20 mm arm section; 302 mm upright; 112 mm horizontal member. Lens at 322 mm gives 249 mm clearance above the plate surface. Brackets, cables, screw heads, component placement and finishes are design estimates.',
-    source: 'Project design decision D10', href: '#assembly-assumptions' },
+  { part: 'Base, arm & mounting hardware', dimensions: 'Base 250 × 240 × 32 on 6 mm feet; rig 420 high', confidence: 'Estimate',
+    basis: `20 mm arm section; 372 mm upright; 112 mm horizontal member. Lens at 393 mm gives ${CLEARANCE} mm above the plate surface. Spacers, stop screw, brackets, cables, screw heads, component placement and finishes are design estimates.`,
+    source: 'Project design decisions D10, D12, D13', href: '#assembly-assumptions' },
 ] as const;

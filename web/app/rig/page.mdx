@@ -1,38 +1,48 @@
 import RigViewer from '@/components/rig/RigViewer';
 import { DimensionTable } from '@/components/rig/DimensionTable';
+import { RigDrawings } from '@/components/rig/Drawings';
 
 export const metadata = {
   title: 'The rig in 3D',
-  description: 'Explore the Smart Food Scale assembly at real geometric scale, with sourced component footprints and clearly marked design estimates.',
+  description:
+    'The Smart Food Scale as a 3D model and four drawings: every part numbered, the load path, and what the camera sees. To scale, with estimates marked.',
 };
 
-# The rig, in scale
+# The rig
 
-A plate on a load cell. A camera looking straight down. Explore how the two nodes fit together, from the measured mass to the photograph.
+A plate on a load cell, a camera looking straight down. Turn it, take it apart, pick a number.
 
 <RigViewer />
 
-**Real geometric scale, proposed assembly.** Component footprints come from the sources below. The enclosure, mounting arrangement and plate are design estimates: no hardware has been measured and no manufacturing CAD exists. Orbiting and zooming change the view, not the proportions. This is not a life-size calibration of your screen.
+## Four drawings
 
-## How the assembly works
+<RigDrawings />
 
-<div className="rig-assembly" id="rig-assembly-description">
-  <p>The <strong>plate and circular platform</strong> sit above a horizontal straight-bar load cell. One end of the bar is bolted to the stationary base; the opposite end connects upward to the platform. A clearance gap keeps the plate and platform off the enclosure, so the food’s weight passes through the sensor.</p>
-  <p>Inside the base, the <strong>HX711 amplifier</strong> reads the load cell and sends its digital value to the <strong>ESP32 DevKit V1</strong>. The front panel carries an <strong>SSD1306 OLED</strong> and separate tare and capture switches. A passive buzzer provides feedback. Tare the empty plate, add food, then capture the net mass.</p>
-  <p>A separate <strong>fixed arm</strong> rises from the base behind the plate. At its tip, the <strong>AI-Thinker ESP32-CAM and OV2640 lens</strong> point vertically down at the plate’s centre. Twelve pixels in the <strong>WS2812B-compatible ring</strong> face the food around the lens. The arm’s weight is supported by the base, not by the weighing platform.</p>
-  <p><strong>Node A sends grams to Node B over ESP-NOW</strong>, without a router between the boards. Node B pairs those grams with a JPEG and uploads both to the backend over Wi-Fi. No direct phone connection or router hardware is part of this model.</p>
-</div>
+## In words
 
-## Dimensions & provenance
+{/* The text version of everything above: for a screen reader, for print, and for
+    anyone whose browser cannot draw the model. scripts/check-rig.mjs requires the
+    description, the dimension table and its source links to be in the served HTML. */}
 
-High confidence means a published dimension for the **selected reference part**, not a measurement of the unit we will receive. Generic breakouts and DevKit clones vary. Mixed rows combine sourced dimensions with estimates; every enclosure dimension is an estimate.
+<details className="rig-more">
+  <summary>The assembly, described</summary>
+  <div className="rig-assembly" id="rig-assembly-description">
+    <p>The <strong>plate</strong> sits on a round platform. The platform is screwed to a riser on the free end of a <strong>3 kg bar load cell</strong>; the cell’s other end is screwed to a spacer on the base. Nothing else touches the platform, so all of the weight passes through the cell. A stop screw under the free end stands 1 mm short of it, so a hand on the platform cannot over-bend the cell.</p>
+    <p>Inside the base, an <strong>HX711 amplifier</strong> reads the cell and hands a number to the <strong>ESP32 DevKit V1</strong>. The front edge carries the <strong>OLED display</strong> and two buttons, tare and photo. A buzzer confirms each press. Tare the empty plate, add the food, then press photo.</p>
+    <p>An <strong>arm</strong> stands on the base behind the plate and reaches over it. At its tip an <strong>ESP32-CAM</strong> looks straight down, 320 mm above the plate, with <strong>six white LEDs</strong> around the lens behind a diffuser. The base carries the arm; the platform never does.</p>
+    <p>The DevKit sends the grams to the camera board over ESP-NOW, with no router between them. The camera board uploads the photo and the grams over Wi-Fi.</p>
+  </div>
+</details>
 
-<DimensionTable />
+<details className="rig-more">
+  <summary>Every dimension, and where it comes from</summary>
+  <DimensionTable />
+</details>
 
-<details className="rig-assumptions" id="assembly-assumptions">
-  <summary>Assembly assumptions and modelling limits</summary>
-  <p>The scene is authored in millimetres, converted once so one Three.js world unit equals one metre. The 250 × 240 mm base accommodates a Ø180 mm plate, a front control strip, a rear arm and separate electronics. A 350 mm overall height leaves 249 mm from the estimated lens face to the plate’s eating surface.</p>
-  <p>The 20 mm arm section, platform, fasteners, enclosure walls, small board details, cables and material finishes are proposed geometry. They are not a fabrication specification. The exact board revisions, plate mass, sensor mounting, arm stiffness and camera field of view must be checked when hardware arrives. The light is illustrative; it is not a calibrated photometric or lens simulation.</p>
-  <p>Exploded mode separates the assemblies vertically and moves the two base boards outward without scaling any part. Its extra spacing is illustrative, not a dimension to manufacture. The platform is attached only at the moving end of the cell; strain and deflection are not exaggerated.</p>
-  <p>Decisions D9–D11 are recorded in the repository’s <code>docs/decisions.md</code>. The current <a href="/project/wiring">wiring page</a> is the electrical reference; this viewer does not certify wiring or power design.</p>
+<details className="rig-more" id="assembly-assumptions">
+  <summary>What is assumed</summary>
+  <p>The model is drawn in millimetres at one scale. No part is enlarged to make it easier to see. Turning and zooming change the view, not the proportions.</p>
+  <p>The base, platform, arm, spacers, stop screw, LED carrier and diffuser are <strong>proposals</strong>, sized to fit the electronics and make the load path clear. They are not a fabrication drawing, and no hardware has been measured. The load cell’s size is a seller’s figure, not a datasheet’s.</p>
+  <p>The exploded view moves parts apart without resizing them; its gaps are not dimensions. The light in the model is an illustration, not a lighting simulation. The camera’s field of view is worked out from a quoted 66°; measure it on the real lens.</p>
+  <p>The reasoning is in decisions D10 to D13 of the repository’s <code>docs/decisions.md</code>. For the electrical side, see the <a href="/project/wiring">wiring page</a>.</p>
 </details>

@@ -41,7 +41,7 @@ for (const file of htmlFiles) {
   rows.push({ route, 'initial JS (KiB)': (bytes / 1024).toFixed(1), 'renderer in initial JS': 'no', HTTP: response.status });
   if (route === '/rig') {
     assert(body.includes('rig-assembly-description'), 'Missing server-rendered assembly equivalent');
-    assert(body.includes('47 × 12 × 6') && body.includes('Estimate'), 'Missing dimensions/estimate labels');
+    assert(body.includes('75 × 12.7 × 12.7') && body.includes('Estimate'), 'Missing dimensions/estimate labels');
     assert(body.includes('components101.com') && body.includes('omronfs.omron.com'), 'Missing source links');
   }
 }

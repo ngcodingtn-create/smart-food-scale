@@ -1,0 +1,218 @@
+/* ---------------------------------------------------------------------------
+   Diagrams. The Architecture and Rig pages explain with drawings, not prose,
+   so the drawings share one hand: the palette below, on any <svg class="fig">.
+
+   Drawings are authored about 360 units wide and shown at roughly that many
+   pixels — one per column on a wide screen, full width on a phone — so their
+   10–12 px labels stay readable everywhere without a separate mobile version.
+
+     .ln .ln-thin .ln-faint   outlines, heavy to light      .dash   make it dashed
+     .body .metal .wood .pcb  filled shapes                 .chip   solid dark
+     .hot / .hot-ln           the accent: force, action     .cool / .cool-ln  measurement
+     .dim                     a sourced dimension           .dim-est  a proposed one
+--------------------------------------------------------------------------- */
+.fig {
+  display: block;
+  width: 100%;
+  height: auto;
+  color: var(--ink);
+}
+.fig .ln,
+.fig .ln-thin,
+.fig .ln-faint,
+.fig .hot-ln,
+.fig .cool-ln,
+.fig .dim,
+.fig .dim-est {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.fig .ln {
+  stroke: currentColor;
+  stroke-width: 1.5;
+}
+.fig .ln-thin {
+  stroke: var(--ink-soft);
+  stroke-width: 1;
+}
+.fig .ln-faint {
+  stroke: var(--ink-faint);
+  stroke-width: 0.8;
+}
+.fig .dash {
+  stroke-dasharray: 4 3;
+}
+.fig .hot-ln {
+  stroke: var(--accent);
+  stroke-width: 1.8;
+}
+.fig .cool-ln {
+  stroke: var(--measure);
+  stroke-width: 1.5;
+}
+.fig .body,
+.fig .metal,
+.fig .wood,
+.fig .pcb {
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+.fig .body {
+  fill: var(--paper-raised);
+}
+.fig .metal {
+  fill: color-mix(in oklch, var(--ink) 14%, var(--paper-raised));
+}
+.fig .wood {
+  fill: var(--paper-sunken);
+}
+.fig .pcb {
+  fill: var(--measure-soft);
+  stroke: var(--measure);
+}
+.fig .chip {
+  fill: var(--ink);
+}
+.fig .hot {
+  fill: var(--accent);
+}
+.fig .cool {
+  fill: var(--measure);
+}
+.fig .glow {
+  fill: var(--accent-soft);
+}
+.fig .wash {
+  fill: var(--paper-sunken);
+}
+.fig .beam {
+  fill: color-mix(in oklch, var(--caution) 20%, transparent);
+}
+.fig .view {
+  fill: color-mix(in oklch, var(--measure) 12%, transparent);
+}
+.fig .ground {
+  stroke: var(--rule-strong);
+  stroke-width: 1.5;
+  fill: none;
+}
+.fig .dim {
+  stroke: var(--measure);
+  stroke-width: 1;
+}
+.fig .dim-est {
+  stroke: var(--caution);
+  stroke-width: 1;
+  stroke-dasharray: 3 2.5;
+}
+.fig text {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  fill: var(--ink-soft);
+}
+.fig .t-strong {
+  fill: var(--ink);
+  font-weight: 500;
+}
+.fig .t-title {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  fill: var(--ink);
+}
+.fig .t-dim {
+  fill: var(--measure-ink);
+}
+.fig .t-est {
+  fill: var(--caution-ink);
+}
+.fig .t-hot {
+  fill: var(--accent-ink);
+}
+.fig .t-small {
+  font-size: 8.5px;
+}
+/* A numbered badge: the same numbers the 3D model and its legend use. */
+.fig .num {
+  fill: var(--accent);
+}
+.fig .num-t {
+  fill: var(--on-accent);
+  font-size: 9px;
+  font-weight: 600;
+  text-anchor: middle;
+}
+
+/* --- figures on the page --------------------------------------------------- */
+.figure-grid {
+  display: grid;
+  gap: 0.9rem;
+  margin-top: 1.5rem;
+}
+@media (min-width: 48rem) {
+  .figure-grid {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+}
+.figure-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  margin: 0;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--paper-raised);
+  overflow: hidden;
+}
+/* Capped, so a single-column tablet layout does not blow a drawing up to twice
+   its size; centred when the card is wider than the cap. */
+.figure-card > .fig {
+  max-width: 27rem;
+  margin-inline: auto;
+  padding: 0.4rem;
+}
+.prose .figure-card figcaption {
+  margin: 0;
+  padding: 0.7rem 0.95rem 0.85rem;
+  border-top: 1px solid var(--rule);
+  font-size: 0.84rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+.figure-card figcaption strong {
+  display: block;
+  margin-bottom: 0.1rem;
+  font-family: var(--font-display);
+  font-size: 1.02rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+/* The key to the two kinds of dimension line. */
+.figure-key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.2rem;
+  margin-top: 0.8rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.03em;
+  color: var(--ink-soft);
+}
+.figure-key span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+.figure-key i {
+  width: 1.6rem;
+  border-top: 2px solid var(--measure);
+}
+.figure-key i[data-kind='est'] {
+  border-top: 2px dashed var(--caution);
+}
+.figure-key i[data-kind='force'] {
+  border-top: 2px solid var(--accent);
+}
