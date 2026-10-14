@@ -1,0 +1,496 @@
+// Node A, the scale.
+//
+// Reads the load cell through the HX711, shows the weight, and on PHOTO takes
+// twelve readings, keeps the median, and hands the grams to Node B over
+// ESP-NOW. Node B photographs the plate and posts both to the backend.
+//
+// The order that works on the bench (and that the /prototype page plays):
+//   1. Put the empty plate on. Press TARE: the display goes to zero.
+//   2. Put the food on. The display shows the food alone.
+//   3. Press PHOTO.
+//
+// Everything the board does is also printed on the serial line at 115200 baud,
+// one line per event, so the Workbench pages can read it. The format and the
+// commands it accepts are in ../README.md.
+
+#include <Arduino.h>
+#include <Preferences.h>
+#include <WiFi.h>
+#include <Wire.h>
+#include <esp_arduino_version.h>
+#include <esp_now.h>
+#include <esp_wifi.h>
+
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+#ifndef SIMULATE_SCALE
+#include <HX711.h>
+#endif
+
+#include "config.h"
+#include "pins.h"
+#include "sfs_protocol.h"
+
+// --- the reading -------------------------------------------------------------
+
+#ifndef SIMULATE_SCALE
+HX711 cell;
+#else
+float simGrams = 0;  // set from the console with `sim <grams>`
+#endif
+
+// The last readings, newest last. Raw counts straight from the converter.
+constexpr int kHistory = 16;
+long history[kHistory];
+int historyCount = 0;
+uint32_t readingsTaken = 0;  // ever, so a caller can wait for fresh ones
+
+long tareOffset = 0;
+bool tared = false;
+float countsPerGram = SFS_COUNTS_PER_GRAM;  // replaced by the saved value, if any
+bool overloaded = false;
+
+Preferences settings;
+
+bool calibrated() { return !isnan(countsPerGram) && countsPerGram > 0; }
+
+long medianOf(long *values, int count) {
+  // Insertion sort on a copy: twelve values, no need for anything cleverer.
+  long sorted[kHistory];
+  for (int i = 0; i < count; i++) {
+    long value = values[i];
+    int j = i;
+    while (j > 0 && sorted[j - 1] > value) {
+      sorted[j] = sorted[j - 1];
+      j--;
+    }
+    sorted[j] = value;
+  }
+  // An even count takes the mean of the middle two.
+  return count % 2 ? sorted[count / 2] : (sorted[count / 2 - 1] + sorted[count / 2]) / 2;
+}
+
+// The median of the newest `count` readings.
+long recentMedian(int count) {
+  count = min(count, historyCount);
+  long recent[kHistory];
+  for (int i = 0; i < count; i++) recent[i] = history[historyCount - count + i];
+  return medianOf(recent, count);
+}
+
+float toGrams(long raw) { return calibrated() ? (raw - tareOffset) / countsPerGram : NAN; }
+
+// One new reading if the converter has one ready. True when it did.
+bool readCell() {
+  long raw;
+#ifndef SIMULATE_SCALE
+  if (!cell.is_ready()) return false;
+  raw = cell.read();
+  // The HX711 pins its output at the ends of its range when overdriven.
+  overloaded = raw >= 0x7FFFFF || raw <= -0x800000;
+#else
+  static uint32_t last = 0;
+  if (millis() - last < 100) return false;  // the real converter's 10 per second
+  last = millis();
+  raw = config::kSimZeroCounts + lroundf(simGrams * config::kSimCountsPerGram) + random(-3, 4);
+  overloaded = false;
+#endif
+  if (historyCount == kHistory) {
+    memmove(history, history + 1, sizeof(long) * (kHistory - 1));
+    historyCount--;
+  }
+  history[historyCount++] = raw;
+  readingsTaken++;
+  return true;
+}
+
+// --- the link to Node B ------------------------------------------------------
+
+const uint8_t kBroadcast[6] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+
+uint8_t cameraMac[6];
+uint8_t cameraChannel = 0;  // 0: not found yet
+uint16_t nextSeq = 1;
+
+// Written by the radio's callback, read by the loop. The flag is set last.
+volatile bool inboxFull = false;
+sfs::Frame inbox;
+uint8_t inboxFrom[6];
+
+void onFrame(const uint8_t *from, const uint8_t *data, int length) {
+  if (length != sizeof(sfs::Frame) || inboxFull) return;
+  sfs::Frame frame;
+  memcpy(&frame, data, sizeof frame);
+  if (frame.magic != sfs::kMagic) return;
+  memcpy(inboxFrom, from, 6);
+  inbox = frame;
+  inboxFull = true;
+}
+
+// The callback's shape changed with version 3 of the ESP32 Arduino core.
+#if ESP_ARDUINO_VERSION_MAJOR >= 3
+void onReceive(const esp_now_recv_info_t *info, const uint8_t *data, int length) { onFrame(info->src_addr, data, length); }
+#else
+void onReceive(const uint8_t *mac, const uint8_t *data, int length) { onFrame(mac, data, length); }
+#endif
+
+void setChannel(uint8_t channel) {
+  esp_wifi_set_promiscuous(true);
+  esp_wifi_set_channel(channel, WIFI_SECOND_CHAN_NONE);
+  esp_wifi_set_promiscuous(false);
+}
+
+void addPeer(const uint8_t *mac) {
+  if (esp_now_is_peer_exist(mac)) esp_now_del_peer(mac);
+  esp_now_peer_info_t peer = {};
+  memcpy(peer.peer_addr, mac, 6);
+  peer.channel = 0;  // whatever channel the radio is on
+  peer.encrypt = false;
+  esp_now_add_peer(&peer);
+}
+
+void send(const uint8_t *to, sfs::Kind kind, uint16_t seq, float grams) {
+  sfs::Frame frame = {sfs::kMagic, kind, cameraChannel, seq, grams, 0};
+  esp_now_send(to, reinterpret_cast<const uint8_t *>(&frame), sizeof frame);
+}
+
+// Wait up to `ms` for a frame of this kind (and this seq, when one is given).
+bool await(sfs::Kind kind, uint16_t seq, uint32_t ms) {
+  uint32_t start = millis();
+  while (millis() - start < ms) {
+    if (inboxFull) {
+      bool match = inbox.kind == kind && (seq == 0 || inbox.seq == seq);
+      if (match) return true;  // left in the inbox for the caller to read
+      inboxFull = false;       // not what we wait for: drop it
+    }
+    readCell();  // keep the history fresh while waiting
+    delay(2);
+  }
+  return false;
+}
+
+String macText(const uint8_t *mac) {
+  char text[18];
+  snprintf(text, sizeof text, "%02X:%02X:%02X:%02X:%02X:%02X", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+  return text;
+}
+
+// Try each channel with a Hello until Node B answers. The last good channel first.
+bool findCamera() {
+  uint8_t saved = settings.getUChar("channel", 0);
+  for (int attempt = 0; attempt <= config::kLastChannel; attempt++) {
+    uint8_t channel = attempt == 0 ? saved : attempt;
+    if (channel == 0 || (attempt > 0 && channel == saved)) continue;
+    setChannel(channel);
+    inboxFull = false;
+    send(kBroadcast, sfs::Kind::Hello, 0, 0);
+    if (await(sfs::Kind::HelloAck, 0, config::kHelloWaitMs)) {
+      memcpy(cameraMac, inboxFrom, 6);
+      inboxFull = false;
+      cameraChannel = channel;
+      addPeer(cameraMac);
+      settings.putUChar("channel", channel);
+      Serial.printf("E link found ch=%u mac=%s\n", channel, macText(cameraMac).c_str());
+      return true;
+    }
+  }
+  cameraChannel = 0;
+  Serial.println("E link none");
+  return false;
+}
+
+// --- the front panel ---------------------------------------------------------
+
+Adafruit_SSD1306 oled(128, 64, &Wire, -1);
+bool hasDisplay = false;
+const char *note = "READY";
+
+void beep(uint16_t hz, uint16_t ms) {
+  tone(PIN_BUZZER, hz, ms);
+  delay(ms + 20);
+}
+
+void beepOk() { beep(config::kBeepHz, 60); }
+void beepTwice() {
+  beep(config::kBeepHz, 50);
+  beep(config::kBeepHz, 50);
+}
+void beepError() { beep(config::kErrorHz, 350); }
+
+void show() {
+  if (!hasDisplay) return;
+  oled.clearDisplay();
+  oled.setTextColor(SSD1306_WHITE);
+
+  // Top line: the link.
+  oled.setTextSize(1);
+  oled.setCursor(0, 0);
+  if (cameraChannel) oled.printf("CAMERA ch %u", cameraChannel);
+  else oled.print("CAMERA ?");
+
+  // The number.
+  oled.setCursor(0, 22);
+  if (overloaded) {
+    oled.setTextSize(2);
+    oled.print("OVERLOAD");
+  } else if (!calibrated()) {
+    oled.setTextSize(1);
+    oled.printf("raw %ld", historyCount ? recentMedian(config::kLiveSamples) : 0L);
+  } else {
+    float grams = historyCount ? toGrams(recentMedian(config::kLiveSamples)) : 0;
+    if (fabsf(grams) < 0.05f) grams = 0;  // no "-0.0"
+    oled.setTextSize(2);
+    oled.printf("%.1f g", grams);
+  }
+
+  // Bottom line: what the scale is doing.
+  oled.setTextSize(1);
+  oled.setCursor(0, 56);
+  oled.print(calibrated() ? note : "NOT CALIBRATED");
+  oled.display();
+}
+
+struct Button {
+  explicit Button(uint8_t pin) : pin(pin) {}
+  uint8_t pin;
+  bool down = false;
+  uint32_t changed = 0;
+  // True once per press, after 30 ms of steady contact.
+  bool pressed() {
+    bool now = digitalRead(pin) == LOW;
+    if (now != down && millis() - changed > 30) {
+      down = now;
+      changed = millis();
+      return down;
+    }
+    return false;
+  }
+};
+
+Button tareButton{PIN_BUTTON_TARE};
+Button captureButton{PIN_BUTTON_CAPTURE};
+
+// --- what the buttons do -----------------------------------------------------
+
+// Block until `count` readings newer than the call have arrived, then return their median.
+long freshMedian(int count) {
+  uint32_t from = readingsTaken;
+  uint32_t start = millis();
+  while (readingsTaken - from < (uint32_t)count) {
+    readCell();
+    if (millis() - start > 3000) break;  // the HX711 stopped answering
+    delay(1);
+  }
+  return recentMedian(min<int>(count, readingsTaken - from));
+}
+
+void tare() {
+  note = "TARING";
+  show();
+  tareOffset = freshMedian(config::kCaptureSamples);
+  tared = true;
+  note = "TARE OK";
+  Serial.printf("E tare offset=%ld\n", tareOffset);
+  beepOk();
+}
+
+void capture() {
+  if (!calibrated()) {
+    Serial.println("E error not-calibrated");
+    beepError();
+    return;
+  }
+  note = "WEIGHING";
+  show();
+  long raw = freshMedian(config::kCaptureSamples);
+  float grams = toGrams(raw);
+
+  // Print the samples behind the median, for anyone checking the arithmetic.
+  Serial.printf("E capture g=%.1f median=%ld samples=", grams, raw);
+  for (int i = historyCount - config::kCaptureSamples; i < historyCount; i++) {
+    Serial.printf(i + 1 < historyCount ? "%ld," : "%ld\n", history[max(i, 0)]);
+  }
+
+  // Over capacity in food alone is certainly too much. The plate's own mass is
+  // not counted here: the scale cannot know it without an empty-cell reference.
+  if (overloaded || grams > config::kCellCapacityG) {
+    note = "OVERLOAD";
+    Serial.println("E error overload");
+    beepError();
+    return;
+  }
+  if (!tared) {
+    // Allowed, but the plate is inside that number. Say so; do not refuse.
+    Serial.println("E warn not-tared");
+  }
+  if (grams < config::kMinMealG) {
+    note = "NOTHING ON IT";
+    Serial.println("E error too-light");
+    beepError();
+    return;
+  }
+
+  uint16_t seq = nextSeq++;
+  bool sent = false;
+  for (int round = 0; round < 2 && !sent; round++) {
+    if (!cameraChannel && !findCamera()) break;
+    for (int attempt = 0; attempt < config::kSendAttempts && !sent; attempt++) {
+      inboxFull = false;
+      send(cameraMac, sfs::Kind::Capture, seq, grams);
+      sent = await(sfs::Kind::CaptureAck, seq, config::kAckWaitMs);
+    }
+    if (!sent) {
+      // Node B moved channel (the hotspot did), or is off. Search once more.
+      Serial.println("E link lost");
+      cameraChannel = 0;
+    }
+  }
+  inboxFull = false;
+
+  Serial.printf("E sent seq=%u g=%.1f ok=%d\n", seq, grams, sent);
+  if (sent) {
+    note = "SENT";
+    beepTwice();
+  } else {
+    note = "NO CAMERA";
+    beepError();
+  }
+}
+
+// --- the serial console ------------------------------------------------------
+
+String line;
+
+void command(String text) {
+  text.trim();
+  if (text == "tare") tare();
+  else if (text == "capture") capture();
+  else if (text == "find") findCamera();
+  else if (text == "info") {
+    Serial.printf("E info fw=%s calibrated=%d cpg=%.6f tared=%d offset=%ld camera_ch=%u\n", SFS_FIRMWARE_VERSION,
+                  calibrated(), countsPerGram, tared, tareOffset, cameraChannel);
+  } else if (text == "cal clear") {
+    settings.remove("cpg");
+    countsPerGram = SFS_COUNTS_PER_GRAM;
+    Serial.println("E cal cleared");
+  } else if (text.startsWith("cal ")) {
+    float value = text.substring(4).toFloat();
+    if (value > 0) {
+      countsPerGram = value;
+      settings.putFloat("cpg", value);
+      Serial.printf("E cal cpg=%.6f\n", value);
+    } else {
+      Serial.println("E error cal-needs-a-positive-number");
+    }
+  }
+#ifdef SIMULATE_SCALE
+  else if (text.startsWith("sim ")) {
+    simGrams = text.substring(4).toFloat();
+    Serial.printf("E sim g=%.1f\n", simGrams);
+  }
+#endif
+  else if (text.length()) {
+    Serial.println("E help tare | capture | find | info | cal <counts per gram> | cal clear | sim <grams>");
+  }
+}
+
+void readConsole() {
+  while (Serial.available()) {
+    char c = Serial.read();
+    if (c == '\n' || c == '\r') {
+      if (line.length()) command(line);
+      line = "";
+    } else if (line.length() < 64) {
+      line += c;
+    }
+  }
+}
+
+// --- start and run -----------------------------------------------------------
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(PIN_BUTTON_TARE, INPUT_PULLUP);
+  pinMode(PIN_BUTTON_CAPTURE, INPUT_PULLUP);
+  pinMode(PIN_BUZZER, OUTPUT);
+  digitalWrite(PIN_BUZZER, LOW);
+
+  settings.begin("sfs-node-a", false);
+  if (settings.isKey("cpg")) countsPerGram = settings.getFloat("cpg", countsPerGram);
+#ifdef SIMULATE_SCALE
+  if (!calibrated()) countsPerGram = config::kSimCountsPerGram;
+#endif
+
+  Wire.begin(PIN_OLED_SDA, PIN_OLED_SCL);
+  hasDisplay = oled.begin(SSD1306_SWITCHCAPVCC, config::kOledAddress);
+  if (!hasDisplay) Serial.println("E error no-display");
+
+#ifndef SIMULATE_SCALE
+  cell.begin(PIN_HX711_DT, PIN_HX711_SCK);
+  cell.set_gain(128);  // channel A, gain 128
+#endif
+
+  WiFi.mode(WIFI_STA);
+  WiFi.disconnect();
+  if (esp_now_init() == ESP_OK) {
+    esp_now_register_recv_cb(onReceive);
+    addPeer(kBroadcast);
+  } else {
+    Serial.println("E error espnow-init");
+  }
+
+  Serial.printf("E boot fw=%s calibrated=%d cpg=%.6f%s\n", SFS_FIRMWARE_VERSION, calibrated(), countsPerGram,
+#ifdef SIMULATE_SCALE
+                " simulated=1"
+#else
+                ""
+#endif
+  );
+  note = "STARTING";
+  show();
+  findCamera();
+  note = "READY";
+  show();
+}
+
+void loop() {
+  static uint32_t lastShown = 0;
+
+  if (readCell()) {
+    long raw = history[historyCount - 1];
+    float grams = toGrams(recentMedian(config::kLiveSamples));
+    // Settled when the last few readings sit inside a narrow band.
+    bool stable = false;
+    if (calibrated() && historyCount >= config::kLiveSamples) {
+      float low = INFINITY, high = -INFINITY;
+      for (int i = historyCount - config::kLiveSamples; i < historyCount; i++) {
+        float g = toGrams(history[i]);
+        low = min(low, g);
+        high = max(high, g);
+      }
+      stable = high - low < config::kStableBandG;
+    }
+    Serial.printf("R raw=%ld net=%ld g=%.1f stable=%d\n", raw, raw - tareOffset, grams, stable);
+  }
+
+  if (tareButton.pressed()) tare();
+  if (captureButton.pressed()) capture();
+  readConsole();
+
+  // Node B reports how the upload went, some seconds after the capture.
+  if (inboxFull && inbox.kind == sfs::Kind::Result) {
+    static const char *names[] = {"saved", "queued", "failed"};
+    uint8_t outcome = min<uint8_t>(inbox.outcome, 2);
+    Serial.printf("E result seq=%u outcome=%s\n", inbox.seq, names[outcome]);
+    note = outcome == 0 ? "SAVED" : outcome == 1 ? "QUEUED" : "UPLOAD FAILED";
+    inboxFull = false;
+    if (outcome == 2) beepError();
+  } else if (inboxFull) {
+    inboxFull = false;  // a late ack, or a Hello from somewhere: nothing to do
+  }
+
+  if (millis() - lastShown > 150) {
+    show();
+    lastShown = millis();
+  }
+}
