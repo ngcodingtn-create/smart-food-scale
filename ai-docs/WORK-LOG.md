@@ -170,3 +170,31 @@ phone.
 - Verified: `tsc`, both sync checks, production build, `check:rig` on 19 routes, the
   old wiring address redirecting, no sideways scroll at 375 and desktop widths, both
   themes on "Wire it". Not verified: any of it against real boards.
+
+---
+
+## Session 4 — 14 October 2026 — Node A's firmware, flashing and the bench
+
+**Asked for:** "continue here". Picked up the next item the Workbench needed: firmware.
+
+- **Node A firmware** (`firmware/node-a-scale/src/main.cpp`, `include/config.h`):
+  HX711 at 10 per second, live median of 5, TARE, PHOTO as the median of 12, OLED,
+  buttons, buzzer, calibration saved on the board, and ESP-NOW to Node B with a channel
+  search, acks and retries. Prints one line per event for the site to read. Frames in
+  `firmware/shared/sfs_protocol.h`, for Node B to share.
+- **Compiled** with PlatformIO (core 2.0.17): both builds, clean, no warnings from our
+  code. **Ran in Wokwi** (core 3.x): boot, `link none`, 0.42 kg read as 176 counts and
+  419.0 g, TARE to 0.0 g, PHOTO 150.0 g from twelve readings of 239, `ok=0` (no camera).
+- `npm run sync:wiring` now also writes Node A's Wokwi sketch and diagram into
+  `web/public/workbench/wokwi/node-a/`; `/workbench/simulate` hands them over.
+- **`/workbench/flash`**: ESP Web Tools install buttons for both builds. Its npm entry
+  point fails under Turbopack (it imports Material Web internals that @material/web
+  2.5 ships as CSS), so the page loads the library's self-contained browser build.
+  Images from `firmware/tools/publish_web.py`, offsets taken from PlatformIO's own upload.
+- **`/workbench/bench`**: Web Serial console with the live reading, the four commands,
+  and a calibration fitted through zero and saved with `cal`. Practice mode runs a
+  pretend scale in the page; checked end to end there (fit 99.9985 against a true 100).
+- Verified: `tsc`, both sync checks, build, `check:rig` on 21 routes, no sideways
+  scroll at 375 px on the new pages. Not verified: anything on a real board.
+- `npm audit` reports issues in next, sharp and source-map-js that predate this work;
+  the flagged Next code path (`next/og`) is not used here. Not fixed.

@@ -20,7 +20,7 @@ Nothing is marked done unless it has been run. Newest work first.
 | Architecture (`/project/architecture`) | ✅ Rebuilt | A playable system map and three drawings |
 | 3D rig (`/rig`) | ✅ Rebuilt | 3 kg cell, six white LEDs, lens at 320 mm; four drawings computed from one dimension file |
 | Docs site | ✅ Live | 16 pages, static, on Vercel |
-| Firmware, Node A | 🚧 Started | Build config only |
+| Firmware, Node A | 🚧 Written | Compiles; runs in the Wokwi simulator; not on a board yet |
 | Firmware, Node B | 📋 Not started | — |
 | Mobile app | 📋 Not started | — |
 | Hardware | 📋 Not ordered | Waiting on the component request |

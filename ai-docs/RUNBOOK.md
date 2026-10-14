@@ -19,6 +19,14 @@ python -m venv .venv
 cd web
 npm ci
 npm run dev                                                   # http://localhost:3000
+
+# Firmware — PlatformIO, in its own venv. The first build downloads the ESP32
+# toolchain into ~/.platformio (several hundred MB, about five minutes).
+python -m venv firmware/.venv
+firmware/.venv/Scripts/python.exe -m pip install platformio
+cd firmware/node-a-scale
+../.venv/Scripts/pio.exe run                                  # both builds: node-a-scale, node-a-sim
+../.venv/Scripts/pio.exe run -e node-a-scale -t upload        # with a board on USB
 ```
 
 In the Claude desktop app, `.claude/launch.json` starts both: `web` (port 3000,
@@ -59,13 +67,25 @@ Run all of these before saying something works. Each has caught a real problem.
 cd web
 npx tsc --noEmit            # ignore errors under .next/ — see "Corrupt generated files"
 npm run sync:foods -- --check   # the simulator's food table matches the backend's
-npm run build               # every route must prerender: 16 pages plus the 404, as of D14
+npm run sync:wiring -- --check  # pins.h and the Wokwi files match wiring.ts and the firmware
+npm run build               # every route must prerender: 21 pages plus the 404, as of 14 Oct 2026
 npm run start -- -p 4317 &  # then, in the same shell:
 npm run check:rig -- http://127.0.0.1:4317   # every route 200 and has an <h1>; WebGL stays out of initial JS
 # stop the :4317 server afterwards
 
 cd ../backend
 .venv/Scripts/python.exe -m pytest   # 145 tests, offline
+
+cd ../firmware/node-a-scale
+../.venv/Scripts/pio.exe run         # both builds compile, no warnings from our code
+```
+
+**After changing the firmware or the wiring**, regenerate what the site serves, and
+commit it with the change:
+
+```bash
+cd web && npm run sync:wiring                                   # pins.h, and the Wokwi sketch and diagram
+cd .. && firmware/.venv/Scripts/python.exe firmware/tools/publish_web.py   # the images the Flash page installs
 ```
 
 `npm run lint` is only `tsc --noEmit`. Next 16 removed `next lint`, and ESLint is not

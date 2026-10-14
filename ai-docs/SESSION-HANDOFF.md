@@ -22,7 +22,8 @@ the rest is as it stood.
 | Architecture (`/project/architecture`) | **Rebuilt** as a playable system map and three drawings |
 | Rig (`/rig`) | **Rebuilt** on the current design, with four computed drawings |
 | Prototype (`/prototype`) | Done. Simulates the whole chain in the browser |
-| Firmware | `platformio.ini` for Node A only. Nothing else |
+| Firmware, Node A | **Written.** Compiles with PlatformIO (ESP32 core 2.0.17, no warnings) and runs in Wokwi (core 3.x). Never on a board: there is none |
+| Firmware, Node B | Not started. The frame format it must speak is in `firmware/shared/sfs_protocol.h` |
 | Mobile app | Not started. `web/components/sim/Phone.tsx` is the closest thing to a spec |
 | Hardware | Not ordered. Waiting on the component request |
 
@@ -32,10 +33,13 @@ In the order the project needs them:
 
 1. **Take the request sheet to the lab technician**, then order what the lab cannot
    lend. The sheet prints: open it, print, and check the result (see "Not verified").
-2. **Node A firmware**: HX711 reading, tare, median of 12 at 10 SPS, OLED, two buttons,
-   buzzer, ESP-NOW send. The simulator and the system map are the behaviour to match.
-3. **Node B firmware**: ESP-NOW receive, light on GPIO 13, capture, multipart POST with
-   retry, microSD buffer.
+2. **Node A on a real board**: flash it from `/workbench/flash`, then check each part and
+   calibrate on `/workbench/bench`. The firmware's serial line format and commands are
+   in `firmware/node-a-scale/README.md`; the bench page speaks them.
+3. **Node B firmware**: answer Node A's `Hello` on the hotspot's channel, ack each
+   `Capture`, light on GPIO 13, one photo, multipart POST with retry, microSD buffer,
+   then send a `Result`. The frames are in `firmware/shared/sfs_protocol.h`; Node A
+   already sends and waits for them.
 4. **Move the backend off the owner's PC, with Gemini doing the recognition.** On
    13 October the owner said: "i want to not use my pc but a server" and "we are using
    gemini api to get the data". That settles D3's open choice (Gemini), though
@@ -46,9 +50,11 @@ In the order the project needs them:
    with the six code changes it needs. **Nothing is built or deployed.** The owner has
    seen the recommendation and not yet answered it. Three steps are theirs alone:
    the Gemini key, the Neon database, the second Vercel project.
-5. **Finish the "Workbench" sidebar category.** Four pages are built and live:
-   `/workbench` (build map), `/workbench/wire`, `/workbench/simulate` and
-   `/workbench/toolbox`. The wiring lives in one file,
+5. **Finish the "Workbench" sidebar category.** Six pages are built: `/workbench`
+   (build map), `/workbench/wire`, `/workbench/simulate` (the two circuits, and Node A's
+   real firmware handed to Wokwi as three files), `/workbench/flash` (Node A from the
+   browser), `/workbench/bench` (live readings and calibration over Web Serial, with a
+   practice mode) and `/workbench/toolbox`. The wiring lives in one file,
    `web/components/workbench/wiring.ts`; the page, its pin tables and
    `firmware/node-a-scale/include/pins.h` (`npm run sync:wiring`) are made from it. The
    old `/project/wiring` redirects to `/workbench/wire`. Still to build, each waiting on
@@ -99,6 +105,12 @@ Real, small, and not fixed. Fix them when you are nearby, or tell the owner.
 - **An unexplained dev-only log line** on every page load. See RUNBOOK, "Known noise".
 
 ## Not verified — say so if asked
+
+- **No firmware has run on a board.** Node A compiles and runs in Wokwi; the Flash
+  page's images were checked byte by byte at their addresses, never written to a chip.
+  The bench page was tested in practice mode only, never with a real serial port.
+- **The camera search** was only seen failing (no Node B exists). Finding Node B, the
+  ack and the result frames are untested until Node B's firmware is written.
 
 - **The request sheet has not been printed.** Print styles exist (`@media print` in
   `request.css`: hides navigation, 8 pt rows, no row split across pages). Nobody has

@@ -9,7 +9,10 @@ Where things are, and which file to change when you want something to change.
 | `backend/` | FastAPI service: recognise the dish, look up nutrients, multiply by the measured grams, store the meal | Built, 145 tests |
 | `backend/data/tunisian_foods.json` | The food table: 18 dishes, every value flagged as an estimate | Built. **The only place a nutrient figure may be edited** |
 | `web/` | Next.js 16 site: docs, the component request, the 3D rig, the prototype simulator | Built, deployed |
-| `firmware/node-a-scale/` | PlatformIO project for the scale node | `platformio.ini` only |
+| `firmware/node-a-scale/` | PlatformIO project for the scale node | Written, compiles, runs in Wokwi; see its README |
+| `firmware/shared/sfs_protocol.h` | The ESP-NOW frames both nodes speak | Node A uses it; Node B must |
+| `firmware/tools/publish_web.py` | Builds Node A and writes the images the Flash page installs | Run after firmware changes |
+| `web/public/workbench/` | Generated: firmware images, and Node A's Wokwi files | Never edit by hand |
 | `firmware/node-b-camera/` | Camera node | Does not exist yet |
 | `app/` | React Native app | Does not exist yet |
 | `docs/decisions.md` | Decision log, D0–D14 | Current |
