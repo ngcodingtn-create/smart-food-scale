@@ -1,0 +1,163 @@
+{
+  "version": 1,
+  "author": "Smart Food Scale",
+  "editor": "wokwi",
+  "parts": [
+    {
+      "type": "wokwi-esp32-devkit-v1",
+      "id": "esp",
+      "top": 0,
+      "left": 0,
+      "attrs": {}
+    },
+    {
+      "type": "board-ssd1306",
+      "id": "oled",
+      "top": 10,
+      "left": 190,
+      "attrs": {
+        "i2cAddress": "0x3c"
+      }
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "tare",
+      "top": 120,
+      "left": 190,
+      "attrs": {
+        "color": "green",
+        "label": "TARE"
+      }
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "capture",
+      "top": 120,
+      "left": 290,
+      "attrs": {
+        "color": "blue",
+        "label": "PHOTO"
+      }
+    },
+    {
+      "type": "wokwi-hx711",
+      "id": "hx711",
+      "top": 210,
+      "left": 190,
+      "attrs": {
+        "type": "5kg"
+      }
+    },
+    {
+      "type": "wokwi-buzzer",
+      "id": "buzzer",
+      "top": 250,
+      "left": -10,
+      "attrs": {
+        "volume": "0.1"
+      }
+    }
+  ],
+  "connections": [
+    [
+      "esp:TX0",
+      "$serialMonitor:RX",
+      "",
+      []
+    ],
+    [
+      "esp:RX0",
+      "$serialMonitor:TX",
+      "",
+      []
+    ],
+    [
+      "esp:3V3",
+      "hx711:VCC",
+      "red",
+      []
+    ],
+    [
+      "esp:3V3",
+      "oled:VCC",
+      "red",
+      []
+    ],
+    [
+      "esp:GND.1",
+      "hx711:GND",
+      "black",
+      []
+    ],
+    [
+      "esp:GND.1",
+      "oled:GND",
+      "black",
+      []
+    ],
+    [
+      "esp:GND.1",
+      "tare:2.r",
+      "black",
+      []
+    ],
+    [
+      "esp:GND.1",
+      "capture:2.r",
+      "black",
+      []
+    ],
+    [
+      "esp:GND.1",
+      "buzzer:1",
+      "black",
+      []
+    ],
+    [
+      "esp:RX2",
+      "hx711:DT",
+      "green",
+      []
+    ],
+    [
+      "esp:TX2",
+      "hx711:SCK",
+      "green",
+      []
+    ],
+    [
+      "esp:D18",
+      "tare:1.l",
+      "green",
+      []
+    ],
+    [
+      "esp:D19",
+      "capture:1.l",
+      "green",
+      []
+    ],
+    [
+      "esp:D21",
+      "oled:SDA",
+      "green",
+      []
+    ],
+    [
+      "esp:D22",
+      "oled:SCL",
+      "green",
+      []
+    ],
+    [
+      "esp:D23",
+      "buzzer:2",
+      "green",
+      []
+    ]
+  ],
+  "serialMonitor": {
+    "display": "always",
+    "newline": "lf"
+  }
+}

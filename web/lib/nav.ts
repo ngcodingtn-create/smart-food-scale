@@ -46,6 +46,8 @@ export const NAV: NavGroup[] = [
       { label: 'Build map', href: '/workbench', icon: 'route' },
       { label: 'Wire it', href: '/workbench/wire', icon: 'plug' },
       { label: 'Simulate it', href: '/workbench/simulate', icon: 'scope' },
+      { label: 'Flash it', href: '/workbench/flash', icon: 'chip' },
+      { label: 'Test and calibrate', href: '/workbench/bench', icon: 'sliders' },
       { label: 'Toolbox', href: '/workbench/toolbox', icon: 'toolbox' },
     ],
   },

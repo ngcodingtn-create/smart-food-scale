@@ -744,3 +744,306 @@
   line-height: 1.5;
   color: var(--ink-soft);
 }
+
+/* --- Simulate it: the Wokwi files --- */
+.wokwi {
+  margin-top: 1.25rem;
+}
+.prose .wokwi-steps {
+  margin: 0;
+}
+.prose .wokwi-steps .btn {
+  display: flex;
+  width: fit-content;
+  margin-top: 0.6rem;
+}
+.prose .wokwi-files {
+  display: grid;
+  gap: 0.7rem;
+  margin: 1.1rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+@media (min-width: 44rem) {
+  .prose .wokwi-files {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+.prose .wokwi-files li.wokwi-file {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0.85rem 0.95rem 0.9rem;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--paper-raised);
+}
+.prose .wokwi-file p {
+  margin: 0;
+}
+.wokwi-file-name code {
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+.prose .wokwi-file-what {
+  flex: 1;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: var(--ink-soft);
+}
+.wokwi-file-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding-top: 0.3rem;
+}
+.wokwi-file-actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2.3rem;
+  padding: 0 0.8rem;
+  border: 1px solid var(--rule-strong);
+  border-radius: 0.55rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ink);
+  cursor: pointer;
+}
+.wokwi-file-actions button:hover {
+  background: var(--paper-sunken);
+}
+.prose .wokwi-file-actions a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.82rem;
+}
+
+/* --- Flash it --- */
+.flash-cards {
+  display: grid;
+  gap: 0.8rem;
+  margin-top: 1.25rem;
+}
+@media (min-width: 44rem) {
+  .flash-cards {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.prose .flash-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding: 1rem 1.05rem 1.1rem;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--paper-raised);
+}
+.prose .flash-card p {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+.prose .flash-card .flash-title {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+.flash-card esp-web-install-button,
+.flash-card > .btn {
+  margin-top: auto;
+  padding-top: 0.5rem;
+}
+.flash-card .btn {
+  width: fit-content;
+}
+.flash-card .btn:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+.prose .flash-note {
+  margin-top: auto;
+  padding: 0.55rem 0.7rem;
+  border-radius: 0.55rem;
+  background: var(--caution-wash);
+  font-size: 0.85rem;
+  color: var(--caution-ink);
+}
+
+/* --- Test and calibrate --- */
+.bench {
+  margin-top: 1.5rem;
+}
+.prose .bench p {
+  margin: 0;
+}
+.bench-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+}
+.prose .bench-note {
+  flex-basis: 100%;
+  padding: 0.55rem 0.7rem;
+  border-radius: 0.55rem;
+  background: var(--caution-wash);
+  font-size: 0.86rem;
+  color: var(--caution-ink);
+}
+/* The board's own display, larger: black glass, as on the OLED. */
+.bench-screen {
+  margin-top: 1rem;
+  padding: 1rem 1.15rem 1.05rem;
+  border-radius: 1rem;
+  background: oklch(0.16 0.01 250);
+  color: oklch(0.94 0.02 230);
+  box-shadow: var(--shadow-md);
+}
+.prose .bench-mode {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: oklch(0.72 0.03 230);
+}
+.bench-screen[data-mode='practice'] .bench-mode {
+  color: oklch(0.82 0.13 80);
+}
+.prose .bench-value {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.2rem 0.8rem;
+  margin-top: 0.3rem;
+  font-family: var(--font-mono);
+  font-size: clamp(2.2rem, 1.6rem + 3vw, 3.4rem);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+.bench-value span {
+  font-size: 0.8rem;
+  letter-spacing: 0.02em;
+  color: oklch(0.82 0.13 80);
+}
+.prose .bench-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 1.1rem;
+  margin-top: 0.55rem;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  color: oklch(0.75 0.02 230);
+}
+.bench-meta span[data-on]::before {
+  content: '';
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-right: 0.4rem;
+  border-radius: 50%;
+  background: oklch(0.6 0.02 230);
+}
+.bench-meta span[data-on='true']::before {
+  background: oklch(0.78 0.16 150);
+}
+.bench-mass {
+  display: grid;
+  gap: 0.3rem;
+  margin-top: 0.9rem;
+  font-size: 0.86rem;
+  color: var(--ink-soft);
+}
+.bench-mass input {
+  width: 100%;
+  accent-color: var(--accent);
+}
+.bench-commands {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.9rem;
+}
+.bench-commands button,
+.bench-record button {
+  min-height: 2.5rem;
+  padding: 0 0.95rem;
+  border: 1px solid var(--rule-strong);
+  border-radius: 0.6rem;
+  background: var(--paper-raised);
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--ink);
+  cursor: pointer;
+}
+.bench-commands button:hover:not(:disabled),
+.bench-record button:hover:not(:disabled) {
+  background: var(--paper-sunken);
+}
+.bench button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.bench-cal {
+  margin-top: 1.4rem;
+  padding: 1rem 1.05rem 1.1rem;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--paper-raised);
+}
+.prose .bench-cal ol {
+  margin: 0.4rem 0 0;
+  font-size: 0.9rem;
+}
+.bench-record {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.9rem;
+}
+.bench-record input {
+  width: 10rem;
+  min-height: 2.5rem;
+  padding: 0 0.75rem;
+  border: 1px solid var(--rule-strong);
+  border-radius: 0.6rem;
+  background: var(--paper);
+  font: inherit;
+  color: var(--ink);
+}
+.bench-record .bench-quiet {
+  border-color: transparent;
+  background: transparent;
+  color: var(--ink-soft);
+}
+.prose .bench-fit {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-top: 0.9rem;
+  font-size: 0.92rem;
+}
+.prose .bench-hint {
+  margin-top: 0.8rem;
+  font-size: 0.86rem;
+  color: var(--ink-soft);
+}
+.bench-log {
+  margin-top: 1rem;
+}
+.bench-log summary {
+  cursor: pointer;
+  font-size: 0.88rem;
+  color: var(--ink-soft);
+}
+.prose .bench-log pre {
+  max-height: 16rem;
+  margin-top: 0.5rem;
+  overflow: auto;
+  font-size: 0.78rem;
+}

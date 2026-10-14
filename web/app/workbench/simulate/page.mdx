@@ -1,5 +1,6 @@
 import { Callout } from '@/components/Callout';
 import { CircuitFrame } from '@/components/workbench/CircuitFrame';
+import { WokwiFiles } from '@/components/workbench/WokwiFiles';
 
 export const metadata = {
   title: 'Simulate it',
@@ -31,15 +32,24 @@ open as requests for years. They are tested on the real boards, or not at all.
 
 ## The scale's firmware
 
-**Waiting on the firmware.** Only a build file exists so far, so there is nothing of ours to run.
+Node A's real firmware on a simulated DevKit, load cell, display, two buttons and
+buzzer. The same code that goes on the board, with the pins from the
+[wiring](/workbench/wire); only the load cell's scale and the buzzer's transistor
+differ, and the sketch says so at the top.
 
-What is already known: on 13 October 2026 a stranger's public Wokwi project with the
-same four parts as Node A (ESP32 DevKit, HX711 with a load cell, SSD1306 display, a
-button, and the same two libraries) compiled and ran inside a frame on this site. Its
-load cell has a slider; at 0.27 kg the sketch printed 269 g.
+<WokwiFiles />
 
-When Node A's firmware is written, it goes here in the same kind of frame, with the pins
-taken from the [wiring](/workbench/wire).
+What it did on 14 October 2026, run this way: it compiled and booted, reported
+`calibrated=1 cpg=0.42` (Wokwi's cell), searched channels 1 to 13 for the camera and
+said `link none`, which is right: there is no Node B in a one-board simulation. With
+0.42 kg on the cell (a plate) it read 176 counts, shown as 419.0 g. TARE set the
+offset to 176 and the display to 0.0 g. At 0.57 kg (plate and food), PHOTO took twelve
+readings of 239 counts, kept the median, and printed `g=150.0`; then it looked for the
+camera again, found none, and reported `ok=0`. It ran at 1 to 10 % of real time there,
+so each step took a minute or more.
+
+To run inside this page instead, the project has to be saved under a Wokwi account,
+which is the owner's to make. Its address then goes in `WokwiFiles.tsx`.
 
 ## The whole chain
 

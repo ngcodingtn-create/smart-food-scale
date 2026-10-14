@@ -1,0 +1,53 @@
+import { Callout } from '@/components/Callout';
+import { FlashButton } from '@/components/workbench/FlashButton';
+
+export const metadata = {
+  title: 'Flash it',
+  description: 'Write Node A’s firmware to the ESP32 DevKit from this page, over USB, with no software to install.',
+};
+
+# Flash it
+
+Write the firmware to a board from this page, over USB. No software to install: Chrome, Edge or Firefox on a computer.
+
+## Node A, the scale
+
+<div className="flash-cards">
+  <section className="flash-card">
+    <p className="label">With the load cell</p>
+    <p className="flash-title">The real build</p>
+    <p>For the finished scale. It starts uncalibrated and shows raw counts until it is calibrated.</p>
+    <FlashButton manifest="/workbench/firmware/node-a/scale.json" label="the scale" />
+  </section>
+  <section className="flash-card">
+    <p className="label">No load cell yet</p>
+    <p className="flash-title">The pretend scale</p>
+    <p>For a bare DevKit. Set the weight from the serial line with <code>sim 150</code>; the buttons, display and buzzer work as they will.</p>
+    <FlashButton manifest="/workbench/firmware/node-a/sim.json" label="the pretend scale" />
+  </section>
+</div>
+
+1. **Plug the DevKit in** with a USB cable that carries data. A charge-only cable is the most common reason a board is not found.
+2. **Press Install** and pick the board's port. It is named after the board's USB chip: CP210x or CH340.
+3. **If it will not connect**, hold the board's BOOT button while it starts to write.
+4. **When it is done**, the display shows `NOT CALIBRATED` (the real build) or a weight (the pretend one), and the serial line prints `E boot fw=0.1.0`.
+
+<Callout type="caution" title="Not yet tried on a board">
+
+Both images were built with PlatformIO on 14 October 2026 and checked piece by piece:
+the bootloader, partition table and program sit at the addresses PlatformIO itself
+writes. Nobody has flashed them to a board, because there is no board yet. If the
+page fails, flash from `firmware/node-a-scale` with `pio run -t upload`.
+
+</Callout>
+
+## Node B, the camera
+
+No firmware yet. It is the next one to write: ESP-NOW in, light on, one photo, posted to
+the backend, kept on the card when the network is down.
+
+## Where these files come from
+
+`firmware/tools/publish_web.py` builds both, joins each into one image starting at
+address 0, and writes them into the site with the version from the firmware. Run it
+after any change to the firmware, and commit what it writes.

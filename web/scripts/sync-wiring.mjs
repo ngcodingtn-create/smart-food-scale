@@ -1,11 +1,18 @@
-/** Write the firmware's pin header from the wiring.
+/** Write the firmware's pin header, and Node A's Wokwi simulation, from the wiring.
  *
- *   npm run sync:wiring            rewrite firmware/node-a-scale/include/pins.h
- *   npm run sync:wiring -- --check exit 1 if that file is stale (for CI)
+ *   npm run sync:wiring            rewrite the files below
+ *   npm run sync:wiring -- --check exit 1 if any of them is stale (for CI)
+ *
+ *   firmware/node-a-scale/include/pins.h   the GPIOs, for the firmware
+ *   web/public/workbench/wokwi/node-a/     Node A for the Wokwi simulator: the parts
+ *                                          and wires (diagram.json), the firmware in
+ *                                          one file (sketch.ino) and its libraries.
+ *                                          Served by the site, so the Simulate page
+ *                                          can hand them over.
  *
  * components/workbench/wiring.ts is the only place a GPIO number may be edited.
- * The "Wire it" page draws from it; this gives the firmware the same numbers,
- * so the drawing and the code cannot disagree.
+ * The "Wire it" page draws from it; this gives the firmware and the simulator
+ * the same numbers, so the drawing, the code and the simulation cannot disagree.
  *
  * Needs Node 22.18 or newer: it imports the TypeScript file directly.
  */
@@ -17,8 +24,9 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const source = path.resolve(here, '../components/workbench/wiring.ts');
 const { NODES, gpiosOf, endName } = await import(pathToFileURL(source).href);
 
-// One header per firmware project that exists. Node B gets its own when its project does.
-const TARGETS = [{ node: 'a', file: path.resolve(here, '../../firmware/node-a-scale/include/pins.h') }];
+const repo = path.resolve(here, '../..');
+const nodeA = path.join(repo, 'firmware/node-a-scale');
+const wokwiA = path.join(repo, 'web/public/workbench/wokwi/node-a');
 
 function header(node) {
   const pins = gpiosOf(node);
@@ -43,26 +51,127 @@ function header(node) {
   ].join('\n');
 }
 
+// --- Wokwi -------------------------------------------------------------------
+//
+// Wokwi's browser editor compiles one Arduino sketch, so the firmware is joined
+// into one file: the settings, the pins, the frame layout, then main.cpp. Two
+// things differ from the real build, and the sketch says so at the top:
+//   - the load cell is Wokwi's 5 kg one: 2100 counts over 5 kg, 0.42 per gram;
+//   - the buzzer hangs straight off its GPIO, with no transistor or diode.
+
+// Where each wired end lands in Wokwi: our part and pin, to Wokwi's part and pin.
+const WOKWI_PIN = {
+  'hx711:DT': 'hx711:DT',
+  'hx711:SCK': 'hx711:SCK',
+  'oled:SDA': 'oled:SDA',
+  'oled:SCL': 'oled:SCL',
+  'tare:leg': 'tare:1.l',
+  'capture:leg': 'capture:1.l',
+  'q1:base': 'buzzer:2',
+};
+
+function wokwiDiagram(node) {
+  const board = node.parts[0].id;
+  const signals = gpiosOf(node).map(({ name, wire }) => {
+    const [ours, other] = wire.from.part === board ? [wire.from, wire.to] : [wire.to, wire.from];
+    const target = WOKWI_PIN[`${other.part}:${other.pin}`];
+    if (!target) throw new Error(`No Wokwi pin for ${other.part}:${other.pin} (${name}). Add it to WOKWI_PIN.`);
+    return [`esp:${ours.pin}`, target, 'green', []];
+  });
+  return {
+    version: 1,
+    author: 'Smart Food Scale',
+    editor: 'wokwi',
+    parts: [
+      { type: 'wokwi-esp32-devkit-v1', id: 'esp', top: 0, left: 0, attrs: {} },
+      { type: 'board-ssd1306', id: 'oled', top: 10, left: 190, attrs: { i2cAddress: '0x3c' } },
+      { type: 'wokwi-pushbutton', id: 'tare', top: 120, left: 190, attrs: { color: 'green', label: 'TARE' } },
+      { type: 'wokwi-pushbutton', id: 'capture', top: 120, left: 290, attrs: { color: 'blue', label: 'PHOTO' } },
+      { type: 'wokwi-hx711', id: 'hx711', top: 210, left: 190, attrs: { type: '5kg' } },
+      { type: 'wokwi-buzzer', id: 'buzzer', top: 250, left: -10, attrs: { volume: '0.1' } },
+    ],
+    connections: [
+      ['esp:TX0', '$serialMonitor:RX', '', []],
+      ['esp:RX0', '$serialMonitor:TX', '', []],
+      ['esp:3V3', 'hx711:VCC', 'red', []],
+      ['esp:3V3', 'oled:VCC', 'red', []],
+      ['esp:GND.1', 'hx711:GND', 'black', []],
+      ['esp:GND.1', 'oled:GND', 'black', []],
+      ['esp:GND.1', 'tare:2.r', 'black', []],
+      ['esp:GND.1', 'capture:2.r', 'black', []],
+      ['esp:GND.1', 'buzzer:1', 'black', []],
+      ...signals,
+    ],
+    serialMonitor: { display: 'always', newline: 'lf' },
+  };
+}
+
+async function wokwiSketch(pins) {
+  const read = async (file) => (await readFile(path.join(repo, file), 'utf8')).replaceAll('\r\n', '\n');
+  // Local includes are inlined below; system includes stay.
+  const local = /^#include "(config|pins|sfs_protocol)\.h"/;
+  const strip = (text) =>
+    text
+      .split('\n')
+      .filter((row) => !row.startsWith('#pragma once') && !local.test(row))
+      .join('\n')
+      .trim();
+  const parts = [
+    ['config.h', await read('firmware/node-a-scale/include/config.h')],
+    ['pins.h', pins],
+    ['sfs_protocol.h', await read('firmware/shared/sfs_protocol.h')],
+    ['main.cpp', await read('firmware/node-a-scale/src/main.cpp')],
+  ];
+  return [
+    '// Node A, joined into one file for the Wokwi simulator.',
+    '//',
+    '// Generated by web/scripts/sync-wiring.mjs from firmware/node-a-scale. Do not edit:',
+    '// change the sources there and run `npm run sync:wiring` in web/.',
+    '//',
+    '// Two differences from the real build:',
+    "//   - Wokwi's 5 kg load cell gives 2100 counts over 5 kg, so 0.42 counts per gram",
+    '//     is set here. The real scale starts uncalibrated.',
+    '//   - In the simulation the buzzer hangs straight off its pin, with no transistor.',
+    '',
+    '#define SFS_COUNTS_PER_GRAM 0.42f',
+    '',
+    ...parts.flatMap(([name, text]) => [`// ---- ${name} ${'-'.repeat(72 - name.length)}`, '', strip(text), '']),
+  ].join('\n');
+}
+
+// Names as Wokwi's library manager lists them. bogde/HX711 is "HX711 Arduino Library"
+// there; plain "HX711" is a different library.
+const LIBRARIES = ['# Wokwi library list', 'HX711 Arduino Library', 'Adafruit SSD1306', 'Adafruit GFX Library', ''].join('\n');
+
+// --- write, or check -----------------------------------------------------------
+
+const node = NODES.find((item) => item.id === 'a');
+const pins = header(node);
+const outputs = [
+  [path.join(nodeA, 'include/pins.h'), pins],
+  [path.join(wokwiA, 'diagram.json'), `${JSON.stringify(wokwiDiagram(node), null, 2)}\n`],
+  [path.join(wokwiA, 'sketch.ino'), await wokwiSketch(pins)],
+  [path.join(wokwiA, 'libraries.txt'), LIBRARIES],
+];
+
 const check = process.argv.includes('--check');
 let stale = false;
 
-for (const target of TARGETS) {
-  const node = NODES.find((item) => item.id === target.node);
-  const next = header(node);
-  const name = path.relative(path.resolve(here, '../..'), target.file).replaceAll('\\', '/');
+for (const [file, next] of outputs) {
+  const name = path.relative(repo, file).replaceAll('\\', '/');
   if (check) {
     // Git may check the file out with CRLF on Windows; that is not staleness.
-    const current = (await readFile(target.file, 'utf8').catch(() => '')).replaceAll('\r\n', '\n');
+    const current = (await readFile(file, 'utf8').catch(() => '')).replaceAll('\r\n', '\n');
     if (current !== next) {
       console.error(`${name} is out of date. Run: npm run sync:wiring`);
       stale = true;
     } else {
-      console.log(`${name} in sync: ${gpiosOf(node).length} pins`);
+      console.log(`${name} in sync`);
     }
   } else {
-    await mkdir(path.dirname(target.file), { recursive: true });
-    await writeFile(target.file, next);
-    console.log(`wrote ${name}: ${gpiosOf(node).length} pins`);
+    await mkdir(path.dirname(file), { recursive: true });
+    await writeFile(file, next);
+    console.log(`wrote ${name}`);
   }
 }
 

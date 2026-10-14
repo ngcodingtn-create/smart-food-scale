@@ -1,0 +1,42 @@
+import { Callout } from '@/components/Callout';
+import { Bench } from '@/components/workbench/Bench';
+
+export const metadata = {
+  title: 'Test and calibrate',
+  description: 'Node A read live over USB in the browser: every reading, the buttons, and a five-point calibration saved to the board.',
+};
+
+# Test and calibrate
+
+Node A, read live over USB. Every reading, every event, and a calibration you save to the board. No board yet? Practise.
+
+<Bench />
+
+## Check each part
+
+With Node A flashed and wired, connected above:
+
+| Part | Do | Expect |
+| --- | --- | --- |
+| Display | Power on | `CAMERA ?` on top, `NOT CALIBRATED` at the bottom, until it is calibrated |
+| Load cell | Press the plate gently | The counts rise, then fall back when you let go. They fall instead? Swap white and green |
+| TARE | Press it | One short beep, and `tare offset=…` in the log |
+| PHOTO | Press it, once calibrated | `WEIGHING`, then two beeps and `SENT`, or one long low beep and `NO CAMERA` while Node B is off |
+| Camera link | Find camera | `link found ch=…` once Node B runs; `link none` until then |
+
+The camera and its light are checked with Node B, whose firmware is not written yet.
+
+## About the calibration
+
+A straight line through zero, fitted to every mass you record: tare first, so no load
+means no counts. Five masses across the range, then a check with masses not used in the
+fit, is what decision D13 asks for. Borrow the masses from a physics or chemistry lab
+and weigh them on their balance first.
+
+<Callout type="note" title="What practice mode is">
+
+A pretend scale inside this page, speaking the same lines as the firmware. Its counts
+per gram (100) and its noise are invented, so nothing measured in practice belongs on
+the [accuracy page](/reference/accuracy).
+
+</Callout>
