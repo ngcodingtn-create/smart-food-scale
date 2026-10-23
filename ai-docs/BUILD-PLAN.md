@@ -36,6 +36,53 @@ Say so if asked; none of it blocks the hardware.
 - **No rig**: the load cell needs two boards and screws to bend properly. Without them it
   can be tested clamped to a table edge, but not used for real meals.
 
+## The load cell, emulated: how far it goes
+
+Asked on 23 October: can the load cell be emulated by a script today, so that tomorrow it
+is only plugged in? **Mostly yes, and it is already built; a reflash and a calibration
+remain.**
+
+- **The pretend-scale image** (`node-a-nodemcu-sim`) replaces one function of the
+  firmware, `readCell()`, with a weight typed over USB. Everything above it is the real
+  code: the history and medians, tare, the display, the buttons, the buzzer, the search
+  for the camera, ESP-NOW, the photo, the upload, the result.
+- **The whole-meal test** (Test and calibrate, added 23 October) is the script: it plays
+  a plate of 420 g, TARE, 150 g of food, PHOTO, and checks every line the boards print, up
+  to the backend's answer. Run it today until it passes; tomorrow the same chain runs with
+  real grams.
+- **What no emulation covers**, and tomorrow still needs: the HX711's eight wires, the
+  load cell's sign (swap white and green if pressing it lowers the counts), the
+  calibration with known masses (counts per gram depend on this cell and this HX711), and
+  the mounting.
+- **Tomorrow's reflash is one minute** on Flash it. An image that falls back to pretend
+  weights when it finds no HX711 was considered and rejected: a loose wire would then
+  produce invented weights that look real. Two images, each saying what it is, is safer.
+- The pretend scale never saves a calibration, and the test never sends `cal` to a real
+  board, so nothing from today can make tomorrow's scale read wrong. Accept the "erase"
+  offer when flashing the real image anyway.
+
+## What to have on the table today
+
+| Thing | Why |
+| --- | --- |
+| NodeMCU, ESP32-CAM on its MB base | The two boards |
+| Two USB data cables, and two free USB ports (or a phone charger for the camera) | Both boards on at once for the whole meal |
+| Breadboard; the 10 female–male, 10 male–male, 10 female–female jumpers | The NodeMCU may not fit on the breadboard: female–male from its pins |
+| OLED, the one push button, the buzzer module | Node A's front panel |
+| Both 2N2222A, the 1N4148, 1 kΩ, 470 Ω, 10 kΩ, 6 × 100 Ω, 6 white LEDs, the 100 µF | Buzzer driver and the light |
+| Laptop with Chrome or Edge; the backend's `.venv` | Flashing, the bench page, the backend |
+| Phone with mobile data, hotspot on 2.4 GHz | The camera's network; Gemini needs internet through it |
+| Optional: Gemini key in `backend/.env`, a food photo to test it | Real recognition |
+| Optional: a kitchen scale | Weigh four or five household things today and label them: tomorrow's calibration masses, if the lab has none |
+
+Not needed today: the HX711, the load cell (except to measure its screw holes), a
+multimeter, a soldering iron.
+
+Wiring notes from the owner's photos, also on Wire it: the buzzer module's pins are −,
+an empty middle, and S, which is its +; the camera's pins are hidden inside the MB base,
+so the light is wired with the camera on the breadboard, powered and read through four
+jumpers from the base's sockets.
+
 ## Today, 23 October: everything that does not need the HX711
 
 The NodeMCU runs the **pretend scale** today: the weight is typed on the Test and
@@ -55,7 +102,7 @@ calibrate page instead of measured. Everything else is real.
 | 8 | Set hotspot name, password and backend `http://<address>:8000` | `/workbench/bench` | `Wi-Fi up` |
 | 9 | Take a test photo with 150 g | `/workbench/bench` | `last upload: 150 g · saved by the backend · HTTP 201`, and the meal is in `/docs` → `GET /meals` |
 | 10 | Wire the light: six LEDs with their 100 Ω, the second 2N2222A, 470 Ω and 10 kΩ on IO13 | `/workbench/wire` (Node B) | `Light on` lights all six |
-| 11 | Both boards at once: power the NodeMCU, let it find the camera, set 150 g, TARE, PHOTO | Both | NodeMCU display: `CAMERA ch N`, then `SENT`, two beeps, then `SAVED`; a new meal of 150 g in the backend |
+| 11 | Both boards at once: NodeMCU on the laptop, camera on (Wi-Fi up). On Test and calibrate, connected to the NodeMCU: **Run the whole-meal test** | Both | All six steps ticked: the last says `saved` (or, with Gemini on and a photo of nothing, that the dish could not be named: the chain still works) |
 | 12 | Mechanical, any time: measure the load cell's screw holes and send a close-up of its label; find two boards (base and top plate) and screws that fit | Home or hardware shop | Photo sent; screws in hand |
 
 If something does not behave, copy the log from **Everything the board said** on the
@@ -67,6 +114,8 @@ bench page into the chat.
 | --- | --- |
 | Bench page: a pretend-weight box for a real board running the pretend scale, and a box for any command | Done 23 October (Node A 0.2.1 reports `simulated=1` in `info`) |
 | `backend-lan` in `.claude/launch.json`: the backend on `0.0.0.0:8000`, reachable from the hotspot | Done 23 October |
+| The whole-meal test on the bench page (tried in practice mode: steps 1–4 pass, 5 fails as it should with no camera) | Done 23 October |
+| Wire it: the NodeMCU's width, the camera off its base for the light, the buzzer module's S pin | Done 23 October, from the photos; not tried on the parts |
 | Answer the owner's logs through steps 1–11; fix what breaks | As it happens |
 | `GeminiRecogniser`, tested against a fake Gemini | Done 23 October. Never called with a real key |
 

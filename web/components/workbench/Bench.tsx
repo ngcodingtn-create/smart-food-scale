@@ -64,7 +64,7 @@ async function openBoard(onLine: (line: string) => void, onGone: (why: string) =
 }
 
 /** A pretend Node A: the firmware's lines and commands, with invented numbers. */
-function practiseScale(onLine: (line: string) => void, massOf: () => number): Source {
+function practiseScale(onLine: (line: string) => void, massOf: () => number, setMass: (grams: number) => void): Source {
   const COUNTS_PER_GRAM = 100; // invented, like the firmware's node-a-sim build
   const ZERO = 84000;
   let offset = 0;
@@ -102,6 +102,9 @@ function practiseScale(onLine: (line: string) => void, massOf: () => number): So
         onLine(`E info node=a fw=practice calibrated=${Number.isNaN(cpg) ? 0 : 1} cpg=${cpg} offset=${offset} camera_ch=0`);
       } else if (word === 'find') {
         onLine('E link none');
+      } else if (word === 'sim' && Number(value) >= 0) {
+        setMass(Number(value));
+        onLine(`E sim g=${Number(value).toFixed(1)}`);
       }
     },
     close: () => window.clearInterval(timer),
@@ -176,6 +179,29 @@ const OUTCOME: Record<string, string> = {
   failed: 'failed',
 };
 
+/** One step of the whole-meal test, and how it went. */
+type Step = { label: string; state: 'waiting' | 'running' | 'ok' | 'fail'; note?: string };
+
+// The meal the test plays: an empty plate, then the plate with food on it.
+// Invented masses, like everything on the pretend scale.
+const PLATE_G = 420;
+const FOOD_G = 150;
+
+const STEPS = [
+  'The scale answers',
+  `Empty plate (${PLATE_G} g), then TARE`,
+  `Food on: the scale reads ${FOOD_G} g`,
+  'PHOTO: twelve readings, one weight',
+  'The camera confirms',
+  'The backend saves the meal',
+];
+
+/** A field of an event line ("E sent seq=3 ok=1" → seq is "3"), or undefined. */
+function fieldOf(text: string, key: string) {
+  const line = parseLine(text);
+  return line.kind === 'event' ? line.event.fields[key] : undefined;
+}
+
 export function Bench() {
   const source = useRef<Source | null>(null);
   const recent = useRef<Reading[]>([]);
@@ -191,6 +217,10 @@ export function Bench() {
   const [simulated, setSimulated] = useState(false);
   const [simGrams, setSimGrams] = useState('150');
   const [typed, setTyped] = useState('');
+  // The whole-meal test: lines it waits for, and how far it got.
+  const waiters = useRef<{ test: (text: string) => boolean; done: (text: string) => void }[]>([]);
+  const [steps, setSteps] = useState<Step[] | null>(null);
+  const [testing, setTesting] = useState(false);
   const mass = useRef(0);
   const [points, setPoints] = useState<Point[]>([]);
   const [known, setKnown] = useState('');
@@ -206,6 +236,12 @@ export function Bench() {
   useEffect(() => setSupported('serial' in navigator), []);
 
   function onLine(text: string) {
+    for (const waiter of [...waiters.current]) {
+      if (waiter.test(text)) {
+        waiters.current = waiters.current.filter((item) => item !== waiter);
+        waiter.done(text);
+      }
+    }
     const line = parseLine(text);
     if (line.kind === 'reading') {
       recent.current = [...recent.current.slice(-19), line.reading];
@@ -265,7 +301,17 @@ export function Bench() {
 
   function practise(which: NodeId) {
     setProblem(null);
-    source.current = which === 'a' ? practiseScale(onLine, () => mass.current) : practiseCamera(onLine);
+    source.current =
+      which === 'a'
+        ? practiseScale(
+            onLine,
+            () => mass.current,
+            (grams) => {
+              mass.current = grams;
+              setPracticeMass(grams);
+            },
+          )
+        : practiseCamera(onLine);
     setMode('practice');
   }
 
@@ -276,6 +322,106 @@ export function Bench() {
     setLog((current) => [...current.slice(-79), `> ${command.startsWith('pass ') ? 'pass ••••••' : command}`]);
     source.current?.send(command);
   };
+
+  /** The first line from the board that passes `test`, or null after `ms`. */
+  function waitFor(test: (text: string) => boolean, ms: number): Promise<string | null> {
+    return new Promise((resolve) => {
+      const waiter = {
+        test,
+        done: (text: string) => {
+          window.clearTimeout(timer);
+          resolve(text);
+        },
+      };
+      const timer = window.setTimeout(() => {
+        waiters.current = waiters.current.filter((item) => item !== waiter);
+        resolve(null);
+      }, ms);
+      waiters.current.push(waiter);
+    });
+  }
+
+  const pause = (ms: number) => new Promise((resolve) => window.setTimeout(resolve, ms));
+
+  /**
+   * Play one meal through the pretend scale and check every line the boards
+   * print on the way: the path a real meal takes, with the weight typed.
+   * It never sends `cal` to a real board: a calibration saved now would outlive
+   * the pretend scale and make tomorrow's real one read wrong.
+   */
+  async function runMealTest() {
+    const states: Step[] = STEPS.map((label) => ({ label, state: 'waiting' }));
+    const mark = (index: number, state: Step['state'], note?: string) => {
+      states[index] = { ...states[index], state, note };
+      setSteps([...states]);
+    };
+    setTesting(true);
+    setSteps([...states]);
+    try {
+      mark(0, 'running');
+      if (mode === 'practice') send('cal 100'); // the practice scale only: it starts uncalibrated
+      // Each answer is listened for before the command goes: practice answers at once.
+      const infoLine = waitFor((text) => text.startsWith('E info node=a'), 3000);
+      send('info');
+      const info = await infoLine;
+      if (!info) return mark(0, 'fail', 'No answer to info. Is this the scale, running the pretend-scale image?');
+      if (fieldOf(info, 'calibrated') !== '1') {
+        return mark(0, 'fail', 'The scale says it is not calibrated. The pretend-scale image calibrates itself: flash it again.');
+      }
+      const simulatedNote = fieldOf(info, 'simulated') === '1' ? `pretend scale, firmware ${fieldOf(info, 'fw')}` : `firmware ${fieldOf(info, 'fw')}`;
+      mark(0, 'ok', mode === 'practice' ? 'practice' : simulatedNote);
+
+      mark(1, 'running');
+      send(`sim ${PLATE_G}`);
+      await pause(1500);
+      const tareLine = waitFor((text) => text.startsWith('E tare'), 6000);
+      send('tare');
+      const tared = await tareLine;
+      if (!tared) return mark(1, 'fail', 'No answer to TARE.');
+      mark(1, 'ok', `offset ${fieldOf(tared, 'offset')} counts`);
+
+      mark(2, 'running');
+      send(`sim ${PLATE_G + FOOD_G}`);
+      let shown = NaN;
+      const settled = await waitFor((text) => {
+        const line = parseLine(text);
+        if (line.kind !== 'reading' || line.reading.grams === null) return false;
+        shown = line.reading.grams;
+        return line.reading.stable && Math.abs(shown - FOOD_G) <= 1;
+      }, 8000);
+      if (!settled) return mark(2, 'fail', `The reading never settled within 1 g of ${FOOD_G} g (last: ${shown} g).`);
+      mark(2, 'ok', `${shown.toFixed(1)} g, settled`);
+
+      mark(3, 'running');
+      const captureLine = waitFor((text) => text.startsWith('E capture') || text.startsWith('E error'), 6000);
+      const sentLine = waitFor((text) => text.startsWith('E sent'), 26000);
+      const resultLine = waitFor((text) => text.startsWith('E result'), 60000);
+      send('capture');
+      const captured = await captureLine;
+      if (!captured || captured.startsWith('E error')) return mark(3, 'fail', captured ?? 'No answer to PHOTO.');
+      const grams = Number(fieldOf(captured, 'g'));
+      if (!(Math.abs(grams - FOOD_G) <= 1)) return mark(3, 'fail', `Weighed ${grams} g, not ${FOOD_G}.`);
+      mark(3, 'ok', `${grams.toFixed(1)} g`);
+
+      mark(4, 'running');
+      const sent = await sentLine;
+      if (mode === 'practice') return mark(4, 'fail', 'Practice has no camera: on the real boards, this is where the camera answers.');
+      if (!sent || fieldOf(sent, 'ok') !== '1') {
+        return mark(4, 'fail', 'The camera did not confirm. It must be on and on the hotspot (Wi-Fi up); then press Find camera and run the test again.');
+      }
+      mark(4, 'ok', `seq ${fieldOf(sent, 'seq')}`);
+
+      mark(5, 'running');
+      const result = await resultLine;
+      const outcome = result ? fieldOf(result, 'outcome') : undefined;
+      if (outcome === 'saved') return mark(5, 'ok', 'saved: the whole chain works');
+      if (outcome === 'unknown') return mark(5, 'ok', 'reached the backend, which could not name the dish: the chain works');
+      if (outcome === 'queued') return mark(5, 'fail', 'Kept on the camera’s card: it could not reach the backend. Check the backend address and the firewall.');
+      return mark(5, 'fail', outcome ? `The camera reports ${outcome}.` : 'No result from the camera within a minute.');
+    } finally {
+      setTesting(false);
+    }
+  }
 
   function record() {
     const grams = Number(known);
@@ -392,6 +538,29 @@ export function Bench() {
             Set the pretend weight, g
           </button>
         </form>
+      ) : null}
+
+      {node === 'a' && (mode === 'practice' || simulated) ? (
+        <section className="bench-cal">
+          <p className="label">The whole-meal test</p>
+          <p className="bench-hint">
+            Plays one meal through the pretend scale, {PLATE_G} g of plate and {FOOD_G} g of food, and checks every step the
+            boards report. With the camera on the hotspot, it goes all the way to the backend.
+          </p>
+          <button type="button" className="btn btn-primary" onClick={runMealTest} disabled={testing}>
+            {testing ? 'Running…' : 'Run the whole-meal test'}
+          </button>
+          {steps ? (
+            <ol className="bench-steps">
+              {steps.map((step) => (
+                <li key={step.label} data-state={step.state}>
+                  <span>{step.label}</span>
+                  {step.note ? <small>{step.note}</small> : null}
+                </li>
+              ))}
+            </ol>
+          ) : null}
+        </section>
       ) : null}
 
       <div className="bench-commands" role="group" aria-label="Commands">

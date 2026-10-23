@@ -32,6 +32,28 @@ waiting to be flashed.
 
 </Callout>
 
+<Callout type="caution" title="Your NodeMCU may be too wide for the breadboard">
+
+Boards of this layout (CH340, "LoLin V3") are wider than most: across the breadboard's
+middle, their pins land on the outermost holes and the board covers every hole beside
+them. If yours does, leave it **off** the breadboard and run **female–male jumpers** from
+its pins to the breadboard. Node A needs ten (3V, G, VIN, D1, D2, D3, D5, D6, D7, D8),
+and you have ten.
+
+</Callout>
+
+<Callout type="caution" title="The camera's pins are inside its programmer base">
+
+On its MB base, none of the ESP32-CAM's pins can be reached, and the light needs IO13.
+Flash it and set its Wi-Fi on the base first. Then note which way round it sits, lift it
+off, and put it across the breadboard's middle. Four **male–male jumpers** from the base's
+now-empty sockets (5V, GND, U0R, U0T) to the camera's pins of the same names, and the base
+still powers it over USB and the bench page still reads it. To flash it again, put it back
+on the base. Not yet tried on your parts; if the camera resets during a photo, power is
+the suspect, and the 100 µF across its 5V and GND is the first fix.
+
+</Callout>
+
 <Callout type="danger" title="Nothing that idles high on the camera's GPIO 12">
 
 The ESP32 reads GPIO 12 at boot to pick the flash voltage. Held high, the board does not

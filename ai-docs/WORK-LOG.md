@@ -331,3 +331,20 @@ button and the microSD … figure out the best plan to do everything today")
   command with no key says so; with a made-up key Google answered 400 "API key not valid",
   so the address and header reach Gemini. Not checked: a real answer, the model name or the
   request body with a real key.
+
+**Same day: can the load cell be emulated, and what the owner needs today** (asked: research
+everything needed today; emulate the load cell with a script so tomorrow it is only plugged in)
+
+- Verdict in `BUILD-PLAN.md`: the pretend-scale image already emulates the cell (only
+  `readCell()` differs). Added the script that was missing: **Run the whole-meal test** on
+  the bench page plays plate, TARE, food, PHOTO and checks each line up to the backend's
+  result. Tried in practice mode (steps 1–4 pass; 5 fails as it should). It listens before
+  it sends, because practice answers synchronously. It never sends `cal` to a real board.
+- An auto-fallback image (pretend weights when no HX711 answers) was rejected: a loose
+  wire would give invented weights that look real.
+- From the owner's photos: the LoLin-style NodeMCU may cover every breadboard hole beside
+  its pins (female–male jumpers, ten needed, ten in hand); the ESP32-CAM's pins are
+  unreachable on its MB base (camera on the breadboard, four jumpers from the base's
+  sockets, not tried); the buzzer module reads −, middle, S, with the + moulded on the S
+  side, so `wiring.ts` now names S and leaves the middle empty.
+- A "what to have on the table today" list in the plan.

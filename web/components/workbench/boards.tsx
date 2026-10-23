@@ -187,7 +187,7 @@ function NodeAParts() {
       <Card x={52} y={40} w={78} h={58} title="BUZZER">
         <circle className="ln-thin" cx="91" cy="74" r="13" />
         <circle className="chip" cx="91" cy="74" r="2.5" />
-        <Pad at={[52, 69]} name="+" side="right" />
+        <Pad at={[52, 69]} name="S" side="right" />
         <Pad at={[130, 69]} name="−" side="left" />
       </Card>
       <Card x={214} y={40} w={62} h={58} title="2N2222">
