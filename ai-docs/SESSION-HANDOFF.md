@@ -34,8 +34,8 @@ In the order the project needs them:
 1. **Swap the board.** The lab handed over an ESP8266 NodeMCU for line 1 instead of an
    ESP32 DevKit (photo on `/workbench/parts`). If the lab cannot swap it, port Node A to
    the ESP8266 (it has ESP-NOW; pins and `pins.h` change via `wiring.ts`). Also waiting
-   on the owner: close-ups of the transistors, electrolytics and load-cell label; photos
-   of the HX711, ESP32-CAM-MB and 100 nF ceramics; a multimeter reading on the buzzer.
+   on the owner: close-ups of the transistors, electrolytics and load-cell label; the HX711 (required; not attached to the load cell)
+   and the 100 nF ceramics; the ESP32-CAM-MB is in hand; a multimeter reading on the buzzer.
    Two 1000 µF capacitors still to buy (not needed for the bench prototype).
 2. **Node A on a real board**: flash it from `/workbench/flash`, then check each part and
    calibrate on `/workbench/bench`. The firmware's serial line format and commands are

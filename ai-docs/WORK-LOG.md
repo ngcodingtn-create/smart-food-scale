@@ -242,3 +242,10 @@ phone.
   HX711, ESP32-CAM-MB, 100 nF ceramics.
 - Checked: `tsc`, `sync:wiring --check`, build; `/workbench/parts` shows all 16 photos
   with no console errors.
+- A 17th photo: the ESP32-CAM seated on its ESP32-CAM-MB (IO0, RST, micro-USB), so
+  line 3 is in hand. The blue part on the load cell's wires is a 4-way connector, not
+  an HX711; the HX711 is still unaccounted for and is required.
+- An 18th photo: a close-up of one electrolytic, 100 µF 25 V. Judged good enough for
+  the 10 µF beside the HX711 (more bulk capacitance on 3.3 V is harmless), so line 14
+  is marked in hand and `bom.ts`'s substitute range for it widened to 4.7–100 µF.
+  That widening is engineering judgement, not a measurement.

@@ -225,7 +225,7 @@ export const PARTS: Part[] = [
     where: 'Node A',
     source: 'lab',
     role: 'Next to the HX711, with a 100 nF, to keep its supply quiet.',
-    swap: 'Anything from 4.7 to 47 µF.',
+    swap: 'Anything from 4.7 to 100 µF, rated 6.3 V or more.',
     changed: 'Replaces the HX711’s dedicated buck converter.',
   },
   {
