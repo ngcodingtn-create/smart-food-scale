@@ -14,7 +14,7 @@ Node A, read live over USB. Every reading, every event, and a calibration you sa
 
 ## Check each part
 
-With Node A flashed and wired, connected above:
+**Node A**, flashed and wired, connected above:
 
 | Part | Do | Expect |
 | --- | --- | --- |
@@ -24,7 +24,16 @@ With Node A flashed and wired, connected above:
 | PHOTO | Press it, once calibrated | `WEIGHING`, then two beeps and `SENT`, or one long low beep and `NO CAMERA` while Node B is off |
 | Camera link | Find camera | `link found ch=…` once Node B runs; `link none` until then |
 
-The camera and its light are checked with Node B, whose firmware is not written yet.
+**Node B**, flashed, connected above:
+
+| Part | Do | Expect |
+| --- | --- | --- |
+| Board | Power on | `boot node=b … psram=1 camera=1 card=1`. `camera=0`: reseat the ribbon. `card=0`: no card, or not FAT32 |
+| Light | Light on, then Light off | All six LEDs on, then off. None: check the transistor's legs |
+| Wi-Fi | Fill in the form, Save and connect | `wifi up ch=…` within a few seconds |
+| Photo and upload | Take a test photo, with the backend running | `photo bytes=…`, then `upload … saved by the backend` and a meal in the app |
+| Card | The same, with the backend off | `kept on the card`; switch the backend on and press Send what is kept |
+| Both boards | Find camera, on Node A | `link found ch=…`: the channel Node B reports |
 
 ## About the calibration
 

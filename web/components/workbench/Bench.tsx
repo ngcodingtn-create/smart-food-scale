@@ -6,15 +6,17 @@ import { fitThroughZero, median, parseLine, type Point, type Reading } from './b
 import './workbench.css';
 
 /**
- * Node A on the bench, read live over USB.
+ * Either board on the bench, read live over USB.
  *
  * Talks to the board through Web Serial at 115200 baud, in the line format of
- * firmware/node-a-scale/README.md. With no board, "Practice" runs a pretend
- * scale in this page that speaks the same lines, so the page can be learnt
- * before the parts arrive. Practice numbers are invented and say so.
+ * the firmware's READMEs. Which board it is comes from its boot or info line
+ * (`node=a` or `node=b`); the controls follow. With no board, "Practise" runs a
+ * pretend board in this page that speaks the same lines, so the page can be
+ * learnt before the parts arrive. Practice numbers are invented and say so.
  */
 
 type Source = { send: (command: string) => void; close: () => void };
+type NodeId = 'a' | 'b';
 
 // The few Web Serial types this page uses; TypeScript's DOM library has none yet.
 type SerialPortLike = {
@@ -62,7 +64,7 @@ async function openBoard(onLine: (line: string) => void, onGone: (why: string) =
 }
 
 /** A pretend Node A: the firmware's lines and commands, with invented numbers. */
-function openPractice(onLine: (line: string) => void, massOf: () => number): Source {
+function practiseScale(onLine: (line: string) => void, massOf: () => number): Source {
   const COUNTS_PER_GRAM = 100; // invented, like the firmware's node-a-sim build
   const ZERO = 84000;
   let offset = 0;
@@ -71,7 +73,7 @@ function openPractice(onLine: (line: string) => void, massOf: () => number): Sou
   const raw = () => Math.round(ZERO + massOf() * COUNTS_PER_GRAM + (Math.random() * 7 - 3));
   const grams = (counts: number) => (Number.isNaN(cpg) ? 'nan' : ((counts - offset) / cpg).toFixed(1));
 
-  onLine('E boot fw=practice calibrated=0 cpg=nan');
+  onLine('E boot node=a fw=practice calibrated=0 cpg=nan');
   onLine('E link none');
   const timer = window.setInterval(() => {
     const counts = raw();
@@ -97,12 +99,67 @@ function openPractice(onLine: (line: string) => void, massOf: () => number): Sou
         cpg = Number(value);
         onLine(`E cal cpg=${cpg.toFixed(6)}`);
       } else if (word === 'info') {
-        onLine(`E info fw=practice calibrated=${Number.isNaN(cpg) ? 0 : 1} cpg=${cpg} offset=${offset} camera_ch=0`);
+        onLine(`E info node=a fw=practice calibrated=${Number.isNaN(cpg) ? 0 : 1} cpg=${cpg} offset=${offset} camera_ch=0`);
       } else if (word === 'find') {
         onLine('E link none');
       }
     },
     close: () => window.clearInterval(timer),
+  };
+}
+
+/**
+ * A pretend Node B. It has no camera and no network: a test photo has an
+ * invented size and is "kept on the card", which is what the real board does
+ * when it cannot reach the backend. The address is from the range reserved for
+ * examples (192.0.2.x), so it can never be mistaken for a real one.
+ */
+function practiseCamera(onLine: (line: string) => void): Source {
+  let ssid = '';
+  let backend = '';
+  let online = false;
+  let kept = 0;
+  const timers: number[] = [];
+
+  onLine('E boot node=b fw=practice psram=1 camera=1 card=1');
+  onLine('E wifi not-set');
+
+  return {
+    send(command) {
+      const space = command.indexOf(' ');
+      const word = space < 0 ? command : command.slice(0, space);
+      const rest = space < 0 ? '' : command.slice(space + 1);
+      if (word === 'ssid') {
+        ssid = rest;
+        onLine(`E set ssid=${rest}`);
+      } else if (word === 'pass') {
+        onLine('E set pass');
+      } else if (word === 'backend') {
+        backend = rest.replace(/\/+$/, '');
+        onLine(`E set backend=${backend}`);
+      } else if (word === 'wifi') {
+        if (!ssid) return onLine('E wifi not-set');
+        timers.push(
+          window.setTimeout(() => {
+            online = true;
+            onLine('E wifi up ch=6 ip=192.0.2.10');
+          }, 700),
+        );
+      } else if (word === 'shoot') {
+        const grams = Number(rest).toFixed(1);
+        onLine('E photo bytes=41230 ms=520');
+        if (!backend) onLine('E error backend-not-set');
+        kept += 1;
+        onLine(`E upload g=${grams} status=-1 outcome=queued`);
+      } else if (command === 'light on' || command === 'light off') {
+        onLine(`E light ${rest}`);
+      } else if (word === 'flush') {
+        if (kept && online) onLine(`E flush id=/queue/00000001 status=-1 kept left=${kept}`);
+      } else if (word === 'info') {
+        onLine(`E info node=b fw=practice psram=1 camera=1 card=1 wifi=${online ? 'up' : 'down'} ch=${online ? 6 : 1} ssid=${ssid} backend=${backend} kept=${kept}`);
+      }
+    },
+    close: () => timers.forEach((timer) => window.clearTimeout(timer)),
   };
 }
 
@@ -112,19 +169,34 @@ function signed(grams: number) {
   return text === '0.0' ? '0.0 g' : `${grams > 0 ? '+' : '−'}${text} g`;
 }
 
+const OUTCOME: Record<string, string> = {
+  saved: 'saved by the backend',
+  queued: 'kept on the card, to send later',
+  unknown: 'the backend could not name the dish',
+  failed: 'failed',
+};
+
 export function Bench() {
   const source = useRef<Source | null>(null);
   const recent = useRef<Reading[]>([]);
   const [mode, setMode] = useState<'off' | 'board' | 'practice'>('off');
-  const [reading, setReading] = useState<Reading | null>(null);
+  const [node, setNode] = useState<NodeId | null>(null);
   const [log, setLog] = useState<string[]>([]);
-  const [link, setLink] = useState('not found');
   const [problem, setProblem] = useState<string | null>(null);
+  // Node A
+  const [reading, setReading] = useState<Reading | null>(null);
+  const [link, setLink] = useState('not found');
   const [practiceMass, setPracticeMass] = useState(0);
   const mass = useRef(0);
   const [points, setPoints] = useState<Point[]>([]);
   const [known, setKnown] = useState('');
   const fit = fitThroughZero(points);
+  // Node B
+  const [wifi, setWifi] = useState<{ state: string; detail: string }>({ state: '—', detail: '' });
+  const [photo, setPhoto] = useState<string | null>(null);
+  const [upload, setUpload] = useState<string | null>(null);
+  const [setup, setSetup] = useState({ ssid: '', pass: '', backend: '' });
+  const [testGrams, setTestGrams] = useState('150');
   // Known only in the browser; assumed until then, so the first render matches the server's.
   const [supported, setSupported] = useState(true);
   useEffect(() => setSupported('serial' in navigator), []);
@@ -136,10 +208,25 @@ export function Bench() {
       setReading(line.reading);
       return;
     }
-    if (line.kind === 'event' && line.event.name === 'link') {
-      setLink(line.event.fields.ch ? `channel ${line.event.fields.ch}` : 'not found');
+    if (line.kind === 'event') {
+      const { name, fields, text: rest } = line.event;
+      if ((name === 'boot' || name === 'info') && (fields.node === 'a' || fields.node === 'b')) setNode(fields.node);
+      if (name === 'link') setLink(fields.ch ? `channel ${fields.ch}` : 'not found');
+      if (name === 'wifi') {
+        if (fields.ch) setWifi({ state: 'Wi-Fi up', detail: `channel ${fields.ch} · ${fields.ip ?? ''}` });
+        else setWifi({ state: rest.includes('not-set') ? 'Wi-Fi not set' : 'Wi-Fi down', detail: '' });
+      }
+      if (name === 'info' && fields.node === 'b') {
+        setWifi({ state: fields.wifi === 'up' ? 'Wi-Fi up' : fields.ssid ? 'Wi-Fi down' : 'Wi-Fi not set', detail: fields.wifi === 'up' ? `channel ${fields.ch}` : '' });
+        setSetup((current) => ({ ...current, ssid: current.ssid || fields.ssid || '', backend: current.backend || fields.backend || '' }));
+      }
+      if (name === 'photo') setPhoto(`${Number(fields.bytes).toLocaleString('en-GB')} bytes`);
+      if (name === 'upload') {
+        const status = Number(fields.status);
+        setUpload(`${fields.g} g · ${OUTCOME[fields.outcome] ?? fields.outcome}${status > 0 ? ` · HTTP ${status}` : ' · no answer'}`);
+      }
     }
-    setLog((current) => [...current.slice(-59), text]);
+    setLog((current) => [...current.slice(-79), text]);
   }
 
   function stop() {
@@ -147,7 +234,11 @@ export function Bench() {
     source.current = null;
     recent.current = [];
     setMode('off');
+    setNode(null);
     setReading(null);
+    setWifi({ state: '—', detail: '' });
+    setPhoto(null);
+    setUpload(null);
   }
 
   async function connect() {
@@ -166,9 +257,9 @@ export function Bench() {
     }
   }
 
-  function practise() {
+  function practise(which: NodeId) {
     setProblem(null);
-    source.current = openPractice(onLine, () => mass.current);
+    source.current = which === 'a' ? practiseScale(onLine, () => mass.current) : practiseCamera(onLine);
     setMode('practice');
   }
 
@@ -176,7 +267,7 @@ export function Bench() {
 
   const send = (command: string) => {
     // Logged first: practice answers at once, and the answer belongs under the command.
-    setLog((current) => [...current.slice(-59), `> ${command}`]);
+    setLog((current) => [...current.slice(-79), `> ${command.startsWith('pass ') ? 'pass ••••••' : command}`]);
     source.current?.send(command);
   };
 
@@ -188,20 +279,43 @@ export function Bench() {
     setKnown('');
   }
 
+  function saveSetup() {
+    if (setup.ssid) send(`ssid ${setup.ssid}`);
+    if (setup.pass) send(`pass ${setup.pass}`);
+    if (setup.backend) send(`backend ${setup.backend}`);
+    send('wifi');
+    setSetup((current) => ({ ...current, pass: '' }));
+  }
+
+  const who =
+    mode === 'off'
+      ? 'Not connected'
+      : mode === 'practice'
+        ? `Practice: a pretend ${node === 'b' ? 'camera board' : 'scale'}, invented numbers`
+        : node === 'a'
+          ? 'Node A, the scale, over USB'
+          : node === 'b'
+            ? 'Node B, the camera, over USB'
+            : 'A board, over USB. Press Info to see which';
   const shown = reading === null ? '—' : reading.grams === null ? `${reading.raw}` : `${reading.grams.toFixed(1)} g`;
+  const off = mode === 'off';
 
   return (
     <div className="bench">
       <div className="bench-top">
-        {mode === 'off' ? (
+        {off ? (
           <>
             <button type="button" className="btn btn-primary" onClick={connect} disabled={!supported}>
               <Icon name="plug" size={16} />
-              Connect the board
+              Connect a board
             </button>
-            <button type="button" className="btn btn-secondary" onClick={practise}>
+            <button type="button" className="btn btn-secondary" onClick={() => practise('a')}>
               <Icon name="play" size={15} />
-              Practise without a board
+              Practise: the scale
+            </button>
+            <button type="button" className="btn btn-secondary" onClick={() => practise('b')}>
+              <Icon name="play" size={15} />
+              Practise: the camera
             </button>
           </>
         ) : (
@@ -215,22 +329,43 @@ export function Bench() {
       </div>
 
       <div className="bench-screen" data-mode={mode}>
-        <p className="bench-mode">{mode === 'board' ? 'Node A, over USB' : mode === 'practice' ? 'Practice: a pretend scale, invented numbers' : 'Not connected'}</p>
-        <p className="bench-value" aria-live="polite">
-          {shown}
-          {reading?.grams === null ? <span>raw counts · not calibrated</span> : null}
-        </p>
-        <p className="bench-meta">
-          <span data-on={reading?.stable ?? false}>{reading?.stable ? 'settled' : 'moving'}</span>
-          <span>camera: {link}</span>
-          {reading ? <span>net {reading.net} counts</span> : null}
-        </p>
+        <p className="bench-mode">{who}</p>
+        {node === 'b' ? (
+          <>
+            <p className="bench-value bench-value-small" aria-live="polite">
+              {wifi.state}
+              {wifi.detail ? <span>{wifi.detail}</span> : null}
+            </p>
+            <p className="bench-meta">
+              <span>last photo: {photo ?? '—'}</span>
+              <span>last upload: {upload ?? '—'}</span>
+            </p>
+          </>
+        ) : (
+          <>
+            <p className="bench-value" aria-live="polite">
+              {shown}
+              {reading?.grams === null ? <span>raw counts · not calibrated</span> : null}
+            </p>
+            <p className="bench-meta">
+              <span data-on={reading?.stable ?? false}>{reading?.stable ? 'settled' : 'moving'}</span>
+              <span>camera: {link}</span>
+              {reading ? <span>net {reading.net} counts</span> : null}
+            </p>
+          </>
+        )}
       </div>
 
-      {mode === 'practice' ? (
+      {mode === 'practice' && node === 'a' ? (
         <label className="bench-mass">
           <span>Mass on the pretend scale: {practiceMass} g</span>
-          <input type="range" min="0" max="3000" step="10" value={practiceMass} onChange={(event) => {
+          <input
+            type="range"
+            min="0"
+            max="3000"
+            step="10"
+            value={practiceMass}
+            onChange={(event) => {
               mass.current = Number(event.target.value);
               setPracticeMass(mass.current);
             }}
@@ -239,86 +374,125 @@ export function Bench() {
       ) : null}
 
       <div className="bench-commands" role="group" aria-label="Commands">
-        {[
-          ['tare', 'Tare'],
-          ['capture', 'Photo'],
-          ['info', 'Info'],
-          ['find', 'Find camera'],
-        ].map(([command, label]) => (
-          <button key={command} type="button" disabled={mode === 'off'} onClick={() => send(command)}>
+        {(node === 'b'
+          ? [
+              ['light on', 'Light on'],
+              ['light off', 'Light off'],
+              ['flush', 'Send what is kept'],
+              ['info', 'Info'],
+            ]
+          : node === 'a'
+            ? [
+                ['tare', 'Tare'],
+                ['capture', 'Photo'],
+                ['info', 'Info'],
+                ['find', 'Find camera'],
+              ]
+            : [['info', 'Info']]
+        ).map(([command, label]) => (
+          <button key={command} type="button" disabled={off} onClick={() => send(command)}>
             {label}
           </button>
         ))}
       </div>
 
-      <section className="bench-cal">
-        <p className="label">Calibrate</p>
-        <ol>
-          <li>Empty plate on, press Tare.</li>
-          <li>Put a known mass on, type its grams, press Record. Five masses, from light to near 2 kg.</li>
-          <li>Save. Then check with masses you did not use here.</li>
-        </ol>
-        <div className="bench-record">
-          <input
-            inputMode="decimal"
-            placeholder="Known mass, g"
-            value={known}
-            onChange={(event) => setKnown(event.target.value)}
-            onKeyDown={(event) => event.key === 'Enter' && record()}
-            aria-label="Known mass in grams"
-          />
-          <button type="button" onClick={record} disabled={mode === 'off' || !(Number(known) > 0)}>
-            Record
-          </button>
-          {points.length ? (
-            <button type="button" className="bench-quiet" onClick={() => setPoints([])}>
-              Clear
+      {node === 'b' ? (
+        <>
+          <div className="bench-record">
+            <input inputMode="decimal" value={testGrams} onChange={(event) => setTestGrams(event.target.value)} aria-label="Grams to send with the test photo" />
+            <button type="button" disabled={off || !(Number(testGrams) >= 0.5)} onClick={() => send(`shoot ${testGrams}`)}>
+              Take a test photo
             </button>
-          ) : null}
-        </div>
-        {points.length ? (
-          <div className="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Known</th>
-                  <th>Counts</th>
-                  <th>Would show</th>
-                  <th>Error</th>
-                </tr>
-              </thead>
-              <tbody>
-                {points.map((point, index) => {
-                  const row = fit?.rows[index];
-                  return (
-                    <tr key={index}>
-                      <td>{point.grams} g</td>
-                      <td>{point.counts}</td>
-                      <td>{row ? `${row.shown.toFixed(1)} g` : '—'}</td>
-                      <td>{row ? signed(row.error) : '—'}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
           </div>
-        ) : null}
-        {fit ? (
-          <p className="bench-fit">
-            <span>
-              <strong>{fit.slope.toFixed(4)}</strong> counts per gram · worst error {fit.worst.toFixed(1)} g
-            </span>
-            <button type="button" className="btn btn-primary" onClick={() => send(`cal ${fit.slope.toFixed(6)}`)} disabled={mode === 'off'}>
-              Save to the board
+
+          <section className="bench-cal">
+            <p className="label">Wi-Fi and backend</p>
+            <p className="bench-hint">
+              Saved on the board. The password is never printed back. Until the backend is hosted, its address is the laptop’s
+              on the hotspot, port 8000: <code>http://192.168.x.y:8000</code>.
+            </p>
+            <div className="bench-setup">
+              <input placeholder="Hotspot name" value={setup.ssid} onChange={(event) => setSetup({ ...setup, ssid: event.target.value })} aria-label="Hotspot name" />
+              <input type="password" placeholder="Password" value={setup.pass} onChange={(event) => setSetup({ ...setup, pass: event.target.value })} aria-label="Hotspot password" />
+              <input placeholder="Backend address" value={setup.backend} onChange={(event) => setSetup({ ...setup, backend: event.target.value })} aria-label="Backend address" />
+              <button type="button" className="btn btn-primary" disabled={off || !setup.ssid} onClick={saveSetup}>
+                Save and connect
+              </button>
+            </div>
+          </section>
+        </>
+      ) : null}
+
+      {node === 'a' ? (
+        <section className="bench-cal">
+          <p className="label">Calibrate</p>
+          <ol>
+            <li>Empty plate on, press Tare.</li>
+            <li>Put a known mass on, type its grams, press Record. Five masses, from light to near 2 kg.</li>
+            <li>Save. Then check with masses you did not use here.</li>
+          </ol>
+          <div className="bench-record">
+            <input
+              inputMode="decimal"
+              placeholder="Known mass, g"
+              value={known}
+              onChange={(event) => setKnown(event.target.value)}
+              onKeyDown={(event) => event.key === 'Enter' && record()}
+              aria-label="Known mass in grams"
+            />
+            <button type="button" onClick={record} disabled={off || !(Number(known) > 0)}>
+              Record
             </button>
-          </p>
-        ) : (
-          <p className="bench-hint">Two masses give a line; five give one worth trusting.</p>
-        )}
-      </section>
+            {points.length ? (
+              <button type="button" className="bench-quiet" onClick={() => setPoints([])}>
+                Clear
+              </button>
+            ) : null}
+          </div>
+          {points.length ? (
+            <div className="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Known</th>
+                    <th>Counts</th>
+                    <th>Would show</th>
+                    <th>Error</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {points.map((point, index) => {
+                    const row = fit?.rows[index];
+                    return (
+                      <tr key={index}>
+                        <td>{point.grams} g</td>
+                        <td>{point.counts}</td>
+                        <td>{row ? `${row.shown.toFixed(1)} g` : '—'}</td>
+                        <td>{row ? signed(row.error) : '—'}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          ) : null}
+          {fit ? (
+            <p className="bench-fit">
+              <span>
+                <strong>{fit.slope.toFixed(4)}</strong> counts per gram · worst error {fit.worst.toFixed(1)} g
+              </span>
+              <button type="button" className="btn btn-primary" onClick={() => send(`cal ${fit.slope.toFixed(6)}`)} disabled={off}>
+                Save to the board
+              </button>
+            </p>
+          ) : (
+            <p className="bench-hint">Two masses give a line; five give one worth trusting.</p>
+          )}
+        </section>
+      ) : null}
 
       <details className="bench-log">
-        <summary>Everything else the board said ({log.length})</summary>
+        <summary>Everything the board said ({log.length})</summary>
         <pre>{log.join('\n') || 'Nothing yet.'}</pre>
       </details>
     </div>

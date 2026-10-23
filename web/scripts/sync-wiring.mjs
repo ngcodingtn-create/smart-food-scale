@@ -3,7 +3,8 @@
  *   npm run sync:wiring            rewrite the files below
  *   npm run sync:wiring -- --check exit 1 if any of them is stale (for CI)
  *
- *   firmware/node-a-scale/include/pins.h   the GPIOs, for the firmware
+ *   firmware/node-a-scale/include/pins.h   the GPIOs, for each board's firmware
+ *   firmware/node-b-camera/include/pins.h
  *   web/public/workbench/wokwi/node-a/     Node A for the Wokwi simulator: the parts
  *                                          and wires (diagram.json), the firmware in
  *                                          one file (sketch.ino) and its libraries.
@@ -149,6 +150,7 @@ const node = NODES.find((item) => item.id === 'a');
 const pins = header(node);
 const outputs = [
   [path.join(nodeA, 'include/pins.h'), pins],
+  [path.join(repo, 'firmware/node-b-camera/include/pins.h'), header(NODES.find((item) => item.id === 'b'))],
   [path.join(wokwiA, 'diagram.json'), `${JSON.stringify(wokwiDiagram(node), null, 2)}\n`],
   [path.join(wokwiA, 'sketch.ino'), await wokwiSketch(pins)],
   [path.join(wokwiA, 'libraries.txt'), LIBRARIES],

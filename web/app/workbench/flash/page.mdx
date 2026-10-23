@@ -34,20 +34,35 @@ Write the firmware to a board from this page, over USB. No software to install: 
 
 <Callout type="caution" title="Not yet tried on a board">
 
-Both images were built with PlatformIO on 14 October 2026 and checked piece by piece:
+All three images were built with PlatformIO on 14 October 2026 and checked piece by piece:
 the bootloader, partition table and program sit at the addresses PlatformIO itself
 writes. Nobody has flashed them to a board, because there is no board yet. If the
-page fails, flash from `firmware/node-a-scale` with `pio run -t upload`.
+page fails, flash from the board's folder under `firmware/` with `pio run -t upload`.
 
 </Callout>
 
 ## Node B, the camera
 
-No firmware yet. It is the next one to write: ESP-NOW in, light on, one photo, posted to
-the backend, kept on the card when the network is down.
+<div className="flash-cards">
+  <section className="flash-card">
+    <p className="label">ESP32-CAM on its MB base</p>
+    <p className="flash-title">The camera</p>
+    <p>Answers Node A, lights the plate, takes one photo and posts it with the grams. Keeps it on the card when the network is down.</p>
+    <FlashButton manifest="/workbench/firmware/node-b/camera.json" label="the camera" />
+  </section>
+  <section className="flash-card">
+    <p className="label">Then, once</p>
+    <p className="flash-title">Wi-Fi and backend</p>
+    <p>The image carries no Wi-Fi name or password. Set them, and the backend’s address, on <a href="/workbench/bench">Test and calibrate</a>: they are saved on the board.</p>
+  </section>
+</div>
+
+Plug the camera in through its MB base. If it will not connect, hold the base's IO0
+button, press RST, then let go of IO0. When it is done the serial line prints
+`E boot node=b`, then `wifi not-set` until the Wi-Fi is set.
 
 ## Where these files come from
 
-`firmware/tools/publish_web.py` builds both, joins each into one image starting at
+`firmware/tools/publish_web.py` builds them all, joins each into one image starting at
 address 0, and writes them into the site with the version from the firmware. Run it
 after any change to the firmware, and commit what it writes.

@@ -1047,3 +1047,33 @@
   overflow: auto;
   font-size: 0.78rem;
 }
+
+/* Node B's screen shows a state, not a number. */
+.prose .bench-value-small {
+  font-size: clamp(1.6rem, 1.3rem + 1.5vw, 2.2rem);
+}
+.bench-setup {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 0.8rem;
+}
+@media (min-width: 40rem) {
+  .bench-setup {
+    grid-template-columns: 1fr 1fr;
+  }
+  .bench-setup input:nth-child(3) {
+    grid-column: 1 / -1;
+  }
+}
+.bench-setup input {
+  min-height: 2.5rem;
+  padding: 0 0.75rem;
+  border: 1px solid var(--rule-strong);
+  border-radius: 0.6rem;
+  background: var(--paper);
+  font: inherit;
+  color: var(--ink);
+}
+.bench-setup .btn {
+  width: fit-content;
+}
