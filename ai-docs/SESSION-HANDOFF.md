@@ -23,7 +23,7 @@ the rest is as it stood.
 | Rig (`/rig`) | **Rebuilt** on the current design, with four computed drawings |
 | Prototype (`/prototype`) | Done. Simulates the whole chain in the browser |
 | Firmware, Node A | **Written.** Compiles with PlatformIO (ESP32 core 2.0.17, no warnings) and runs in Wokwi (core 3.x). Never on a board: there is none |
-| Firmware, Node B | Not started. The frame format it must speak is in `firmware/shared/sfs_protocol.h` |
+| Firmware, Node B | **Written.** Compiles (core 2.0.17, no warnings). Its upload format was checked against the running backend by a script that builds the same bytes. No simulator runs it (no ESP32-CAM anywhere); never on a board |
 | Mobile app | Not started. `web/components/sim/Phone.tsx` is the closest thing to a spec |
 | Hardware | Not ordered. Waiting on the component request |
 
@@ -36,10 +36,11 @@ In the order the project needs them:
 2. **Node A on a real board**: flash it from `/workbench/flash`, then check each part and
    calibrate on `/workbench/bench`. The firmware's serial line format and commands are
    in `firmware/node-a-scale/README.md`; the bench page speaks them.
-3. **Node B firmware**: answer Node A's `Hello` on the hotspot's channel, ack each
-   `Capture`, light on GPIO 13, one photo, multipart POST with retry, microSD buffer,
-   then send a `Result`. The frames are in `firmware/shared/sfs_protocol.h`; Node A
-   already sends and waits for them.
+3. **Node B on a real board**: flash it from `/workbench/flash`, set the hotspot and
+   the backend's address on `/workbench/bench` (saved on the board, not compiled in),
+   take a test photo, then tune the light's settle time and the JPEG quality in
+   `firmware/node-b-camera/include/config.h` from real photos. Then both boards
+   together: Node A's Find camera, then one whole meal.
 4. **Move the backend off the owner's PC, with Gemini doing the recognition.** On
    13 October the owner said: "i want to not use my pc but a server" and "we are using
    gemini api to get the data". That settles D3's open choice (Gemini), though
@@ -109,8 +110,11 @@ Real, small, and not fixed. Fix them when you are nearby, or tell the owner.
 - **No firmware has run on a board.** Node A compiles and runs in Wokwi; the Flash
   page's images were checked byte by byte at their addresses, never written to a chip.
   The bench page was tested in practice mode only, never with a real serial port.
-- **The camera search** was only seen failing (no Node B exists). Finding Node B, the
-  ack and the result frames are untested until Node B's firmware is written.
+- **The two boards have never spoken.** Node A's camera search was only seen failing
+  in Wokwi, and Node B's firmware has only been compiled. The Hello, ack and result
+  frames, the duplicate-capture guard and the microSD queue are untested.
+- **Node B's photo settings** (300 ms for the light to settle, two frames discarded,
+  JPEG quality 12) are starting values, not measured ones.
 
 - **The request sheet has not been printed.** Print styles exist (`@media print` in
   `request.css`: hides navigation, 8 pt rows, no row split across pages). Nobody has

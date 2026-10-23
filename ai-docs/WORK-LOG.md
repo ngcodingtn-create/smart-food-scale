@@ -198,3 +198,22 @@ phone.
   scroll at 375 px on the new pages. Not verified: anything on a real board.
 - `npm audit` reports issues in next, sharp and source-map-js that predate this work;
   the flagged Next code path (`next/og`) is not used here. Not fixed.
+
+**Later the same day: Node B's firmware** (asked: "continue")
+
+- `firmware/node-b-camera/`: joins the hotspot, answers Node A's Hello with its
+  channel, acks each Capture at once (and does not re-shoot a repeated one), then light
+  on, settle, one 800 × 600 JPEG, light off, `POST /meals` (`grams`, `eaten_on` once the
+  clock is set, `image`). No answer or a 5xx: kept on the microSD card and retried every
+  15 s. The outcome goes back to Node A as a Result.
+- Added a fourth outcome to `sfs_protocol.h`, `Unknown` (the backend could not name the
+  dish); Node A shows it as `NOT RECOGNISED`. Both boards' boot and info lines now say
+  `node=a` or `node=b`.
+- Wi-Fi name, password and backend address are serial commands saved on the board, so
+  the image on the Flash page works for anyone. https needs a root certificate in
+  `secrets.h`; without one Node B refuses it rather than skip the check.
+- Checked: both boards compile; the request bytes Node B builds were rebuilt in Python
+  and posted to the running backend: 201 with and without a date, 422 under 0.5 g (the
+  three test meals were deleted afterwards). The Flash page installs all three images;
+  the bench page recognises which board is attached and has a camera practice mode.
+- Not checked: anything on hardware, or the two boards talking.

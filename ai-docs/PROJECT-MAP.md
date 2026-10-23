@@ -13,7 +13,7 @@ Where things are, and which file to change when you want something to change.
 | `firmware/shared/sfs_protocol.h` | The ESP-NOW frames both nodes speak | Node A uses it; Node B must |
 | `firmware/tools/publish_web.py` | Builds Node A and writes the images the Flash page installs | Run after firmware changes |
 | `web/public/workbench/` | Generated: firmware images, and Node A's Wokwi files | Never edit by hand |
-| `firmware/node-b-camera/` | Camera node | Does not exist yet |
+| `firmware/node-b-camera/` | PlatformIO project for the camera node | Written, compiles; see its README. Wi-Fi and backend set over serial |
 | `app/` | React Native app | Does not exist yet |
 | `docs/decisions.md` | Decision log, D0–D14 | Current |
 | `PROGRESS.md` | Human-facing status | Current |

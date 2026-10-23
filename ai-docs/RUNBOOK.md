@@ -27,6 +27,8 @@ firmware/.venv/Scripts/python.exe -m pip install platformio
 cd firmware/node-a-scale
 ../.venv/Scripts/pio.exe run                                  # both builds: node-a-scale, node-a-sim
 ../.venv/Scripts/pio.exe run -e node-a-scale -t upload        # with a board on USB
+cd ../node-b-camera
+../.venv/Scripts/pio.exe run                                  # the camera; flash with -t upload via the MB base
 ```
 
 In the Claude desktop app, `.claude/launch.json` starts both: `web` (port 3000,
@@ -78,6 +80,8 @@ cd ../backend
 
 cd ../firmware/node-a-scale
 ../.venv/Scripts/pio.exe run         # both builds compile, no warnings from our code
+cd ../node-b-camera
+../.venv/Scripts/pio.exe run         # likewise
 ```
 
 **After changing the firmware or the wiring**, regenerate what the site serves, and
