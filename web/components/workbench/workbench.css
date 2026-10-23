@@ -1292,3 +1292,207 @@
   border-radius: 0.35rem;
   border: 1px solid var(--rule);
 }
+
+/* --- Still missing: the French sheet for the lab (/workbench/missing) ------- */
+
+.fig .miss {
+  fill: var(--paper-raised);
+  stroke: var(--accent);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 3;
+}
+.prose .missing-map {
+  max-width: 34rem;
+  margin: 1.5rem auto;
+}
+.missing-urgency {
+  display: inline-block;
+  padding: 0.05rem 0.45rem;
+  border-radius: 0.35rem;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  background: var(--paper-sunken);
+  color: var(--ink-soft);
+}
+.missing-urgency[data-urgency='blocking'] {
+  background: var(--danger-wash);
+  color: var(--danger-ink);
+}
+.missing-urgency[data-urgency='needed'],
+.missing-urgency[data-urgency='useful'] {
+  background: var(--caution-wash);
+  color: var(--caution-ink);
+}
+.missing-urgency[data-urgency='final'] {
+  background: var(--tip-wash);
+  color: var(--tip-ink);
+}
+.prose .missing-cards {
+  display: grid;
+  gap: 1rem;
+  margin: 1.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+@media (min-width: 52rem) {
+  .prose .missing-cards {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.prose .missing-cards > li.missing-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0.9rem 1rem 1rem;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--paper-raised);
+  scroll-margin-top: 5rem;
+}
+.missing-card[data-urgency='blocking'] {
+  border-color: var(--danger);
+  box-shadow: inset 4px 0 0 var(--danger);
+}
+.missing-head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+}
+.prose .missing-head h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  line-height: 1.25;
+}
+.missing-n {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 600;
+  translate: 0 -0.1rem;
+}
+.missing-qty {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  white-space: nowrap;
+  color: var(--ink-soft);
+}
+.prose .missing-urgency-line {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--ink-soft);
+}
+.missing-pictures {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: 1px solid var(--rule);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  background: var(--paper-sunken);
+}
+.prose .missing-pictures figure {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  min-width: 0;
+}
+.missing-pictures figure + figure {
+  border-left: 1px solid var(--rule);
+}
+.missing-drawing .part-art {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  padding: 0.4rem;
+}
+.prose .missing-photo img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  margin: 0;
+  background: #fff;
+}
+.prose .missing-pictures figcaption {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  margin: 0;
+  padding: 0.35rem 0.55rem 0.45rem;
+  font-size: 0.75rem;
+  line-height: 1.35;
+  color: var(--ink-soft);
+}
+.missing-drawing figcaption {
+  font-family: var(--font-mono);
+  font-size: 0.62rem !important;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-faint) !important;
+}
+.missing-pictures figcaption small {
+  font-size: 0.68rem;
+  color: var(--ink-faint);
+}
+.prose .missing-facts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.3rem 0.8rem;
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+.prose .missing-facts dt {
+  margin: 0;
+  font-weight: 600;
+  color: var(--ink);
+}
+.prose .missing-facts dd {
+  margin: 0;
+  color: var(--ink-soft);
+}
+@media (max-width: 30rem) {
+  .prose .missing-facts {
+    grid-template-columns: 1fr;
+  }
+  .prose .missing-facts dd {
+    margin-bottom: 0.3rem;
+  }
+}
+.missing-table td:first-child {
+  font-family: var(--font-mono);
+  font-weight: 600;
+}
+
+@media print {
+  .prose .missing-cards {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+  .prose .missing-cards > li.missing-card {
+    break-inside: avoid;
+    padding: 0.5rem 0.6rem;
+    font-size: 8.5pt;
+    box-shadow: none;
+  }
+  .prose .missing-facts {
+    font-size: 8pt;
+  }
+  .missing-urgency,
+  .missing-n,
+  .missing-card {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+}

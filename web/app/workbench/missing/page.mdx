@@ -1,0 +1,43 @@
+import { MissingCards, MissingMap, MissingTable, NoSwap, OnSite, receivedCount } from '@/components/workbench/Missing';
+import { MISSING } from '@/components/workbench/missing';
+
+export const metadata = {
+  title: 'Ce qui manque encore',
+  description: 'Pour le laboratoire : les composants qui manquent encore au projet Smart Food Scale, avec un dessin, une photo et la façon de reconnaître chacun.',
+};
+
+# Ce qui manque encore
+
+<div lang="fr">
+
+Bonjour, et merci pour les composants du 14 octobre. Nous avons photographié tout ce que
+nous avons reçu ({receivedCount()} sortes de composants) et l’avons comparé à notre liste. Il manque
+encore **{MISSING.length} pièces**, ci-dessous de la plus urgente à la moins urgente.
+Chacune a un dessin, une photo et la façon de la reconnaître dans un tiroir.
+
+Le projet : **Smart Food Scale**, une balance de cuisine qui pèse l’assiette et la
+photographie, pour estimer ce que l’on mange.
+
+<MissingTable />
+
+## Où va chaque pièce
+
+<MissingMap />
+
+## Les pièces, une par une
+
+<MissingCards />
+
+## Pas besoin d’échanger
+
+<NoSwap />
+
+## Au labo, sur place
+
+À utiliser au laboratoire, rien ne sort :
+
+<OnSite />
+
+Merci ! L’équipe Smart Food Scale, 23 octobre 2026.
+
+</div>

@@ -249,3 +249,47 @@ phone.
   the 10 µF beside the HX711 (more bulk capacitance on 3.3 V is harmless), so line 14
   is marked in hand and `bom.ts`'s substitute range for it widened to 4.7–100 µF.
   That widening is engineering judgement, not a measurement.
+- A 19th photo: the transistor's face reads 2N2222A, the part asked for; `kit.ts` gives
+  the usual leg order and the multimeter check, since makers differ.
+- Asked: can the kit build the prototype? Yes, once the HX711 is found and the ESP8266
+  is swapped or Node A ported to it. Written up, with a proposed NodeMCU pin map, in
+  [research/2026-10-23-can-the-kit-build-the-prototype.md](research/2026-10-23-can-the-kit-build-the-prototype.md).
+  Web search failed this session; the two facts it rests on were read from the source pages.
+
+**Same day: Node A moved to the ESP8266** (asked: "move the firmware to the ESP8266";
+the faculty was closed, so no HX711 and no swap)
+
+- `main.cpp` builds for both chips; the differences are two `#if defined(ESP8266)`
+  blocks: settings in EEPROM (a magic-tagged struct) instead of Preferences, and the
+  ESP8266's ESP-NOW calls (role COMBO, `wifi_set_channel`, the broadcast peer re-added on
+  each channel). On the ESP8266, Wi-Fi persistence, auto-connect and modem sleep are
+  turned off so the radio stays on the channel it searches. Version 0.2.0.
+- `wiring.ts`: Node A's board is the NodeMCU, pins read off the owner's photo (LoLin V3
+  layout). GPIOs: capture D3/0, SDA D2/4, SCL D1/5, HX711 DT D6/12, SCK D7/13, tare
+  D5/14, buzzer D8/15, chosen around the boot pins. Each also names its old ESP32 pin
+  (`esp32`), which `sync-wiring.mjs` uses for the `#else` half of `pins.h` and for the
+  Wokwi diagram (Wokwi has no ESP8266, checked on docs.wokwi.com).
+- `platformio.ini`: four environments. `publish_web.py`: one image per chip, both listed
+  in each manifest, so the Flash page writes whichever chip is plugged in. Files renamed
+  to `<name>-<chip>.bin`.
+- Pages: the Wire it drawing and callouts (NodeMCU boot pins; the 2N2222A's legs), Flash
+  it, Simulate it, and the parts card (`given` in `kit.ts`).
+- Checked: all four builds compile with no warnings; the ESP8266 images start with the
+  0xE9 header; `tsc`; `sync:wiring --check`; the Wire it drawing in the browser (every
+  wire on its pin); the manifests and images load. Not checked: anything on the board.
+
+**Same day: "Ce qui manque encore"** (`/workbench/missing`; asked: a page in French, with
+drawings and web images, to show the lab)
+
+- Which parts are missing is read from `kit.ts` (status not have/skip): HX711, a second
+  push button, 4 × 100 nF, 2 × 1000 µF, header strip, 5 V charger, microSD. The French
+  words, urgency and photos are in `web/components/workbench/missing.ts`, which fails the
+  build if it and `kit.ts` disagree. `kit.ts` gained `given` for the 100 µF standing in
+  for the 10 µF; the push button is now "check" (only one came).
+- Photos: the owner's own where a received part shows what is wanted (button, 100 µF),
+  otherwise freely licensed ones in `web/public/workbench/missing/`, each credited on the
+  page: SparkFun HX711 (Flickr, CC BY 2.0, found through Openverse), and Wikimedia
+  Commons for the 100 nF, header, charger and microSD (CC BY-SA). Commons has no HX711.
+- A French SVG map of where each missing part goes, a summary table, one card per part.
+- Checked: `tsc`, build, all seven photos load, no sideways scroll, no text overlap in the
+  map (measured with getBBox). Screenshots of the hidden browser pane were unreliable.

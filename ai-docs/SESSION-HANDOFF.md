@@ -22,7 +22,7 @@ the rest is as it stood.
 | Architecture (`/project/architecture`) | **Rebuilt** as a playable system map and three drawings |
 | Rig (`/rig`) | **Rebuilt** on the current design, with four computed drawings |
 | Prototype (`/prototype`) | Done. Simulates the whole chain in the browser |
-| Firmware, Node A | **Written.** Compiles with PlatformIO (ESP32 core 2.0.17, no warnings) and runs in Wokwi (core 3.x). Never on a board: there is none |
+| Firmware, Node A | **Moved to the ESP8266 NodeMCU** the lab gave (23 Oct). Four builds compile with no warnings: `node-a-nodemcu` and `-sim` (ESP8266), `node-a-scale` and `node-a-sim` (ESP32, kept because Wokwi has no ESP8266). Runs in Wokwi on the ESP32 pins. Never on a board |
 | Firmware, Node B | **Written.** Compiles (core 2.0.17, no warnings). Its upload format was checked against the running backend by a script that builds the same bytes. No simulator runs it (no ESP32-CAM anywhere); never on a board |
 | Mobile app | Not started. `web/components/sim/Phone.tsx` is the closest thing to a spec |
 | Hardware | **In hand from the lab** (form of 14 Oct), photographed 23 Oct: see `/workbench/parts`. The "DevKit" is an ESP8266 NodeMCU and must be swapped |
@@ -31,12 +31,15 @@ the rest is as it stood.
 
 In the order the project needs them:
 
-1. **Swap the board.** The lab handed over an ESP8266 NodeMCU for line 1 instead of an
-   ESP32 DevKit (photo on `/workbench/parts`). If the lab cannot swap it, port Node A to
-   the ESP8266 (it has ESP-NOW; pins and `pins.h` change via `wiring.ts`). Also waiting
-   on the owner: close-ups of the transistors, electrolytics and load-cell label; the HX711 (required; not attached to the load cell)
-   and the 100 nF ceramics; the ESP32-CAM-MB is in hand; a multimeter reading on the buzzer.
-   Two 1000 µF capacitors still to buy (not needed for the bench prototype).
+1. **Get an HX711.** The lab's form ticked one, but it is not in the photos and not on
+   the load cell's wires; the faculty was closed on 23 October. Nothing in the kit can
+   stand in for it. Until it comes, the owner can run everything else with the
+   pretend-scale image on `/workbench/flash` (`sim <grams>` on the serial line). Also
+   waiting on the owner: the load-cell label, the 100 nF ceramics, a multimeter reading
+   on the buzzer. Two 1000 µF capacitors still to buy (final build only). The French
+   sheet for the lab is `/workbench/missing`, built from `kit.ts` and `missing.ts`. What the kit
+   can build is in
+   [research/2026-10-23-can-the-kit-build-the-prototype.md](research/2026-10-23-can-the-kit-build-the-prototype.md).
 2. **Node A on a real board**: flash it from `/workbench/flash`, then check each part and
    calibrate on `/workbench/bench`. The firmware's serial line format and commands are
    in `firmware/node-a-scale/README.md`; the bench page speaks them.
