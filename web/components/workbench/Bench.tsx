@@ -187,6 +187,10 @@ export function Bench() {
   const [reading, setReading] = useState<Reading | null>(null);
   const [link, setLink] = useState('not found');
   const [practiceMass, setPracticeMass] = useState(0);
+  // A real board running the pretend-scale build: its weight is typed here.
+  const [simulated, setSimulated] = useState(false);
+  const [simGrams, setSimGrams] = useState('150');
+  const [typed, setTyped] = useState('');
   const mass = useRef(0);
   const [points, setPoints] = useState<Point[]>([]);
   const [known, setKnown] = useState('');
@@ -211,6 +215,7 @@ export function Bench() {
     if (line.kind === 'event') {
       const { name, fields, text: rest } = line.event;
       if ((name === 'boot' || name === 'info') && (fields.node === 'a' || fields.node === 'b')) setNode(fields.node);
+      if ((name === 'boot' || name === 'info') && fields.node === 'a') setSimulated(fields.simulated === '1');
       if (name === 'link') setLink(fields.ch ? `channel ${fields.ch}` : 'not found');
       if (name === 'wifi') {
         if (fields.ch) setWifi({ state: 'Wi-Fi up', detail: `channel ${fields.ch} · ${fields.ip ?? ''}` });
@@ -235,6 +240,7 @@ export function Bench() {
     recent.current = [];
     setMode('off');
     setNode(null);
+    setSimulated(false);
     setReading(null);
     setWifi({ state: '—', detail: '' });
     setPhoto(null);
@@ -373,6 +379,21 @@ export function Bench() {
         </label>
       ) : null}
 
+      {mode === 'board' && node === 'a' && simulated ? (
+        <form
+          className="bench-record"
+          onSubmit={(event) => {
+            event.preventDefault();
+            send(`sim ${simGrams}`);
+          }}
+        >
+          <input inputMode="decimal" value={simGrams} onChange={(event) => setSimGrams(event.target.value)} aria-label="Pretend weight, in grams" />
+          <button type="submit" disabled={!(Number(simGrams) >= 0)}>
+            Set the pretend weight, g
+          </button>
+        </form>
+      ) : null}
+
       <div className="bench-commands" role="group" aria-label="Commands">
         {(node === 'b'
           ? [
@@ -494,6 +515,19 @@ export function Bench() {
       <details className="bench-log">
         <summary>Everything the board said ({log.length})</summary>
         <pre>{log.join('\n') || 'Nothing yet.'}</pre>
+        <form
+          className="bench-record"
+          onSubmit={(event) => {
+            event.preventDefault();
+            if (typed.trim()) send(typed.trim());
+            setTyped('');
+          }}
+        >
+          <input value={typed} onChange={(event) => setTyped(event.target.value)} placeholder="Any command from the firmware’s README" aria-label="A command for the board" disabled={off} />
+          <button type="submit" disabled={off || !typed.trim()}>
+            Send
+          </button>
+        </form>
       </details>
     </div>
   );

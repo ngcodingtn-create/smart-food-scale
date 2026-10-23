@@ -293,3 +293,17 @@ drawings and web images, to show the lab)
 - A French SVG map of where each missing part goes, a summary table, one card per part.
 - Checked: `tsc`, build, all seven photos load, no sideways scroll, no text overlap in the
   map (measured with getBBox). Screenshots of the hidden browser pane were unreliable.
+
+**Same day: the plan for finishing** (asked: "tomorrow i will get the HX711, the second
+button and the microSD … figure out the best plan to do everything today")
+
+- [BUILD-PLAN.md](BUILD-PLAN.md): today, everything except the real weight, on the
+  pretend scale; tomorrow, the HX711, the button and the card, calibration, real meals.
+  Each step says where and how to tell it worked; a risks table at the end.
+- The bench page could not set the weight of a real board running the pretend scale (only
+  practice mode had a slider). Added a pretend-weight box, shown when the board reports
+  `simulated=1` (Node A 0.2.1 now says so in `info` as well as at boot), and a box that
+  sends any command. Images republished as 0.2.1.
+- `backend-lan` in `.claude/launch.json`: uvicorn on `0.0.0.0:8000`, so the camera board
+  on the hotspot can reach the laptop. The firewall prompt is the owner's to answer.
+- `kit.ts`: the HX711, second button and microSD marked as coming 24 October.

@@ -458,8 +458,14 @@ void command(String text) {
   else if (text == "capture") capture();
   else if (text == "find") findCamera();
   else if (text == "info") {
-    Serial.printf("E info node=a fw=%s calibrated=%d cpg=%.6f tared=%d offset=%ld camera_ch=%u\n", SFS_FIRMWARE_VERSION,
-                  calibrated(), countsPerGram, tared, tareOffset, cameraChannel);
+    Serial.printf("E info node=a fw=%s calibrated=%d cpg=%.6f tared=%d offset=%ld camera_ch=%u%s\n", SFS_FIRMWARE_VERSION,
+                  calibrated(), countsPerGram, tared, tareOffset, cameraChannel,
+#ifdef SIMULATE_SCALE
+                  " simulated=1"
+#else
+                  ""
+#endif
+    );
   } else if (text == "cal clear") {
     saveCountsPerGram(NAN);
     countsPerGram = SFS_COUNTS_PER_GRAM;

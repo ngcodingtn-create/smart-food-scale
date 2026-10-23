@@ -79,7 +79,7 @@ export const KIT: KitItem[] = [
     photo: 'load-cell.jpg',
     why: 'Red, black, white and green wires, already plugged into a blue 4-way connector and extended with jumper wires. No HX711 is attached: those jumpers end loose. Its capacity is not readable in the photo: send a close-up of the label or engraving on its side.',
   },
-  { id: 'hx711', line: 5, bom: 'HX711', qty: '1', status: 'check', why: 'Needed: the board cannot read the load cell without it, and nothing else in the kit can stand in. Until it comes, the pretend scale on Flash it runs everything else. It is not the blue part on the load cell’s wires, which is only a 4-way connector. Look in the load cell’s bag for a small green or purple board with E+, E−, A−, A+ on one side and GND, DT, SCK, VCC on the other; if it is not there, ask the lab.' },
+  { id: 'hx711', line: 5, bom: 'HX711', qty: '1', status: 'check', why: 'Coming 24 October. Needed: the board cannot read the load cell without it, and nothing else in the kit can stand in. Until it comes, the pretend scale on Flash it runs everything else. It is not the blue part on the load cell’s wires, which is only a 4-way connector. Look in the load cell’s bag for a small green or purple board with E+, E−, A−, A+ on one side and GND, DT, SCK, VCC on the other; if it is not there, ask the lab.' },
   {
     id: 'oled',
     line: 6,
@@ -96,7 +96,7 @@ export const KIT: KitItem[] = [
     qty: '2',
     status: 'check',
     photo: 'push-button.jpg',
-    why: '12 × 12 mm, larger than the 6 × 6 asked for: same four legs, same job. Only one came: the scale needs two, TARE and PHOTO. Until the second comes, the NodeMCU’s own FLASH button works as PHOTO.',
+    why: '12 × 12 mm, larger than the 6 × 6 asked for: same four legs, same job. Only one came: the scale needs two, TARE and PHOTO; the second is coming 24 October. Until the second comes, the NodeMCU’s own FLASH button works as PHOTO.',
   },
   {
     id: 'buzzer',
@@ -170,5 +170,5 @@ export const KIT: KitItem[] = [
   { id: 'cap-1000u', line: 17, bom: 'Electrolytic capacitor, 1000 µF', qty: '2', status: 'buy', why: 'About 0.9 TND each (Tuni Smart, 12 Oct). The prototype runs without; the final build needs them.' },
   { id: 'charger', line: 18, bom: '5 V / 2 A USB wall charger', qty: '1', status: 'check', why: 'Any phone charger marked 2 A or more. The laptop powers both boards on the bench.' },
   { id: 'header-pins', line: 19, bom: 'Male header strip', qty: '1 strip', status: 'check', why: 'Only if the HX711 or the display came with loose pins in the bag.' },
-  { id: 'microsd', line: null, bom: 'microSD card', qty: '1', status: 'check', why: 'Not on the form. A spare phone card, FAT32. Optional: it keeps photos when the Wi-Fi is down.' },
+  { id: 'microsd', line: null, bom: 'microSD card', qty: '1', status: 'check', why: 'Coming 24 October. Not on the form. A spare phone card, FAT32. Optional: it keeps photos when the Wi-Fi is down.' },
 ];

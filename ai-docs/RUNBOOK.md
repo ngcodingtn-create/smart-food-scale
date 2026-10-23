@@ -14,6 +14,7 @@ cd backend
 python -m venv .venv
 .venv/Scripts/python.exe -m pip install -r requirements.txt   # source .venv/bin/activate elsewhere
 .venv/Scripts/python.exe -m uvicorn app.main:app --reload     # http://127.0.0.1:8000/docs
+.venv/Scripts/python.exe -m uvicorn app.main:app --host 0.0.0.0 --port 8000   # reachable from the phone hotspot, for the camera board (launch.json: backend-lan)
 
 # Site — Next.js docs and prototype.
 cd web

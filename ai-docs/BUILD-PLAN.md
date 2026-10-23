@@ -1,0 +1,110 @@
+# Build plan: 23 and 24 October 2026
+
+Written 23 October 2026. The goal: by the evening of 24 October, **one whole meal
+through the real hardware** — food weighed on the load cell, photographed by the
+camera board, saved by the backend with its grams — on a calibrated scale.
+
+Update this file as steps get done; move it to the work log when the build is finished.
+
+## Where things stand
+
+- **In hand** (photographed, `/workbench/parts`): ESP8266 NodeMCU (the scale's board,
+  firmware moved to it), ESP32-CAM on its ESP32-CAM-MB base, load cell, OLED, one push
+  button, passive buzzer module, 2 × 2N2222A, 1N4148, 6 white LEDs, resistors (6 × 100 Ω,
+  470 Ω, 1 kΩ, 10 kΩ), electrolytics including a 100 µF 25 V, breadboard, 30 jumpers,
+  2 USB cables.
+- **Arriving 24 October** (the owner said so on 23 October): the **HX711**, the **second
+  push button**, a **microSD card**.
+- **Still missing after that**: 4 × 100 nF ceramics (the prototype runs without),
+  2 × 1000 µF and the 5 V 2 A charger (final build only), a header strip if the HX711
+  comes with loose pins. The French sheet for the lab is `/workbench/missing`.
+- **Lab only**: multimeter and soldering iron. The faculty was closed on 23 October.
+
+## Not part of these two days
+
+Say so if asked; none of it blocks the hardware.
+
+- **Dish recognition is the stub**: deterministic, not real. Real recognition needs a
+  `GeminiRecogniser` (not written) and the owner's own Gemini key in `backend/.env`,
+  which the owner sets and never pastes in chat. Claude can write and test it with a fake
+  client before the key exists.
+- **The backend runs on the laptop**, not a server. Hosting is researched
+  ([research/2026-10-13-free-backend-hosting.md](research/2026-10-13-free-backend-hosting.md))
+  and not done.
+- **No mobile app.**
+- **No rig**: the load cell needs two boards and screws to bend properly. Without them it
+  can be tested clamped to a table edge, but not used for real meals.
+
+## Today, 23 October: everything that does not need the HX711
+
+The NodeMCU runs the **pretend scale** today: the weight is typed on the Test and
+calibrate page instead of measured. Everything else is real.
+
+### The owner
+
+| # | Step | Where | Done when |
+| --- | --- | --- | --- |
+| 1 | Plug in the NodeMCU with a data cable. A new COM port appears (CH340). If not, install WCH's CH340 driver | Windows | A port is listed on Flash it |
+| 2 | Flash **The pretend scale** to the NodeMCU | `/workbench/flash` | The log says `E boot node=a fw=0.2.1 … simulated=1` |
+| 3 | Wire the rails, the display, the tare button (D5) and the buzzer with its transistor, diode and 1 kΩ. Skip the HX711 and load-cell lines | `/workbench/wire` | Ticks on Wire it |
+| 4 | Connect the board, set the pretend weight to 150, press TARE then the board's own FLASH button (it is PHOTO until the second button comes) | `/workbench/bench` | The display shows the weight; tare zeroes it; the buzzer beeps; PHOTO says `NO CAMERA` (no camera yet) |
+| 5 | Turn on the phone hotspot **on 2.4 GHz** (the ESP32-CAM cannot see 5 GHz; on an iPhone, "Maximise compatibility"). Join it with the laptop | Phone, laptop | Laptop online through the phone |
+| 6 | Start the backend so the camera can reach it: the `backend-lan` configuration (or `--host 0.0.0.0`). Allow Python through Windows Firewall on private networks when asked. Note the laptop's address on the hotspot (`ipconfig`, Wi-Fi adapter, IPv4) | Laptop | `http://<that address>:8000/docs` opens from the phone's browser |
+| 7 | Seat the ESP32-CAM on its MB base, flash **The camera** | `/workbench/flash` | `E boot node=b … camera=1` |
+| 8 | Set hotspot name, password and backend `http://<address>:8000` | `/workbench/bench` | `Wi-Fi up` |
+| 9 | Take a test photo with 150 g | `/workbench/bench` | `last upload: 150 g · saved by the backend · HTTP 201`, and the meal is in `/docs` → `GET /meals` |
+| 10 | Wire the light: six LEDs with their 100 Ω, the second 2N2222A, 470 Ω and 10 kΩ on IO13 | `/workbench/wire` (Node B) | `Light on` lights all six |
+| 11 | Both boards at once: power the NodeMCU, let it find the camera, set 150 g, TARE, PHOTO | Both | NodeMCU display: `CAMERA ch N`, then `SENT`, two beeps, then `SAVED`; a new meal of 150 g in the backend |
+| 12 | Mechanical, any time: measure the load cell's screw holes and send a close-up of its label; find two boards (base and top plate) and screws that fit | Home or hardware shop | Photo sent; screws in hand |
+
+If something does not behave, copy the log from **Everything the board said** on the
+bench page into the chat.
+
+### Claude
+
+| Step | State |
+| --- | --- |
+| Bench page: a pretend-weight box for a real board running the pretend scale, and a box for any command | Done 23 October (Node A 0.2.1 reports `simulated=1` in `info`) |
+| `backend-lan` in `.claude/launch.json`: the backend on `0.0.0.0:8000`, reachable from the hotspot | Done 23 October |
+| Answer the owner's logs through steps 1–11; fix what breaks | As it happens |
+| Optional: write `GeminiRecogniser` with tests against a fake client | Waiting on the owner's go-ahead |
+
+## Tomorrow, 24 October: the HX711, the second button, the microSD
+
+### At the lab
+
+1. If the HX711's pins are loose, **solder them** (4 on the GPIO side, 4 on the cell side).
+2. **Multimeter**: the 2N2222A's legs (diode test, red on the middle leg, the slightly
+   higher reading is the emitter); the buzzer between S and − (tens of ohms: a coil, keep
+   the transistor; open: a piezo); VIN to G on the NodeMCU on USB.
+3. Ask whether the lab lends **calibration masses** (100 g to 1 kg). If not, a kitchen
+   scale to weigh a few household things, whose weights become the references.
+4. If they have them: the 100 nF ceramics.
+
+### Then
+
+| # | Step | Done when |
+| --- | --- | --- |
+| 1 | Wire the HX711 (VCC 3V3, GND, DT D6, SCK D7) and the load cell's four wires (red E+, black E−, white A−, green A+), with the 100 µF across the HX711's VCC and GND | Ticks on Wire it |
+| 2 | Second button on D3 (PHOTO) | Pressing it does what FLASH did |
+| 3 | Flash **The scale** (the real build) | `E boot node=a fw=0.2.1 calibrated=0` and raw counts on the display |
+| 4 | Press on the cell: counts should rise. If they fall, swap white and green | Counts rise under load |
+| 5 | Mount the cell between base and top plate | Readings settle (`settled` on the bench page) |
+| 6 | Calibrate: TARE empty, then three to five known masses, Save | `calibrated=1`; a known mass reads within a gram or two |
+| 7 | microSD: format FAT32 on the laptop, insert in the ESP32-CAM, restart it | `card=1` in its boot line |
+| 8 | Offline test: hotspot off, PHOTO, then hotspot on, `Send what is kept` | First `QUEUED`, then `saved` |
+| 9 | Three real meals: plate, TARE, food, PHOTO | Three meals in the backend with real grams and photos |
+| 10 | Record what was measured: load-cell dimensions and capacity in `web/components/rig/specs.ts`, the calibration results on `/reference/accuracy` | Real numbers replace the labelled estimates |
+
+## Risks, and what to do
+
+| Risk | Sign | What to do |
+| --- | --- | --- |
+| Laptop USB too weak for the camera | `Brownout detector was triggered`, resets during a photo | Shorter cable; the 100 µF across the camera's 5V and GND; another USB port; a phone charger |
+| Hotspot on 5 GHz | Camera never says `Wi-Fi up` | Switch the hotspot to 2.4 GHz |
+| Firewall blocks the backend | Phone cannot open `/docs`; uploads `no answer` | Allow Python on private networks; check the laptop's address again |
+| Transistor legs reversed | Buzzer silent, or LEDs dim | Turn the transistor round, flat face the other way |
+| Buzzer is a piezo, not a coil | Very faint click through the transistor | Tell Claude: drive it straight from D8 instead |
+| NodeMCU does not start | Nothing on the display, no boot line | Something holds D3 low or D8 high at power-on: unplug the button and the buzzer line, retry |
+| Camera not found by the scale | `CAMERA ?`, `link none` | Camera must be `Wi-Fi up` first; press Find camera |
+| HX711 missing again tomorrow | — | Keep running the pretend scale; the rest is already proven |
