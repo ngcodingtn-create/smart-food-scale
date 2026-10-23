@@ -56,6 +56,14 @@ export const LANES: Lane[] = [
     note: 'In this order.',
     stages: [
       {
+        title: 'Know your parts',
+        does: 'Every part from the lab’s form: what it does, which board it goes on, and a photo of yours.',
+        tools: ['This site'],
+        done: 'Every part photographed and found; the 1000 µF capacitors bought.',
+        state: 'open',
+        href: '/workbench/parts',
+      },
+      {
         title: 'Wire it',
         does: 'Every wire, one at a time, on drawings of the two boards.',
         tools: ['This site'],

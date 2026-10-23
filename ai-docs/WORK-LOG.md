@@ -217,3 +217,12 @@ phone.
   three test meals were deleted afterwards). The Flash page installs all three images;
   the bench page recognises which board is attached and has a camera practice mode.
 - Not checked: anything on hardware, or the two boards talking.
+
+**23 October 2026: "Your parts"** (`/workbench/parts`)
+
+- The lab signed the IoT form: lines 1–14 and 16 handed over, 15 crossed out, 17–19
+  not given. `web/components/workbench/kit.ts` records that, per part, with a status
+  (have, buy, check, skip); what each part does still comes from `bom.ts`.
+- Each card has a slot for a photo of the real part. Photos the owner sends in chat go
+  in `web/public/workbench/kit/` and are named in `kit.ts`; "Add photo" keeps one in that
+  browser only (IndexedDB). No photos yet.

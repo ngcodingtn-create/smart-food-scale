@@ -1077,3 +1077,193 @@
 .bench-setup .btn {
   width: fit-content;
 }
+
+/* --- Your parts --- */
+.prose .kit-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.2rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+}
+.kit-counts strong {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin-right: 0.3rem;
+}
+.prose .kit {
+  display: grid;
+  gap: 0.8rem;
+  margin: 1.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+@media (min-width: 46rem) {
+  .prose .kit {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.prose .kit > li.kit-card {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--paper-raised);
+  overflow: hidden;
+  scroll-margin-top: 5rem;
+}
+.kit-card[data-status='skip'] {
+  opacity: 0.6;
+}
+.kit-pictures {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-bottom: 1px solid var(--rule);
+  background: var(--paper-sunken);
+}
+.prose .kit-pictures figure {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  min-width: 0;
+}
+.kit-pictures figure + figure {
+  border-left: 1px solid var(--rule);
+}
+.kit-drawing .part-art {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  padding: 0.4rem;
+}
+.kit-photo img,
+.kit-add {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+.kit-add {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  border: 1.5px dashed var(--rule-strong);
+  border-radius: 0.5rem;
+  margin: 0.4rem;
+  width: calc(100% - 0.8rem);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+.kit-add:hover {
+  background: var(--paper-raised);
+  color: var(--ink);
+}
+.prose .kit-pictures figcaption {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0.25rem 0.55rem 0.35rem;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.kit-photo[data-kind='site'] figcaption {
+  color: var(--tip-ink);
+}
+.kit-photo[data-kind='local'] figcaption {
+  color: var(--caution-ink);
+}
+.kit-photo figcaption button {
+  font: inherit;
+  text-decoration: underline;
+  color: inherit;
+  cursor: pointer;
+}
+.kit-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.75rem 0.95rem 0.9rem;
+}
+.prose .kit-text p {
+  margin: 0;
+}
+.prose .kit-head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  line-height: 1.25;
+}
+.kit-head em {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-style: normal;
+  white-space: nowrap;
+  color: var(--ink-soft);
+}
+.kit-line {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 1.45rem;
+  height: 1.45rem;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  translate: 0 -0.1rem;
+}
+.prose .kit-status {
+  width: fit-content;
+  padding: 0.08rem 0.45rem;
+  border-radius: 0.35rem;
+  background: var(--tip-wash);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--tip-ink);
+}
+.kit-card[data-status='buy'] .kit-status {
+  background: var(--danger-wash);
+  color: var(--danger-ink);
+}
+.kit-card[data-status='check'] .kit-status {
+  background: var(--caution-wash);
+  color: var(--caution-ink);
+}
+.kit-card[data-status='skip'] .kit-status {
+  background: color-mix(in oklch, var(--ink) 6%, transparent);
+  color: var(--ink-soft);
+}
+.prose .kit-role {
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+.prose .kit-where {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--measure-ink);
+}
+.prose .kit-why {
+  padding-left: 0.6rem;
+  border-left: 2px solid var(--rule-strong);
+  font-size: 0.84rem;
+  line-height: 1.45;
+  color: var(--ink-soft);
+}
