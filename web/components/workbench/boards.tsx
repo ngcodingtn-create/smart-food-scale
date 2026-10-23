@@ -133,8 +133,9 @@ const A_WIRES: Record<string, WireArt> = {
   'a-cell-white': line([342, 486], [342, 446]),
   'a-cell-green': line([376, 486], [376, 446]),
   // display
-  'a-oled-vcc': line([A_MOD, 164], [A_V33, 164]),
-  'a-oled-gnd': line([A_MOD, 142], [A_GND, 142]),
+  // Our module's order, from its photo: VCC, GND, SCL, SDA.
+  'a-oled-vcc': line([A_MOD, 142], [A_V33, 142]),
+  'a-oled-gnd': line([A_MOD, 164], [A_GND, 164]),
   'a-oled-scl': bend([A_MOD, 186], [204, 186], [196, 176], aRight('D22')),
   'a-oled-sda': bend([A_MOD, 208], [196, 208], [206, 254], aRight('D21')),
   // buttons
@@ -198,8 +199,8 @@ function NodeAParts() {
         <text className="t-inv" x="351" y="171" textAnchor="middle">
           143 g
         </text>
-        <Pad at={[A_MOD, 142]} name="GND" />
-        <Pad at={[A_MOD, 164]} name="VCC" />
+        <Pad at={[A_MOD, 142]} name="VCC" />
+        <Pad at={[A_MOD, 164]} name="GND" />
         <Pad at={[A_MOD, 186]} name="SCL" />
         <Pad at={[A_MOD, 208]} name="SDA" />
       </Card>

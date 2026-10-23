@@ -9,6 +9,7 @@ const STATUS: Record<KitStatus, string> = {
   buy: 'To buy',
   check: 'Check you have it',
   skip: 'Not needed',
+  swap: 'Wrong part: swap it',
 };
 
 const part = (prefix: string) => {
@@ -21,11 +22,13 @@ const part = (prefix: string) => {
 export function KitCounts() {
   const count = (status: KitStatus) => KIT.filter((item) => item.status === status).length;
   const photos = KIT.filter((item) => item.photo).length;
+  const swaps = KIT.filter((item) => item.status === 'swap').length;
   return (
     <p className="kit-counts">
       <span><strong>{count('have')}</strong> in hand</span>
       <span><strong>{count('buy')}</strong> to buy</span>
       <span><strong>{count('check')}</strong> to check</span>
+      {swaps ? <span><strong>{swaps}</strong> wrong part</span> : null}
       <span><strong>{photos}</strong> of {KIT.length} photographed</span>
     </p>
   );
@@ -55,6 +58,15 @@ export function Kit() {
               <p className="kit-role">{info.role}</p>
               <p className="kit-where">{info.where}</p>
               {item.why ? <p className="kit-why">{item.why}</p> : info.note ? <p className="kit-why">{info.note}</p> : null}
+              {item.extra ? (
+                <p className="kit-extra">
+                  {item.extra.map((file) => (
+                    <a key={file} href={`/workbench/kit/${file}`} target="_blank" rel="noreferrer noopener">
+                      <img src={`/workbench/kit/${file}`} alt={file.replace('.jpg', '').replace('-', ' ')} loading="lazy" />
+                    </a>
+                  ))}
+                </p>
+              ) : null}
             </div>
           </li>
         );

@@ -226,3 +226,19 @@ phone.
 - Each card has a slot for a photo of the real part. Photos the owner sends in chat go
   in `web/public/workbench/kit/` and are named in `kit.ts`; "Add photo" keeps one in that
   browser only (IndexedDB). No photos yet.
+
+**Same day: the owner's photos** (asked: "check", then "push to prod")
+
+- The owner uploaded 16 photos through a private claude.ai upload page. Each was looked
+  at, resized to 1400 px with metadata removed, and put in `web/public/workbench/kit/`;
+  `kit.ts` now names each part's photo and says what the photo showed.
+- **The board handed over as "ESP32 DevKit V1" is an ESP8266 NodeMCU** (module reads
+  ESP8266MOD, pins D0–D8 and A0, CH340). New status `swap` on the parts page. The owner
+  has been told to ask the lab for a swap; porting Node A to the ESP8266 is the fallback.
+- The ESP32-CAM's printed pin names match `wiring.ts`: marked as checked. The display's
+  pins run VCC, GND, SCL, SDA: the drawing in `boards.tsx` was changed to match.
+- Not settled by the photos: transistor part number (leg order), electrolytic values,
+  load-cell capacity, buzzer type (multimeter), a second push button. Not photographed:
+  HX711, ESP32-CAM-MB, 100 nF ceramics.
+- Checked: `tsc`, `sync:wiring --check`, build; `/workbench/parts` shows all 16 photos
+  with no console errors.

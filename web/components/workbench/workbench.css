@@ -1267,3 +1267,28 @@
   line-height: 1.45;
   color: var(--ink-soft);
 }
+.kit-card[data-status='swap'] {
+  border-color: color-mix(in oklch, var(--danger) 55%, var(--rule));
+}
+.kit-card[data-status='swap'] .kit-status {
+  background: var(--danger-wash);
+  color: var(--danger-ink);
+}
+.kit-photo a {
+  display: block;
+}
+.prose .kit-extra {
+  display: flex;
+  gap: 0.4rem;
+}
+.kit-extra a {
+  display: block;
+  width: 4.5rem;
+}
+.kit-extra img {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border-radius: 0.35rem;
+  border: 1px solid var(--rule);
+}

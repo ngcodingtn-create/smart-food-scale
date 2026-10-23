@@ -8,9 +8,9 @@
  *     rules: the project's pin map (the old Wiring page, decisions D12 and D13).
  *   - The DevKit's pin order: the 30-pin DOIT layout, checked on 2026-10-13
  *     against the open-source part definition in wokwi/wokwi-elements.
- *   - The ESP32-CAM's pin order: as commonly drawn for the AI-Thinker board.
- *     Not confirmed against a board in hand: the names printed beside the pins
- *     are the authority, not their position in this file.
+ *   - The ESP32-CAM's pin order: read off the owner's own board, photographed
+ *     23 October 2026. It matches the order as commonly drawn.
+ *   - The display's pin order (VCC, GND, SCL, SDA): the owner's module, same photos.
  *   - Anything marked `proposed`: a choice made while writing this file,
  *     because the pin map did not say. It is labelled as such on the page.
  *
@@ -87,7 +87,7 @@ const ESP32_CAM: Board = {
   name: 'ESP32-CAM, AI-Thinker',
   left: ['5V', 'GND', 'IO12', 'IO13', 'IO15', 'IO14', 'IO2', 'IO4'],
   right: ['3V3', 'IO16', 'IO0', 'GND', 'VCC', 'U0R', 'U0T', 'GND'],
-  checked: 'nothing: the order as commonly drawn, not confirmed on a board',
+  checked: 'the pin names printed on our own board, photographed 23 October 2026',
 };
 
 const NODE_A: NodeWiring = {

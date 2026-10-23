@@ -81,7 +81,9 @@ export function KitPhoto({ id, name, photo }: { id: string; name: string; photo?
   if (photo) {
     return (
       <figure className="kit-photo" data-kind="site">
-        <img src={`/workbench/kit/${photo}`} alt={`Our ${name}`} loading="lazy" />
+        <a href={`/workbench/kit/${photo}`} target="_blank" rel="noreferrer noopener">
+          <img src={`/workbench/kit/${photo}`} alt={`Our ${name}`} loading="lazy" />
+        </a>
         <figcaption>Your photo</figcaption>
       </figure>
     );

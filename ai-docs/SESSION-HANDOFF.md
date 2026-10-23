@@ -1,6 +1,6 @@
 # Session handoff
 
-**Written:** 13 October 2026, at the end of session 3. **Rewrite this file when you
+**Written:** 13 October 2026, at the end of session 3; the hardware lines updated 23 October 2026. **Rewrite this file when you
 stop**; history belongs in [WORK-LOG.md](WORK-LOG.md).
 
 ## Where things stand
@@ -25,14 +25,18 @@ the rest is as it stood.
 | Firmware, Node A | **Written.** Compiles with PlatformIO (ESP32 core 2.0.17, no warnings) and runs in Wokwi (core 3.x). Never on a board: there is none |
 | Firmware, Node B | **Written.** Compiles (core 2.0.17, no warnings). Its upload format was checked against the running backend by a script that builds the same bytes. No simulator runs it (no ESP32-CAM anywhere); never on a board |
 | Mobile app | Not started. `web/components/sim/Phone.tsx` is the closest thing to a spec |
-| Hardware | Not ordered. Waiting on the component request |
+| Hardware | **In hand from the lab** (form of 14 Oct), photographed 23 Oct: see `/workbench/parts`. The "DevKit" is an ESP8266 NodeMCU and must be swapped |
 
 ## What the owner is likely to ask next
 
 In the order the project needs them:
 
-1. **Take the request sheet to the lab technician**, then order what the lab cannot
-   lend. The sheet prints: open it, print, and check the result (see "Not verified").
+1. **Swap the board.** The lab handed over an ESP8266 NodeMCU for line 1 instead of an
+   ESP32 DevKit (photo on `/workbench/parts`). If the lab cannot swap it, port Node A to
+   the ESP8266 (it has ESP-NOW; pins and `pins.h` change via `wiring.ts`). Also waiting
+   on the owner: close-ups of the transistors, electrolytics and load-cell label; photos
+   of the HX711, ESP32-CAM-MB and 100 nF ceramics; a multimeter reading on the buzzer.
+   Two 1000 µF capacitors still to buy (not needed for the bench prototype).
 2. **Node A on a real board**: flash it from `/workbench/flash`, then check each part and
    calibrate on `/workbench/bench`. The firmware's serial line format and commands are
    in `firmware/node-a-scale/README.md`; the bench page speaks them.
@@ -65,7 +69,7 @@ In the order the project needs them:
    [research/2026-10-13-web-tools-for-the-build.md](research/2026-10-13-web-tools-for-the-build.md).
    Two choices were made while writing the wiring and are marked "proposed" on the
    page: the buzzer takes its supply from 5 V (VIN), and the breadboard carries a
-   separate 5 V rail for it. The ESP32-CAM's pin order was not confirmed on a board.
+   separate 5 V rail for it. The ESP32-CAM's pin order and the display's were checked against photos of the owner's parts on 23 Oct.
 6. **When the parts arrive**: measure the load cell and the camera's field of view and
    put the real numbers in `web/components/rig/specs.ts`. Then calibrate, and fill the
    empty tables on `/reference/accuracy`.
