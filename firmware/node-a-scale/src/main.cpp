@@ -367,7 +367,7 @@ void command(String text) {
   else if (text == "capture") capture();
   else if (text == "find") findCamera();
   else if (text == "info") {
-    Serial.printf("E info fw=%s calibrated=%d cpg=%.6f tared=%d offset=%ld camera_ch=%u\n", SFS_FIRMWARE_VERSION,
+    Serial.printf("E info node=a fw=%s calibrated=%d cpg=%.6f tared=%d offset=%ld camera_ch=%u\n", SFS_FIRMWARE_VERSION,
                   calibrated(), countsPerGram, tared, tareOffset, cameraChannel);
   } else if (text == "cal clear") {
     settings.remove("cpg");
@@ -439,7 +439,7 @@ void setup() {
     Serial.println("E error espnow-init");
   }
 
-  Serial.printf("E boot fw=%s calibrated=%d cpg=%.6f%s\n", SFS_FIRMWARE_VERSION, calibrated(), countsPerGram,
+  Serial.printf("E boot node=a fw=%s calibrated=%d cpg=%.6f%s\n", SFS_FIRMWARE_VERSION, calibrated(), countsPerGram,
 #ifdef SIMULATE_SCALE
                 " simulated=1"
 #else
@@ -479,12 +479,13 @@ void loop() {
 
   // Node B reports how the upload went, some seconds after the capture.
   if (inboxFull && inbox.kind == sfs::Kind::Result) {
-    static const char *names[] = {"saved", "queued", "failed"};
-    uint8_t outcome = min<uint8_t>(inbox.outcome, 2);
+    static const char *names[] = {"saved", "queued", "failed", "unknown"};
+    static const char *notes[] = {"SAVED", "QUEUED", "UPLOAD FAILED", "NOT RECOGNISED"};
+    uint8_t outcome = min<uint8_t>(inbox.outcome, 3);
     Serial.printf("E result seq=%u outcome=%s\n", inbox.seq, names[outcome]);
-    note = outcome == 0 ? "SAVED" : outcome == 1 ? "QUEUED" : "UPLOAD FAILED";
+    note = notes[outcome];
     inboxFull = false;
-    if (outcome == 2) beepError();
+    if (outcome >= 2) beepError();
   } else if (inboxFull) {
     inboxFull = false;  // a late ack, or a Hello from somewhere: nothing to do
   }

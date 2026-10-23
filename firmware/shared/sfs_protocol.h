@@ -35,9 +35,10 @@ enum class Kind : uint8_t {
 
 // Node B's report on a capture, once the upload has been tried.
 enum class Outcome : uint8_t {
-  Saved = 0,   // the backend stored the meal
-  Queued = 1,  // no network: kept on the microSD card, sent later
-  Failed = 2,  // the backend refused it, or the card is missing
+  Saved = 0,    // the backend stored the meal
+  Queued = 1,   // no network: kept on the microSD card, sent later
+  Failed = 2,   // the backend refused it, or no photo, or no card to keep it on
+  Unknown = 3,  // the backend could not name the dish: enter it in the app
 };
 
 struct __attribute__((packed)) Frame {
