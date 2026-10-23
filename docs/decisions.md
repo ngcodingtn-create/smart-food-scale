@@ -75,7 +75,9 @@ worse than a slightly clumsier one everybody understands. Say so and it gets por
 
 ## D3 — Dish identification is driven by *our* candidate list, not a vendor's label set
 
-**Date:** 2026-09-21 · **Status:** accepted; the concrete vision API is still the owner's call
+**Date:** 2026-09-21 · **Status:** accepted. The vision API: **Gemini**, the owner's choice on
+2026-10-13; `backend/app/recognition/gemini.py`, written 2026-10-23, keeps this contract
+(an answer outside our list is `unknown`)
 
 Constraint 7 in the brief — Tunisian dishes are absent from USDA, Nutritionix and the
 commercial food-recognition APIs — rules out a whole category of vendor. LogMeal,

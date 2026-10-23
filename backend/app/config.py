@@ -25,6 +25,19 @@ class Settings(BaseSettings):
     # --- Recognition ---------------------------------------------------------
     recogniser: str = "stub"
 
+    # Gemini, when SFS_RECOGNISER=gemini. The key is the owner's own, from Google
+    # AI Studio, and lives in backend/.env only. The model: Google's model page
+    # (read 2026-10-23) says new projects should use 3.5 Flash-Lite or 3.8 Flash;
+    # Flash-Lite is the one with the larger free allowance.
+    gemini_api_key: str | None = None
+    gemini_model: str = "gemini-3.5-flash-lite"
+    gemini_base_url: str = "https://generativelanguage.googleapis.com/v1beta"
+    # The camera board gives up after 20 s (kUploadTimeoutMs); answer before that.
+    gemini_timeout_s: float = 15.0
+    # Below this, "not sure" is the answer. The model's confidence is its own
+    # estimate, not a measured accuracy; 0.5 is a starting value, not a tuned one.
+    gemini_min_confidence: float = 0.5
+
     # --- Nutrition -----------------------------------------------------------
     usda_enabled: bool = False
     usda_api_key: str | None = None

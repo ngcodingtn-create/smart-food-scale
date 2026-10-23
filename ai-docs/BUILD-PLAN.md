@@ -24,10 +24,11 @@ Update this file as steps get done; move it to the work log when the build is fi
 
 Say so if asked; none of it blocks the hardware.
 
-- **Dish recognition is the stub**: deterministic, not real. Real recognition needs a
-  `GeminiRecogniser` (not written) and the owner's own Gemini key in `backend/.env`,
-  which the owner sets and never pastes in chat. Claude can write and test it with a fake
-  client before the key exists.
+- **Dish recognition is the stub until the owner adds a Gemini key.** `GeminiRecogniser`
+  is written and tested against a fake Gemini (23 October). To switch it on: in
+  `backend/.env`, `SFS_RECOGNISER=gemini` and `SFS_GEMINI_API_KEY=<the owner's key>`
+  (the owner types it; never in chat), restart the backend, then check with one photo:
+  `.venv/Scripts/python.exe -m app.recognition.gemini photo.jpg` from `backend/`.
 - **The backend runs on the laptop**, not a server. Hosting is researched
   ([research/2026-10-13-free-backend-hosting.md](research/2026-10-13-free-backend-hosting.md))
   and not done.
@@ -67,7 +68,7 @@ bench page into the chat.
 | Bench page: a pretend-weight box for a real board running the pretend scale, and a box for any command | Done 23 October (Node A 0.2.1 reports `simulated=1` in `info`) |
 | `backend-lan` in `.claude/launch.json`: the backend on `0.0.0.0:8000`, reachable from the hotspot | Done 23 October |
 | Answer the owner's logs through steps 1–11; fix what breaks | As it happens |
-| Optional: write `GeminiRecogniser` with tests against a fake client | Waiting on the owner's go-ahead |
+| `GeminiRecogniser`, tested against a fake Gemini | Done 23 October. Never called with a real key |
 
 ## Tomorrow, 24 October: the HX711, the second button, the microSD
 

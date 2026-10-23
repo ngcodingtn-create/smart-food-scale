@@ -53,9 +53,10 @@ In the order the project needs them:
    together: Node A's Find camera, then one whole meal.
 4. **Move the backend off the owner's PC, with Gemini doing the recognition.** On
    13 October the owner said: "i want to not use my pc but a server" and "we are using
-   gemini api to get the data". That settles D3's open choice (Gemini), though
-   `docs/decisions.md` and `/reference/vision-apis` do not say so yet, and no
-   `GeminiRecogniser` exists. The research and a recommendation (Vercel + Neon + Gemini
+   gemini api to get the data". That settles D3's open choice (Gemini); `docs/decisions.md` says
+   so, `/reference/vision-apis` does not yet. **`GeminiRecogniser` exists** (23 Oct,
+   `backend/app/recognition/gemini.py`), tested against a fake Gemini only; it waits on
+   the owner's key in `backend/.env`. The research and a recommendation (Vercel + Neon + Gemini
    Flash-Lite, all free, no bank card) are in
    [research/2026-10-13-free-backend-hosting.md](research/2026-10-13-free-backend-hosting.md),
    with the six code changes it needs. **Nothing is built or deployed.** The owner has

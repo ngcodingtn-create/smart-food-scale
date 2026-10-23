@@ -35,6 +35,15 @@ class RecognitionResult(BaseModel):
         return self.dish_key is not None
 
 
+class RecognitionUnavailable(RuntimeError):
+    """The recogniser could not be asked: no key, no network, quota spent, a
+    malformed reply. Not "I do not know the dish" — that is ``dish_key=None``.
+
+    The API answers it with 502. The camera board treats any 5xx as "try again
+    later" and keeps the capture on its card.
+    """
+
+
 class Recogniser(ABC):
     """Swap-in point for the vision backend.
 
@@ -52,6 +61,7 @@ class Recogniser(ABC):
         """Identify the dish in ``image`` as one of ``candidates``.
 
         Implementations must not raise on an unrecognisable image — return a
-        result with ``dish_key=None`` instead. They may raise on a transport
-        failure (network, auth), which the API surfaces as a 502.
+        result with ``dish_key=None`` instead. They raise
+        :class:`RecognitionUnavailable` on a transport failure (network, auth,
+        quota), which the API surfaces as a 502.
         """

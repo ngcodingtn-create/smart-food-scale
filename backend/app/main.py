@@ -11,12 +11,14 @@ from __future__ import annotations
 
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from app.config import get_settings
 from app.db import init_db
 from app.nutrition.local import get_local_table
+from app.recognition.base import RecognitionUnavailable
 from app.recognition.registry import available, get_recogniser
 from app.routers import foods, meals
 
@@ -73,6 +75,13 @@ app.include_router(meals.router)
 app.include_router(foods.router)
 
 
+@app.exception_handler(RecognitionUnavailable)
+def recognition_unavailable(request: Request, error: RecognitionUnavailable) -> JSONResponse:
+    """The vision service could not be asked. 502, so the camera board keeps the
+    capture and tries again later, as it does for any 5xx."""
+    return JSONResponse(status_code=502, content={"detail": f"Recognition unavailable: {error}"})
+
+
 @app.get("/health", tags=["meta"], summary="Liveness and configuration")
 def health() -> dict:
     """What the firmware pings to check the backend is reachable before a POST."""
@@ -83,6 +92,8 @@ def health() -> dict:
         "recogniser": {
             "active": get_recogniser().name,
             "available": available(),
+            "gemini_model": settings.gemini_model,
+            "gemini_key_present": bool(settings.gemini_api_key),
         },
         "nutrition": {
             "local_dishes": len(table),

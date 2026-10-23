@@ -9,6 +9,7 @@ import datetime as dt
 import uuid
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile, status
+from fastapi.concurrency import run_in_threadpool
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -105,7 +106,9 @@ async def create_meal(
                     "or frame size."
                 ),
             )
-        result = get_recogniser().recognise(image_bytes, candidates)
+        # A vision API call can take seconds; on a worker thread it does not
+        # stall every other request while it waits.
+        result = await run_in_threadpool(get_recogniser().recognise, image_bytes, candidates)
 
     recognition_info = RecognitionInfo(
         identified_by=result.recogniser,

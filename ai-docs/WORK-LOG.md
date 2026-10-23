@@ -307,3 +307,27 @@ button and the microSD … figure out the best plan to do everything today")
 - `backend-lan` in `.claude/launch.json`: uvicorn on `0.0.0.0:8000`, so the camera board
   on the hotspot can reach the laptop. The firewall prompt is the owner's to answer.
 - `kit.ts`: the HX711, second button and microSD marked as coming 24 October.
+
+**Same day: the Gemini recogniser** (asked: "write the Gemini recogniser now")
+
+- `backend/app/recognition/gemini.py`, registered as `gemini`. It sends the photo and our
+  18 dishes to `generateContent` over `httpx` (no SDK), asks for JSON
+  `{dish_key, confidence, reason}`, and keeps D3: `unknown`, a key outside our list, or a
+  confidence under `SFS_GEMINI_MIN_CONFIDENCE` (0.5, a starting value) all give
+  `dish_key=None`, so the API answers 422 and the camera reports NOT RECOGNISED.
+- Settings: `SFS_GEMINI_API_KEY`, `SFS_GEMINI_MODEL` (default `gemini-3.5-flash-lite`,
+  which Google's model page recommended for new projects on 23 October),
+  `SFS_GEMINI_TIMEOUT_S` (15, under the camera's 20 s), `SFS_GEMINI_BASE_URL`.
+- Request and response shape from the generateContent examples on Google's "Migrating to
+  the Interactions API" page, which says generateContent "remains fully supported". The
+  Interactions API itself was not used: its pages disagreed on its version and on
+  `response_format`. Web search and fetch were down; the pages were read with curl.
+- `RecognitionUnavailable` (no key, no network, any non-200 from Gemini) now gives a 502,
+  as `base.py` always claimed; before, it would have been a 500. The camera board keeps the
+  capture and retries on either.
+- `POST /meals` calls the recogniser on a worker thread, so a slow Gemini call does not
+  stall the server.
+- Checked: 162 tests pass (17 new, all against an `httpx.MockTransport`); the check
+  command with no key says so; with a made-up key Google answered 400 "API key not valid",
+  so the address and header reach Gemini. Not checked: a real answer, the model name or the
+  request body with a real key.

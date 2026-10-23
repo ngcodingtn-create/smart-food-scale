@@ -10,11 +10,12 @@ from functools import lru_cache
 
 from app.config import get_settings
 from app.recognition.base import Recogniser
+from app.recognition.gemini import GeminiRecogniser
 from app.recognition.stub import StubRecogniser
 
 _BUILDERS: dict[str, type[Recogniser]] = {
     "stub": StubRecogniser,
-    # "gemini":  GeminiRecogniser,     <- pending the owner's choice, docs/decisions.md D3
+    "gemini": GeminiRecogniser,  # the owner's choice, 13 October 2026; docs/decisions.md D3
     # "claude":  ClaudeRecogniser,
     # "openai":  OpenAIRecogniser,
 }

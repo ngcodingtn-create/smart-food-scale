@@ -15,6 +15,8 @@ _TMP = Path(tempfile.mkdtemp(prefix="sfs-tests-"))
 
 os.environ["SFS_DATABASE_URL"] = f"sqlite:///{(_TMP / 'test.db').as_posix()}"
 os.environ["SFS_RECOGNISER"] = "stub"
+# A real Gemini key in backend/.env must never reach the tests.
+os.environ["SFS_GEMINI_API_KEY"] = ""
 # No network in the test suite, ever. USDA stays off.
 os.environ["SFS_USDA_ENABLED"] = "false"
 os.environ["SFS_USDA_API_KEY"] = ""
