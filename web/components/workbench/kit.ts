@@ -20,6 +20,8 @@ export type KitItem = {
   line: number | null;
   /** Start of the part's name in bom.ts. */
   bom: string;
+  /** What the lab handed over instead, when it is not the part on the form. */
+  given?: string;
   qty: string;
   status: KitStatus;
   /** What the photo showed, or why the status is what it is. */
@@ -36,9 +38,10 @@ export const KIT: KitItem[] = [
     line: 1,
     bom: 'ESP32 DevKit',
     qty: '1',
-    status: 'swap',
+    given: 'ESP8266 NodeMCU',
+    status: 'have',
     photo: 'devkit.jpg',
-    why: 'The board in the photo is not an ESP32: its module reads ESP8266MOD, its pins are D0–D8 and A0, and its USB chip is a CH340. That is an ESP8266 NodeMCU. Ask the lab to swap it for the ESP32 DevKit on the form. If they cannot, the scale’s firmware can be moved to it.',
+    why: 'Not the ESP32 on the form: its module reads ESP8266MOD, its pins are D0–D8 and A0, and its USB chip is a CH340. The scale’s firmware was moved to it on 23 October 2026; Wire it shows its pins, and Flash it writes the right image to it.',
   },
   {
     id: 'esp32-cam',
@@ -76,7 +79,7 @@ export const KIT: KitItem[] = [
     photo: 'load-cell.jpg',
     why: 'Red, black, white and green wires, already plugged into a blue 4-way connector and extended with jumper wires. No HX711 is attached: those jumpers end loose. Its capacity is not readable in the photo: send a close-up of the label or engraving on its side.',
   },
-  { id: 'hx711', line: 5, bom: 'HX711', qty: '1', status: 'check', why: 'Needed: the board cannot read the load cell without it. It is not the blue part on the load cell’s wires, which is only a 4-way connector. Look in the load cell’s bag for a small green or purple board with E+, E−, A−, A+ on one side and GND, DT, SCK, VCC on the other; if it is not there, ask the lab.' },
+  { id: 'hx711', line: 5, bom: 'HX711', qty: '1', status: 'check', why: 'Needed: the board cannot read the load cell without it, and nothing else in the kit can stand in. Until it comes, the pretend scale on Flash it runs everything else. It is not the blue part on the load cell’s wires, which is only a 4-way connector. Look in the load cell’s bag for a small green or purple board with E+, E−, A−, A+ on one side and GND, DT, SCK, VCC on the other; if it is not there, ask the lab.' },
   {
     id: 'oled',
     line: 6,
@@ -91,9 +94,9 @@ export const KIT: KitItem[] = [
     line: 7,
     bom: 'Tactile push button',
     qty: '2',
-    status: 'have',
+    status: 'check',
     photo: 'push-button.jpg',
-    why: '12 × 12 mm, larger than the 6 × 6 asked for: same four legs, same job. One is in the photo: check you have two.',
+    why: '12 × 12 mm, larger than the 6 × 6 asked for: same four legs, same job. Only one came: the scale needs two, TARE and PHOTO. Until the second comes, the NodeMCU’s own FLASH button works as PHOTO.',
   },
   {
     id: 'buzzer',
@@ -111,7 +114,8 @@ export const KIT: KitItem[] = [
     qty: '2',
     status: 'have',
     photo: 'transistor.jpg',
-    why: 'Two in TO-92 cases; one carries a “K” maker’s logo. The part number is not readable in the photo. Send a close-up of the flat face: the leg order depends on it.',
+    extra: ['transistor-face.jpg'],
+    why: 'The close-up reads 2N2222A (1726 is a date code): the part asked for. Flat face towards you, legs down: the base is the middle leg, and a 2N2222A is usually emitter, base, collector from left to right. A few makers reverse the outer two, so check once with a multimeter’s diode test: red probe on the middle leg, black on each outer leg; both read about 0.6–0.7 V, and the slightly higher one is the emitter. The second transistor’s face is not photographed yet.',
   },
   {
     id: 'diode',
@@ -146,6 +150,7 @@ export const KIT: KitItem[] = [
     line: 14,
     bom: 'Electrolytic capacitor, 10 µF',
     qty: '1',
+    given: 'Electrolytic capacitor, 100 µF, 25 V',
     status: 'have',
     photo: 'cap-electrolytic.jpg',
     extra: ['cap-100u.jpg'],

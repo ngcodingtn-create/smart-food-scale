@@ -51,10 +51,11 @@ export function Kit() {
             <div className="kit-text">
               <p className="kit-head">
                 {item.line ? <span className="kit-line">{item.line}</span> : null}
-                <strong>{info.name}</strong>
+                <strong>{item.given ?? info.name}</strong>
                 <em>× {item.qty}</em>
               </p>
               <p className="kit-status">{STATUS[item.status]}</p>
+              {item.given ? <p className="kit-role">In place of the {info.name} on the form.</p> : null}
               <p className="kit-role">{info.role}</p>
               <p className="kit-where">{info.where}</p>
               {item.why ? <p className="kit-why">{item.why}</p> : info.note ? <p className="kit-why">{info.note}</p> : null}

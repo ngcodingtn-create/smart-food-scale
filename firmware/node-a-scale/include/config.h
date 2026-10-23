@@ -6,7 +6,7 @@
 #include <math.h>
 #include <stdint.h>
 
-#define SFS_FIRMWARE_VERSION "0.1.0"
+#define SFS_FIRMWARE_VERSION "0.2.0"
 
 // Counts per gram, until the scale is calibrated and the real value is saved on
 // the board. Unknown by default, on purpose: an uncalibrated scale shows raw
@@ -47,7 +47,7 @@ constexpr uint8_t kOledAddress = 0x3C;
 
 // SIMULATE_SCALE (the node-a-sim build): no load cell at all. The weight is set
 // from the serial console with `sim <grams>`, so the buttons, the display, the
-// link and the camera node can be tried on a bare DevKit.
+// link and the camera node can be tried on a bare board.
 #ifdef SIMULATE_SCALE
 namespace config {
 constexpr float kSimCountsPerGram = 100.0f;  // made up, and only used by the simulation

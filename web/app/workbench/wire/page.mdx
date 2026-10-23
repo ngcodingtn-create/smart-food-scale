@@ -14,17 +14,21 @@ Every wire in the build, one at a time. Tick each off as you make it; the ticks 
 <WireIt />
 
 Find a pin by the **name printed beside it** on your board, not by where it sits in the
-drawing. The DevKit's order was checked against a reference, the ESP32-CAM's and the
-display's against photos of your own parts.
+drawing. The order of every board's pins was read off photos of your own parts.
 Wire colours are a suggestion.
+
+Node A is the **ESP8266 NodeMCU** the lab handed over, not the ESP32 DevKit on the
+request. The firmware was moved to it on 23 October 2026; the pins below are its pins.
 
 ## Before power goes on
 
-<Callout type="danger" title="Read the metal shield on the DevKit">
+<Callout type="danger" title="Three NodeMCU pins have a job at power-on">
 
-If it says **WROVER**, not WROOM-32, GPIO 16 and 17 belong to its memory. Move the HX711
-to **GPIO 25 and 26**. This one half-works: the board boots, the display runs, and the
-weight readings are garbage.
+**D3** (GPIO 0) and **D4** (GPIO 2) must not be held low while the board starts, and
+**D8** (GPIO 15) must not be held high. Wired as drawn, all three are safe: D3 is the
+capture button, so do not hold it while plugging in, and D8 drives the transistor. Do
+not move anything else onto them. A board held wrong at power-on looks dead, or sits
+waiting to be flashed.
 
 </Callout>
 
@@ -37,9 +41,10 @@ start, and it looks like a dead board. The light is on GPIO 13 for this reason.
 
 <Callout type="caution" title="Find the transistor's legs before you plug it in">
 
-2N2222s in a plastic case are sold in both leg orders, and a BC547 is the other way
-round again. Read the datasheet for the marking on yours, or find the base with a
-multimeter's diode test.
+Yours read **2N2222A**. Flat face towards you, legs down, the base is the middle leg, and
+the usual order is emitter, base, collector. Some makers swap the outer two, so check
+once: a multimeter on diode test, red probe on the middle leg, black on each outer leg.
+Both read about 0.6 to 0.7 V; the slightly higher one is the emitter.
 
 </Callout>
 
@@ -51,7 +56,7 @@ costs nothing.
 Read from the same file as the drawings above, and the same file the firmware's pin
 names are generated from.
 
-**Node A, ESP32 DevKit V1**
+**Node A, NodeMCU (ESP8266)**
 
 <PinTable node="a" />
 

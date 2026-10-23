@@ -114,24 +114,6 @@
       []
     ],
     [
-      "esp:RX2",
-      "hx711:DT",
-      "green",
-      []
-    ],
-    [
-      "esp:TX2",
-      "hx711:SCK",
-      "green",
-      []
-    ],
-    [
-      "esp:D18",
-      "tare:1.l",
-      "green",
-      []
-    ],
-    [
       "esp:D19",
       "capture:1.l",
       "green",
@@ -146,6 +128,24 @@
     [
       "esp:D22",
       "oled:SCL",
+      "green",
+      []
+    ],
+    [
+      "esp:RX2",
+      "hx711:DT",
+      "green",
+      []
+    ],
+    [
+      "esp:TX2",
+      "hx711:SCK",
+      "green",
+      []
+    ],
+    [
+      "esp:D18",
+      "tare:1.l",
       "green",
       []
     ],

@@ -1,7 +1,13 @@
 # Node A, the scale
 
-ESP32 DevKit V1 with the HX711 and the 3 kg load cell, the OLED, two buttons and the
+An ESP8266 NodeMCU with the HX711 and the load cell, the OLED, two buttons and the
 buzzer. It weighs, and on **PHOTO** hands the grams to Node B over ESP-NOW.
+
+The request asked for an ESP32 DevKit; the lab handed over a NodeMCU, and the firmware
+was moved to it on 23 October 2026. It still builds for the ESP32 too, because the
+Wokwi simulator has no ESP8266. The two differ only in the `#if defined(ESP8266)`
+blocks of `main.cpp` (saving settings: EEPROM instead of Preferences; the radio:
+the ESP8266's older ESP-NOW calls) and in `pins.h`, which carries both pin sets.
 
 | File | What it is |
 | --- | --- |
@@ -20,22 +26,30 @@ pio run
 ```
 
 ```bash
-pio run -e node-a-scale -t upload
+pio run -e node-a-nodemcu -t upload
 ```
 
 ```bash
 pio device monitor
 ```
 
-The second build, `node-a-sim`, needs no load cell: set the weight from the serial
+`node-a-nodemcu-sim` needs no HX711 or load cell: set the weight from the serial
 console with `sim 143.2`.
 
 ```bash
-pio run -e node-a-sim -t upload
+pio run -e node-a-nodemcu-sim -t upload
 ```
 
-Both builds compiled on 14 October 2026 (PlatformIO, ESP32 Arduino core 2.0.17) with no
-warnings. Neither has run on a board yet: there is no board yet.
+| Build | Chip | For |
+| --- | --- | --- |
+| `node-a-nodemcu` | ESP8266 | The board in hand |
+| `node-a-nodemcu-sim` | ESP8266 | The board in hand, before the HX711 |
+| `node-a-scale` | ESP32 | An ESP32 DevKit, if one turns up |
+| `node-a-sim` | ESP32 | Likewise; the Wokwi sketch is the same code |
+
+All four compiled on 23 October 2026 (ESP8266 Arduino core from PlatformIO's
+`espressif8266`, ESP32 Arduino core 2.0.17) with no warnings. None has run on a board
+yet.
 
 ## Using it
 

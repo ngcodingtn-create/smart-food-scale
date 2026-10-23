@@ -6,8 +6,15 @@
  * Where a line comes from:
  *   - GPIO numbers, the load cell's colours, the light circuit and the power
  *     rules: the project's pin map (the old Wiring page, decisions D12 and D13).
- *   - The DevKit's pin order: the 30-pin DOIT layout, checked on 2026-10-13
- *     against the open-source part definition in wokwi/wokwi-elements.
+ *   - Node A's board: the lab handed over an ESP8266 NodeMCU, not the ESP32
+ *     DevKit on the request, and the scale runs on it. Its pin order was read off
+ *     the owner's board, photographed 23 October 2026 (the CH340 "LoLin V3"
+ *     layout). Its GPIOs were chosen on 23 October 2026 around the ESP8266's boot
+ *     pins: GPIO 0 and 2 must not be low at power-on, GPIO 15 must not be high.
+ *   - Each of Node A's GPIOs also names the ESP32 DevKit pin it had before
+ *     (`esp32`). The Wokwi simulator has no ESP8266, so the simulation still runs
+ *     the same firmware on a DevKit, on those pins. The DevKit's pin names are the
+ *     30-pin DOIT layout in wokwi/wokwi-elements, checked 2026-10-13.
  *   - The ESP32-CAM's pin order: read off the owner's own board, photographed
  *     23 October 2026. It matches the order as commonly drawn.
  *   - The display's pin order (VCC, GND, SCL, SDA): the owner's module, same photos.
@@ -43,7 +50,12 @@ export type Wire = {
   /** The non-obvious part: why, or what goes wrong otherwise. */
   why?: string;
   /** The GPIO this wire lands on, and the name the firmware calls it. */
-  gpio?: { number: number; name: string };
+  gpio?: {
+    number: number;
+    name: string;
+    /** Node A only: the same signal on an ESP32 DevKit, for the Wokwi simulation. */
+    esp32?: { number: number; pin: string };
+  };
   /** Set when the pin map did not specify this, with the reason for the choice. */
   proposed?: string;
 };
@@ -76,11 +88,11 @@ export type NodeWiring = {
   groups: Group[];
 };
 
-const DEVKIT: Board = {
-  name: 'ESP32 DevKit V1, 30-pin',
-  left: ['EN', 'VP', 'VN', 'D34', 'D35', 'D32', 'D33', 'D25', 'D26', 'D27', 'D14', 'D12', 'D13', 'GND', 'VIN'],
-  right: ['D23', 'D22', 'TX0', 'RX0', 'D21', 'D19', 'D18', 'D5', 'TX2', 'RX2', 'D4', 'D2', 'D15', 'GND', '3V3'],
-  checked: 'the 30-pin DOIT layout in wokwi/wokwi-elements, 2026-10-13',
+const NODEMCU: Board = {
+  name: 'NodeMCU, ESP8266',
+  left: ['A0', 'G', 'VU', 'S3', 'S2', 'S1', 'SC', 'S0', 'SK', 'G', '3V', 'EN', 'RST', 'G', 'VIN'],
+  right: ['D0', 'D1', 'D2', 'D3', 'D4', '3V', 'G', 'D5', 'D6', 'D7', 'D8', 'RX', 'TX', 'G', '3V'],
+  checked: 'the pin names printed on our own board, photographed 23 October 2026',
 };
 
 const ESP32_CAM: Board = {
@@ -94,9 +106,9 @@ const NODE_A: NodeWiring = {
   id: 'a',
   title: 'Node A',
   job: 'the scale',
-  board: DEVKIT,
+  board: NODEMCU,
   parts: [
-    { id: 'esp32', name: 'DevKit', bom: 'ESP32 DevKit' },
+    { id: 'mcu', name: 'NodeMCU' },
     { id: 'hx711', name: 'HX711', bom: 'HX711' },
     { id: 'cell', name: 'Load cell', bom: 'Bar load cell' },
     { id: 'oled', name: 'OLED', bom: 'SSD1306' },
@@ -115,25 +127,25 @@ const NODE_A: NodeWiring = {
       wires: [
         {
           id: 'a-3v3',
-          from: { part: 'esp32', pin: '3V3' },
+          from: { part: 'mcu', pin: '3V' },
           to: { part: 'v33', pin: 'rail' },
           colour: 'red',
-          say: 'DevKit 3V3 to one of the breadboard’s + rails. This is the 3V3 rail.',
+          say: 'NodeMCU 3V, the one between D4 and G, to one of the breadboard’s + rails. This is the 3V3 rail.',
         },
         {
           id: 'a-gnd',
-          from: { part: 'esp32', pin: 'GND' },
+          from: { part: 'mcu', pin: 'G' },
           to: { part: 'gnd', pin: 'rail' },
           colour: 'black',
-          say: 'DevKit GND, the one beside 3V3, to the − rail. Every ground meets here.',
+          say: 'NodeMCU G, the one just below that 3V, to the − rail. Every ground meets here.',
         },
         {
           id: 'a-5v',
-          from: { part: 'esp32', pin: 'VIN' },
+          from: { part: 'mcu', pin: 'VIN' },
           to: { part: 'v5', pin: 'rail' },
           colour: 'red',
-          say: 'DevKit VIN to the + rail on the other side of the breadboard. This is the 5 V rail.',
-          why: 'Keep the two + rails apart. One carries 3.3 V, the other 5 V; joining them destroys the board.',
+          say: 'NodeMCU VIN to the + rail on the other side of the breadboard. This is the 5 V rail.',
+          why: 'Keep the two + rails apart. One carries 3.3 V, the other 5 V; joining them destroys the board. On USB, VIN may sit a diode’s drop under 5 V: measure yours, VIN to G.',
           proposed: 'The pin map never said where the buzzer takes its supply. 5 V keeps its pulses off the 3V3 that feeds the HX711.',
         },
         {
@@ -143,7 +155,7 @@ const NODE_A: NodeWiring = {
           colour: 'grey',
           through: '100 nF',
           kind: 'part',
-          say: 'A 100 nF capacitor between the 3V3 rail and the GND rail, near the DevKit.',
+          say: 'A 100 nF capacitor between the 3V3 rail and the GND rail, near the NodeMCU.',
         },
       ],
     },
@@ -156,7 +168,7 @@ const NODE_A: NodeWiring = {
           to: { part: 'v33', pin: 'rail' },
           colour: 'red',
           say: 'HX711 VCC to the 3V3 rail.',
-          why: 'Not 5 V. At 5 V its data pin swings to 5 V, which the ESP32 is not rated for.',
+          why: 'Not 5 V. At 5 V its data pin swings to 5 V, which the ESP8266 is not rated for.',
         },
         {
           id: 'a-hx-gnd',
@@ -168,19 +180,18 @@ const NODE_A: NodeWiring = {
         {
           id: 'a-hx-dt',
           from: { part: 'hx711', pin: 'DT' },
-          to: { part: 'esp32', pin: 'RX2' },
+          to: { part: 'mcu', pin: 'D6' },
           colour: 'yellow',
-          say: 'HX711 DT to the pin printed RX2. That is GPIO 16.',
-          why: 'If the metal shield says WROVER, GPIO 16 and 17 are taken by its memory: use GPIO 25 and 26.',
-          gpio: { number: 16, name: 'HX711_DT' },
+          say: 'HX711 DT to D6. That is GPIO 12.',
+          gpio: { number: 12, name: 'HX711_DT', esp32: { number: 16, pin: 'RX2' } },
         },
         {
           id: 'a-hx-sck',
           from: { part: 'hx711', pin: 'SCK' },
-          to: { part: 'esp32', pin: 'TX2' },
+          to: { part: 'mcu', pin: 'D7' },
           colour: 'orange',
-          say: 'HX711 SCK to the pin printed TX2. That is GPIO 17.',
-          gpio: { number: 17, name: 'HX711_SCK' },
+          say: 'HX711 SCK to D7. That is GPIO 13.',
+          gpio: { number: 13, name: 'HX711_SCK', esp32: { number: 17, pin: 'TX2' } },
         },
         {
           id: 'a-hx-caps',
@@ -254,19 +265,19 @@ const NODE_A: NodeWiring = {
         {
           id: 'a-oled-scl',
           from: { part: 'oled', pin: 'SCL' },
-          to: { part: 'esp32', pin: 'D22' },
+          to: { part: 'mcu', pin: 'D1' },
           colour: 'green',
-          say: 'OLED SCL to D22.',
-          gpio: { number: 22, name: 'OLED_SCL' },
+          say: 'OLED SCL to D1. That is GPIO 5.',
+          gpio: { number: 5, name: 'OLED_SCL', esp32: { number: 22, pin: 'D22' } },
         },
         {
           id: 'a-oled-sda',
           from: { part: 'oled', pin: 'SDA' },
-          to: { part: 'esp32', pin: 'D21' },
+          to: { part: 'mcu', pin: 'D2' },
           colour: 'blue',
-          say: 'OLED SDA to D21.',
+          say: 'OLED SDA to D2. That is GPIO 4.',
           why: 'I²C, address 0x3C.',
-          gpio: { number: 21, name: 'OLED_SDA' },
+          gpio: { number: 4, name: 'OLED_SDA', esp32: { number: 21, pin: 'D21' } },
         },
       ],
     },
@@ -276,10 +287,11 @@ const NODE_A: NodeWiring = {
         {
           id: 'a-capture',
           from: { part: 'capture', pin: 'leg' },
-          to: { part: 'esp32', pin: 'D19' },
+          to: { part: 'mcu', pin: 'D3' },
           colour: 'violet',
-          say: 'One leg of the capture button to D19.',
-          gpio: { number: 19, name: 'BUTTON_CAPTURE' },
+          say: 'One leg of the capture button to D3. That is GPIO 0.',
+          why: 'GPIO 0 picks the boot mode: held down while the board powers up, this button starts it in flashing mode instead. The board’s own FLASH button is on the same pin, so it works as PHOTO too.',
+          gpio: { number: 0, name: 'BUTTON_CAPTURE', esp32: { number: 19, pin: 'D19' } },
         },
         {
           id: 'a-capture-gnd',
@@ -292,11 +304,11 @@ const NODE_A: NodeWiring = {
         {
           id: 'a-tare',
           from: { part: 'tare', pin: 'leg' },
-          to: { part: 'esp32', pin: 'D18' },
+          to: { part: 'mcu', pin: 'D5' },
           colour: 'white',
-          say: 'One leg of the tare button to D18.',
+          say: 'One leg of the tare button to D5. That is GPIO 14.',
           why: 'No resistor: the firmware switches on the pin’s own pull-up.',
-          gpio: { number: 18, name: 'BUTTON_TARE' },
+          gpio: { number: 14, name: 'BUTTON_TARE', esp32: { number: 18, pin: 'D18' } },
         },
         {
           id: 'a-tare-gnd',
@@ -312,13 +324,13 @@ const NODE_A: NodeWiring = {
       wires: [
         {
           id: 'a-buz-base',
-          from: { part: 'esp32', pin: 'D23' },
+          from: { part: 'mcu', pin: 'D8' },
           to: { part: 'q1', pin: 'base' },
           colour: 'yellow',
           through: '1 kΩ',
-          say: 'D23, through a 1 kΩ resistor, to the transistor’s base.',
-          why: 'Which leg is the base depends on the exact part: 2N2222s in plastic come in both orders. Find it with a multimeter’s diode test, or the datasheet for the marking on yours.',
-          gpio: { number: 23, name: 'BUZZER' },
+          say: 'D8, through a 1 kΩ resistor, to the transistor’s base. D8 is GPIO 15.',
+          why: 'Yours reads 2N2222A: flat face towards you, legs down, the base is the middle leg; check the outer two with a multimeter’s diode test. GPIO 15 must be low at power-on: the board holds it there, and a transistor’s base does not pull it up.',
+          gpio: { number: 15, name: 'BUZZER', esp32: { number: 23, pin: 'D23' } },
         },
         {
           id: 'a-buz-emitter',

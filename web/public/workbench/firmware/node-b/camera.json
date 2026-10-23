@@ -7,7 +7,7 @@
       "chipFamily": "ESP32",
       "parts": [
         {
-          "path": "camera.bin",
+          "path": "camera-esp32.bin",
           "offset": 0
         }
       ]

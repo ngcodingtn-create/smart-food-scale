@@ -82,7 +82,8 @@ function Header({ x, w, pitch, first, left, right, used }: { x: number; w: numbe
       const y = first + index * pitch;
       const px = side === 'left' ? x : x + w;
       // "GND" appears on both rows; only the one a wire lands on is marked used.
-      const live = used.has(`${side}:${name}`);
+      // A name printed twice on one side (3V, G) is marked at its first place, where wires land.
+      const live = used.has(`${side}:${name}`) && names.indexOf(name) === index;
       return (
         <g key={`${side}-${index}`} className={live ? 'pin pin-used' : 'pin'}>
           <circle className="pad" cx={px} cy={y} r="3" />
@@ -100,7 +101,7 @@ function Header({ x, w, pitch, first, left, right, used }: { x: number; w: numbe
   );
 }
 
-// --- Node A: ESP32 DevKit V1 -------------------------------------------------
+// --- Node A: NodeMCU, ESP8266 -------------------------------------------------
 
 const A = NODES[0];
 const A_PITCH = 26;
@@ -117,15 +118,15 @@ const A_MOD = 252; // left edge of the module column
 
 const A_WIRES: Record<string, WireArt> = {
   // rails
-  'a-3v3': line(aRight('3V3'), [A_V33, aRight('3V3')[1]]),
-  'a-gnd': line(aRight('GND'), [A_GND, aRight('GND')[1]]),
+  'a-3v3': line(aRight('3V'), [A_V33, aRight('3V')[1]]),
+  'a-gnd': line(aRight('G'), [A_GND, aRight('G')[1]]),
   'a-5v': line(aLeft('VIN'), [A_V5, aLeft('VIN')[1]]),
   'a-decouple': line([A_V33, 544], [A_GND, 544], [210, 544]),
   // HX711
   'a-hx-vcc': line([A_MOD, 426], [A_V33, 426]),
   'a-hx-gnd': line([A_MOD, 360], [A_GND, 360]),
-  'a-hx-dt': bend([A_MOD, 382], [212, 382], [196, 384], aRight('RX2')),
-  'a-hx-sck': bend([A_MOD, 404], [200, 404], [208, 358], aRight('TX2')),
+  'a-hx-dt': bend([A_MOD, 382], [212, 382], [196, 358], aRight('D6')),
+  'a-hx-sck': bend([A_MOD, 404], [212, 404], [196, 384], aRight('D7')),
   'a-hx-caps': bend([A_MOD, 426], [290, 426], [290, 360], [A_MOD, 360], [336, 393]),
   // load cell
   'a-cell-red': line([274, 486], [274, 446]),
@@ -136,15 +137,16 @@ const A_WIRES: Record<string, WireArt> = {
   // Our module's order, from its photo: VCC, GND, SCL, SDA.
   'a-oled-vcc': line([A_MOD, 142], [A_V33, 142]),
   'a-oled-gnd': line([A_MOD, 164], [A_GND, 164]),
-  'a-oled-scl': bend([A_MOD, 186], [204, 186], [196, 176], aRight('D22')),
-  'a-oled-sda': bend([A_MOD, 208], [196, 208], [206, 254], aRight('D21')),
+  'a-oled-scl': bend([A_MOD, 186], [212, 186], [196, 176], aRight('D1')),
+  'a-oled-sda': bend([A_MOD, 208], [212, 208], [196, 202], aRight('D2')),
   // buttons
-  'a-capture': bend([A_MOD, 246], [202, 246], [204, 280], aRight('D19')),
+  'a-capture': bend([A_MOD, 246], [212, 246], [196, 228], aRight('D3')),
   'a-capture-gnd': line([A_MOD, 266], [A_GND, 266]),
-  'a-tare': bend([A_MOD, 298], [206, 298], [198, 306], aRight('D18')),
+  'a-tare': bend([A_MOD, 298], [212, 298], [196, 332], aRight('D5')),
   'a-tare-gnd': line([A_MOD, 318], [A_GND, 318]),
   // buzzer
-  'a-buz-base': bend(aRight('D23'), [200, 150], [245, 150], [245, 98], [214, 143]),
+  // D8 is near the USB end and the transistor at the top: up the gap beside the board.
+  'a-buz-base': { d: `M${aRight('D8')}H146V112H245V98`, ends: [aRight('D8'), [245, 98]], chip: [214, 112] },
   'a-buz-emitter': line([214, 82], [A_GND, 82]),
   'a-buz-collector': bend([130, 69], [170, 69], [174, 56], [214, 56]),
   'a-buz-supply': line([52, 69], [A_V5, 69]),
@@ -161,7 +163,7 @@ const A_WIRES: Record<string, WireArt> = {
   'a-supply-gnd': line([128, 566], [A_GND, 566]),
 };
 
-const A_USED = new Set(['right:3V3', 'right:GND', 'left:VIN', 'right:RX2', 'right:TX2', 'right:D22', 'right:D21', 'right:D19', 'right:D18', 'right:D23']);
+const A_USED = new Set(['right:3V', 'right:G', 'left:VIN', 'right:D1', 'right:D2', 'right:D3', 'right:D5', 'right:D6', 'right:D7', 'right:D8']);
 
 function NodeAParts() {
   return (
@@ -170,12 +172,12 @@ function NodeAParts() {
       <Rail x={A_V33} from={128} to={556} tone="hot" name="3V3" at={[A_V33 - 4, 122]} />
       <Rail x={A_GND} from={12} to={572} tone="ground" name="GND" at={[A_GND + 16, 22]} />
 
-      {/* the DevKit, antenna end up, USB end down */}
+      {/* the NodeMCU, antenna end up, USB end down */}
       <rect className="pcb" x={A_X} y="130" width={A_W} height="404" rx="6" />
       <rect className="metal" x={A_X + 28} y="138" width="40" height="52" rx="2" />
       <rect className="metal" x={A_X + 34} y="522" width="28" height="16" rx="2" />
       <text className="t-small" x={A_X + 48} y="206" textAnchor="middle">
-        ESP32
+        ESP8266
       </text>
       <text className="t-small" x={A_X + 48} y="516" textAnchor="middle">
         USB

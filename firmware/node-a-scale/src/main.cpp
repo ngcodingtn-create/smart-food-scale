@@ -12,14 +12,25 @@
 // Everything the board does is also printed on the serial line at 115200 baud,
 // one line per event, so the Workbench pages can read it. The format and the
 // commands it accepts are in ../README.md.
+//
+// Two chips, one program. The board in hand is an ESP8266 NodeMCU; the ESP32
+// DevKit on the original request is still built, because the Wokwi simulator
+// has no ESP8266. What differs between them (saving settings, the radio's calls)
+// is kept to the `#if defined(ESP8266)` blocks below.
 
 #include <Arduino.h>
+#include <Wire.h>
+#if defined(ESP8266)
+#include <EEPROM.h>
+#include <ESP8266WiFi.h>
+#include <espnow.h>
+#else
 #include <Preferences.h>
 #include <WiFi.h>
-#include <Wire.h>
 #include <esp_arduino_version.h>
 #include <esp_now.h>
 #include <esp_wifi.h>
+#endif
 
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
@@ -50,7 +61,52 @@ bool tared = false;
 float countsPerGram = SFS_COUNTS_PER_GRAM;  // replaced by the saved value, if any
 bool overloaded = false;
 
+// --- what the board remembers ------------------------------------------------
+//
+// Two values survive a restart: the calibration, and the channel Node B was last
+// found on. NAN means no calibration saved; 0, no channel.
+
+#if defined(ESP8266)
+// The ESP8266 has no Preferences. A few bytes of its emulated EEPROM do the job.
+struct Saved {
+  uint32_t magic;
+  float cpg;
+  uint8_t channel;
+};
+constexpr uint32_t kSavedMagic = 0x53465341;  // "SFSA": anything else is a blank or foreign flash
+Saved saved;
+
+void settingsBegin() {
+  EEPROM.begin(sizeof(Saved));
+  EEPROM.get(0, saved);
+  if (saved.magic != kSavedMagic) saved = {kSavedMagic, NAN, 0};
+}
+void settingsWrite() {
+  EEPROM.put(0, saved);
+  EEPROM.commit();
+}
+float savedCountsPerGram() { return saved.cpg; }
+void saveCountsPerGram(float value) {
+  saved.cpg = value;
+  settingsWrite();
+}
+uint8_t savedChannel() { return saved.channel; }
+void saveChannel(uint8_t channel) {
+  saved.channel = channel;
+  settingsWrite();
+}
+#else
 Preferences settings;
+
+void settingsBegin() { settings.begin("sfs-node-a", false); }
+float savedCountsPerGram() { return settings.isKey("cpg") ? settings.getFloat("cpg", NAN) : NAN; }
+void saveCountsPerGram(float value) {
+  if (isnan(value)) settings.remove("cpg");
+  else settings.putFloat("cpg", value);
+}
+uint8_t savedChannel() { return settings.getUChar("channel", 0); }
+void saveChannel(uint8_t channel) { settings.putUChar("channel", channel); }
+#endif
 
 bool calibrated() { return !isnan(countsPerGram) && countsPerGram > 0; }
 
@@ -127,6 +183,29 @@ void onFrame(const uint8_t *from, const uint8_t *data, int length) {
   inboxFull = true;
 }
 
+#if defined(ESP8266)
+// The ESP8266's ESP-NOW is the older API: plain pointers, a role, and 0 for success.
+void onReceive(uint8_t *mac, uint8_t *data, uint8_t length) { onFrame(mac, data, length); }
+
+void setChannel(uint8_t channel) { wifi_set_channel(channel); }
+
+void addPeer(const uint8_t *mac, uint8_t channel) {
+  uint8_t *address = const_cast<uint8_t *>(mac);
+  if (esp_now_is_peer_exist(address)) esp_now_del_peer(address);
+  esp_now_add_peer(address, ESP_NOW_ROLE_COMBO, channel, nullptr, 0);
+}
+
+bool radioBegin() {
+  if (esp_now_init() != 0) return false;
+  esp_now_set_self_role(ESP_NOW_ROLE_COMBO);
+  esp_now_register_recv_cb(onReceive);
+  return true;
+}
+
+void radioSend(const uint8_t *to, sfs::Frame &frame) {
+  esp_now_send(const_cast<uint8_t *>(to), reinterpret_cast<uint8_t *>(&frame), sizeof frame);
+}
+#else
 // The callback's shape changed with version 3 of the ESP32 Arduino core.
 #if ESP_ARDUINO_VERSION_MAJOR >= 3
 void onReceive(const esp_now_recv_info_t *info, const uint8_t *data, int length) { onFrame(info->src_addr, data, length); }
@@ -140,7 +219,7 @@ void setChannel(uint8_t channel) {
   esp_wifi_set_promiscuous(false);
 }
 
-void addPeer(const uint8_t *mac) {
+void addPeer(const uint8_t *mac, uint8_t) {
   if (esp_now_is_peer_exist(mac)) esp_now_del_peer(mac);
   esp_now_peer_info_t peer = {};
   memcpy(peer.peer_addr, mac, 6);
@@ -149,9 +228,20 @@ void addPeer(const uint8_t *mac) {
   esp_now_add_peer(&peer);
 }
 
+bool radioBegin() {
+  if (esp_now_init() != ESP_OK) return false;
+  esp_now_register_recv_cb(onReceive);
+  return true;
+}
+
+void radioSend(const uint8_t *to, sfs::Frame &frame) {
+  esp_now_send(to, reinterpret_cast<const uint8_t *>(&frame), sizeof frame);
+}
+#endif
+
 void send(const uint8_t *to, sfs::Kind kind, uint16_t seq, float grams) {
   sfs::Frame frame = {sfs::kMagic, kind, cameraChannel, seq, grams, 0};
-  esp_now_send(to, reinterpret_cast<const uint8_t *>(&frame), sizeof frame);
+  radioSend(to, frame);
 }
 
 // Wait up to `ms` for a frame of this kind (and this seq, when one is given).
@@ -177,19 +267,20 @@ String macText(const uint8_t *mac) {
 
 // Try each channel with a Hello until Node B answers. The last good channel first.
 bool findCamera() {
-  uint8_t saved = settings.getUChar("channel", 0);
+  uint8_t last = savedChannel();
   for (int attempt = 0; attempt <= config::kLastChannel; attempt++) {
-    uint8_t channel = attempt == 0 ? saved : attempt;
-    if (channel == 0 || (attempt > 0 && channel == saved)) continue;
+    uint8_t channel = attempt == 0 ? last : attempt;
+    if (channel == 0 || (attempt > 0 && channel == last)) continue;
     setChannel(channel);
+    addPeer(kBroadcast, channel);
     inboxFull = false;
     send(kBroadcast, sfs::Kind::Hello, 0, 0);
     if (await(sfs::Kind::HelloAck, 0, config::kHelloWaitMs)) {
       memcpy(cameraMac, inboxFrom, 6);
       inboxFull = false;
       cameraChannel = channel;
-      addPeer(cameraMac);
-      settings.putUChar("channel", channel);
+      addPeer(cameraMac, channel);
+      if (channel != last) saveChannel(channel);  // flash wears: write only on a change
       Serial.printf("E link found ch=%u mac=%s\n", channel, macText(cameraMac).c_str());
       return true;
     }
@@ -370,14 +461,14 @@ void command(String text) {
     Serial.printf("E info node=a fw=%s calibrated=%d cpg=%.6f tared=%d offset=%ld camera_ch=%u\n", SFS_FIRMWARE_VERSION,
                   calibrated(), countsPerGram, tared, tareOffset, cameraChannel);
   } else if (text == "cal clear") {
-    settings.remove("cpg");
+    saveCountsPerGram(NAN);
     countsPerGram = SFS_COUNTS_PER_GRAM;
     Serial.println("E cal cleared");
   } else if (text.startsWith("cal ")) {
     float value = text.substring(4).toFloat();
     if (value > 0) {
       countsPerGram = value;
-      settings.putFloat("cpg", value);
+      saveCountsPerGram(value);
       Serial.printf("E cal cpg=%.6f\n", value);
     } else {
       Serial.println("E error cal-needs-a-positive-number");
@@ -415,8 +506,8 @@ void setup() {
   pinMode(PIN_BUZZER, OUTPUT);
   digitalWrite(PIN_BUZZER, LOW);
 
-  settings.begin("sfs-node-a", false);
-  if (settings.isKey("cpg")) countsPerGram = settings.getFloat("cpg", countsPerGram);
+  settingsBegin();
+  if (!isnan(savedCountsPerGram())) countsPerGram = savedCountsPerGram();
 #ifdef SIMULATE_SCALE
   if (!calibrated()) countsPerGram = config::kSimCountsPerGram;
 #endif
@@ -430,11 +521,18 @@ void setup() {
   cell.set_gain(128);  // channel A, gain 128
 #endif
 
+#if defined(ESP8266)
+  // The ESP8266 keeps Wi-Fi settings in flash and rejoins old networks by itself,
+  // which would move it off the channel it is searching. It also dozes between
+  // beacons by default, and misses frames while it does.
+  WiFi.persistent(false);
+  WiFi.setAutoConnect(false);
+  WiFi.setSleepMode(WIFI_NONE_SLEEP);
+#endif
   WiFi.mode(WIFI_STA);
   WiFi.disconnect();
-  if (esp_now_init() == ESP_OK) {
-    esp_now_register_recv_cb(onReceive);
-    addPeer(kBroadcast);
+  if (radioBegin()) {
+    addPeer(kBroadcast, 1);
   } else {
     Serial.println("E error espnow-init");
   }

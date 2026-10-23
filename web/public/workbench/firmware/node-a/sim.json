@@ -1,13 +1,22 @@
 {
   "name": "Smart Food Scale: Node A, with a pretend load cell",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "new_install_prompt_erase": true,
   "builds": [
+    {
+      "chipFamily": "ESP8266",
+      "parts": [
+        {
+          "path": "sim-esp8266.bin",
+          "offset": 0
+        }
+      ]
+    },
     {
       "chipFamily": "ESP32",
       "parts": [
         {
-          "path": "sim.bin",
+          "path": "sim-esp32.bin",
           "offset": 0
         }
       ]

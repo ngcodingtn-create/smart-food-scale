@@ -25,8 +25,8 @@ npm run dev                                                   # http://localhost
 python -m venv firmware/.venv
 firmware/.venv/Scripts/python.exe -m pip install platformio
 cd firmware/node-a-scale
-../.venv/Scripts/pio.exe run                                  # both builds: node-a-scale, node-a-sim
-../.venv/Scripts/pio.exe run -e node-a-scale -t upload        # with a board on USB
+../.venv/Scripts/pio.exe run                                  # four builds: node-a-nodemcu(-sim) on the ESP8266 in hand, node-a-scale/-sim on ESP32 (Wokwi)
+../.venv/Scripts/pio.exe run -e node-a-nodemcu -t upload      # the NodeMCU on USB
 cd ../node-b-camera
 ../.venv/Scripts/pio.exe run                                  # the camera; flash with -t upload via the MB base
 ```
@@ -79,7 +79,7 @@ cd ../backend
 .venv/Scripts/python.exe -m pytest   # 145 tests, offline
 
 cd ../firmware/node-a-scale
-../.venv/Scripts/pio.exe run         # both builds compile, no warnings from our code
+../.venv/Scripts/pio.exe run         # all four builds compile, no warnings from our code
 cd ../node-b-camera
 ../.venv/Scripts/pio.exe run         # likewise
 ```
