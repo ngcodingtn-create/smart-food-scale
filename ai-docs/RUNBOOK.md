@@ -4,7 +4,7 @@ How to run, check and ship this repo. Written on Windows 11 with Git Bash and
 PowerShell; paths are Windows where it matters.
 
 Tool versions these steps were run with: Node 24.11.1, npm 11.6.2, Python 3.14.2,
-Next.js 16.3.5 (Turbopack), React 19.2.8. PlatformIO is not installed on this machine.
+Next.js 16.3.5 (Turbopack), React 19.2.8. PlatformIO and pyserial live in `firmware/.venv`.
 
 ## Run it
 
@@ -36,8 +36,33 @@ cd ../node-b-camera
 In the Claude desktop app, `.claude/launch.json` starts both: `web` (port 3000,
 `autoPort`) and `backend` (port 8000). The backend entry uses the Windows venv path.
 
-**The app stops these servers when a turn ends.** Expect to start them again; a
-connection refused at the start of a turn is normal, not a bug.
+**The app stops preview servers when a turn ends.** So the site's dev server runs in a
+Terminal tab of the app instead ("site (localhost:3000)", `npm run dev` in `web/`), and
+`launch.json`'s `web` only attaches to it by URL; `web-start` still starts one. The
+backend is still started per turn; a connection refused there is normal.
+
+## Driving the boards
+
+The owner plugs in and wires; Claude does the rest from the laptop with
+`firmware/tools/board.py` (run with `firmware/.venv/Scripts/python`). It finds the one USB
+board by itself (CH340, CH9102 or CP210x); pass `--port COM5` when two are plugged in.
+
+```bash
+firmware/.venv/Scripts/python firmware/tools/board.py ports
+firmware/.venv/Scripts/python firmware/tools/board.py flash node-a-nodemcu-sim
+firmware/.venv/Scripts/python firmware/tools/board.py listen --reset --seconds 6
+firmware/.venv/Scripts/python firmware/tools/board.py send "sim 150" --expect "E sim"
+firmware/.venv/Scripts/python firmware/tools/board.py meal-test --no-camera
+firmware/.venv/Scripts/python firmware/tools/board.py counts --grams 200
+```
+
+- Only one program holds a port: close the bench page or Flash it in the browser first.
+- Flashing the NodeMCU fails to connect now and then: ask the owner to hold FLASH, tap
+  RST, let go of FLASH, and run it again.
+- `board.py` refuses `pass …`. The Wi-Fi password is typed by the owner on the bench page,
+  so it never passes through a command line, a log or the chat.
+- Calibrating: tare on an empty plate (`send tare --expect "E tare"`), then for each known
+  mass `counts --grams <g>`; average the `cpg` values and `send "cal <cpg>" --expect "E cal"`.
 
 ## One Next.js dev server, never two
 

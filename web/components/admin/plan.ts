@@ -4,6 +4,10 @@
  *
  * `status` is written here for Claude's tasks, as the work lands. The owner's
  * tasks start as "todo" and are ticked on the page, in that browser only.
+ *
+ * The owner's list holds only what needs hands: plugging in, wiring, the phone,
+ * the one password, the firewall prompt, the weights. Claude flashes, reads and
+ * tests the boards from the laptop (firmware/tools/board.py).
  */
 
 export type Who = 'you' | 'claude';
@@ -42,17 +46,14 @@ export const DAYS: Day[] = [
     title: 'Today',
     summary: 'Everything except the real weight. The scale runs the pretend-scale image; the laptop is the server.',
     you: [
-      { id: 'y-port', title: 'Plug in the NodeMCU', doneWhen: 'A new port (CH340) shows on Flash it', href: '/workbench/flash', status: 'todo' },
-      { id: 'y-flash-sim', title: 'Flash “The pretend scale”', doneWhen: 'It prints E boot node=a … simulated=1', href: '/workbench/flash', status: 'todo' },
-      { id: 'y-wire-a', title: 'Wire the display, tare button and buzzer', doneWhen: 'Ticks on Wire it; female–male jumpers from the NodeMCU', href: '/workbench/wire', status: 'todo' },
-      { id: 'y-try-a', title: 'Set 150 g, press TARE, press FLASH', doneWhen: 'The display shows the weight and the buzzer beeps', href: '/workbench/bench', status: 'todo' },
+      { id: 'y-port', title: 'Plug in the NodeMCU and say “plugged in”', doneWhen: 'Claude finds its CH340 port and flashes it', status: 'todo' },
+      { id: 'y-wire-a', title: 'Wire the display, tare button and buzzer', doneWhen: 'Ticks on the step pages; Claude says it still boots', href: '/admin/build/m1-scale-brain', status: 'todo' },
+      { id: 'y-try-a', title: 'Watch and listen while Claude runs the pretend meal', doneWhen: 'The display shows 150 g and the buzzer beeps', status: 'todo' },
       { id: 'y-hotspot', title: 'Phone hotspot on 2.4 GHz, laptop joins', doneWhen: 'Laptop online through the phone', status: 'todo' },
-      { id: 'y-backend', title: 'Backend on the network (backend-lan), firewall allowed', doneWhen: 'http://<laptop>:8000/docs opens on the phone', status: 'todo' },
-      { id: 'y-flash-cam', title: 'Flash “The camera” on its base', doneWhen: 'It prints E boot node=b … camera=1', href: '/workbench/flash', status: 'todo' },
-      { id: 'y-cam-wifi', title: 'Hotspot and backend address on the camera', doneWhen: 'The bench page says Wi-Fi up', href: '/workbench/bench', status: 'todo' },
-      { id: 'y-photo', title: 'Test photo with 150 g', doneWhen: 'The meal appears in the backend', href: '/workbench/bench', status: 'todo' },
+      { id: 'y-backend', title: 'Click Allow when Windows asks about Python and the network', doneWhen: 'Claude reaches the server from the hotspot address', status: 'todo' },
+      { id: 'y-cam-plug', title: 'Seat the camera on its base and plug it in', doneWhen: 'Claude flashes it and reads E boot node=b … camera=1', status: 'todo' },
+      { id: 'y-cam-wifi', title: 'Type the hotspot’s password once on the bench page', doneWhen: 'The bench page says Wi-Fi up', href: '/workbench/bench', status: 'todo' },
       { id: 'y-light', title: 'Camera onto the breadboard, wire the light', doneWhen: '“Light on” lights all six LEDs', href: '/workbench/wire', status: 'todo' },
-      { id: 'y-meal-test', title: 'Run the whole-meal test', doneWhen: 'All six steps ticked', href: '/workbench/bench', status: 'todo' },
       { id: 'y-rig', title: 'Measure the load cell’s screw holes; find two boards and screws', doneWhen: 'Screws in hand', status: 'todo' },
     ],
     claude: [
@@ -60,6 +61,10 @@ export const DAYS: Day[] = [
       { id: 'c-gemini', title: 'Gemini recogniser, tested against a fake Gemini', status: 'done' },
       { id: 'c-admin', title: 'This builder’s area, behind a password', status: 'done' },
       { id: 'c-companion', title: 'The build companion: milestones 0–9, steps with your photos and the wiring', status: 'done' },
+      { id: 'c-board-tool', title: 'board.py: find, flash, read and test the boards from the laptop', status: 'done' },
+      { id: 'c-flash-boards', title: 'Flash the pretend scale and the camera; read their boot lines', status: 'todo' },
+      { id: 'c-server-lan', title: 'Start the server where the camera can reach it, and check it', status: 'todo' },
+      { id: 'c-tests', title: 'Run the tests on the boards: pretend meal, test photo, the whole-meal test', status: 'todo' },
       { id: 'c-server', title: 'Server v2: accounts, pairing, the “to name” inbox, photos, Postgres', status: 'todo' },
       { id: 'c-fake', title: 'The fake scale: sends meals as if it were your paired scale', status: 'todo' },
       { id: 'c-app', title: 'App v1 in Expo: all nine screens, French first', status: 'todo' },
@@ -75,15 +80,17 @@ export const DAYS: Day[] = [
     you: [
       { id: 't-lab', title: 'At the lab: solder the HX711’s pins, check the transistor and buzzer, ask for calibration weights', status: 'todo' },
       { id: 't-wire', title: 'Wire the HX711 (8 wires) and the second button on D3', href: '/workbench/wire', status: 'todo' },
-      { id: 't-flash', title: 'Flash “The scale”, the real image, and accept the erase', href: '/workbench/flash', status: 'todo' },
-      { id: 't-sign', title: 'Press the cell: the numbers rise (else swap white and green); mount it', status: 'todo' },
-      { id: 't-cal', title: 'Calibrate: TARE empty, then 3 to 5 known weights, Save', href: '/workbench/bench', status: 'todo' },
+      { id: 't-flash', title: 'Plug the NodeMCU back in: Claude flashes “The scale”, the real image', status: 'todo' },
+      { id: 't-sign', title: 'Press the cell when Claude says (swap white and green if told); mount it', status: 'todo' },
+      { id: 't-cal', title: 'Put on 3 to 5 known weights, one at a time, when Claude asks', status: 'todo' },
       { id: 't-sd', title: 'microSD: FAT32, into the camera; test with the hotspot off, then on', status: 'todo' },
       { id: 't-pair', title: 'From the app: the scale’s Wi-Fi and pairing code', status: 'todo' },
       { id: 't-meals', title: 'Three real meals: plate, TARE, food, PHOTO', doneWhen: 'They appear in the app', status: 'todo' },
     ],
     claude: [
-      { id: 't-c-logs', title: 'Read your logs, fix what breaks in the firmware', status: 'todo' },
+      { id: 't-c-flash', title: 'Flash the real scale and check the counts', status: 'todo' },
+      { id: 't-c-cal', title: 'Calibrate from your weights and save it on the board', status: 'todo' },
+      { id: 't-c-logs', title: 'Read the boards, fix what breaks in the firmware', status: 'todo' },
       { id: 't-c-polish', title: 'App polish from what you see on your phone', status: 'todo' },
     ],
   },

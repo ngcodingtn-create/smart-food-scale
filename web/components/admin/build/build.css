@@ -290,6 +290,32 @@
   font-family: var(--font-mono);
   color: var(--accent-ink);
 }
+/* Who does what: the owner's hands, then Claude from the laptop. */
+.step-roles {
+  gap: 0.75rem !important;
+}
+.step-role {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--rule);
+  border-left: 4px solid var(--accent);
+  border-radius: 0.6rem;
+  background: var(--paper-raised);
+}
+.step-role[data-who='claude'] {
+  border-left-color: var(--tip);
+  background: var(--tip-wash);
+}
+.step-role h2 {
+  margin: 0;
+}
+.step-role[data-who='claude'] .step-actions {
+  list-style: '→  ';
+}
+.step-role[data-who='claude'] .step-actions li::marker {
+  color: var(--tip-ink);
+}
 .step-draft-note {
   margin: 0;
   padding: 0.9rem 1rem;

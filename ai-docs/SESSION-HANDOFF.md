@@ -1,31 +1,44 @@
 # Session handoff
 
-**Written:** 13 October 2026, at the end of session 3; the hardware lines updated 23 October 2026. **Rewrite this file when you
-stop**; history belongs in [WORK-LOG.md](WORK-LOG.md).
+**Written:** 25 October 2026 (the top two sections); the rest of the file is older and
+says so where it matters. **Rewrite this file when you stop**; history belongs in
+[WORK-LOG.md](WORK-LOG.md).
 
-## Where things stand
+## Now, 25 October
 
-The site and the code are committed and pushed to `main`, which is production
-(<https://web-ivory-ten-26.vercel.app>). If `git status` shows changes, someone has
-worked since.
+- **Production** (`main`, <https://web-ivory-ten-26.vercel.app>) has everything up to
+  `363b2c0`: `/admin` and the build companion. `/admin` stays locked on production until
+  the owner adds `SFS_ADMIN_PASSWORD` in Vercel (website project, Settings, Environment
+  Variables, then redeploy). Offered; not done; changing it needs their yes.
+- **After `363b2c0`, committed but not pushed:** Claude drives the boards. Step pages say
+  "You do" (hands only) and "Claude does, from the laptop"; `firmware/tools/board.py` finds,
+  flashes, reads and tests the boards (RUNBOOK, "Driving the boards"). Never run on a real
+  board yet.
+- **Localhost**: the dev server runs in the app's Terminal tab "site (localhost:3000)"
+  (`npm run dev` in `web/`). `.claude/launch.json` "web" attaches to it by URL. If the
+  tab is gone, start it there again, not as a preview process (those stop at the end of
+  a turn).
+- **The owner's working model**: they plug in, wire, press, look, turn on the hotspot,
+  type the Wi-Fi password once and click Allow on the firewall prompt. Claude does the
+  rest: port, flashing, boot lines, commands, the tests, calibration from their weights.
+- **Today** the NodeMCU runs the pretend scale (M1); then the camera (M2), the light (M3),
+  both boards (M4). **26 Oct**: the HX711, the second button and the microSD arrive (M5).
 
-This file was last rewritten in full at `0dced01`. The Workbench lines below were
-corrected when that category shipped; the owner asked for no new handoff that day, so
-the rest is as it stood.
+## Where things stood before 25 October
 
 | Piece | State |
 | --- | --- |
-| Backend | Done. 145 tests, offline. Recognition is a stub by design |
+| Backend | Done. 162 tests, offline. `GeminiRecogniser` written, tested against a fake Gemini only |
 | Food table | Done. 18 dishes, all flagged as estimates |
 | Site shell and design | Done |
 | Component request (`/project/component-request`) | **Final form.** A sheet for the lab technician; reasoning on `/notes` |
 | Architecture (`/project/architecture`) | **Rebuilt** as a playable system map and three drawings |
 | Rig (`/rig`) | **Rebuilt** on the current design, with four computed drawings |
 | Prototype (`/prototype`) | Done. Simulates the whole chain in the browser |
-| Firmware, Node A | **Moved to the ESP8266 NodeMCU** the lab gave (23 Oct). Four builds compile with no warnings: `node-a-nodemcu` and `-sim` (ESP8266), `node-a-scale` and `node-a-sim` (ESP32, kept because Wokwi has no ESP8266). Runs in Wokwi on the ESP32 pins. Never on a board |
-| Firmware, Node B | **Written.** Compiles (core 2.0.17, no warnings). Its upload format was checked against the running backend by a script that builds the same bytes. No simulator runs it (no ESP32-CAM anywhere); never on a board |
-| Mobile app | Not started. `web/components/sim/Phone.tsx` is the closest thing to a spec |
-| Hardware | **In hand from the lab** (form of 14 Oct), photographed 23 Oct: see `/workbench/parts`. The "DevKit" is an ESP8266 NodeMCU and must be swapped |
+| Firmware, Node A | **On the ESP8266 NodeMCU** the lab gave (23 Oct). Four builds compile with no warnings: `node-a-nodemcu` and `-sim` (ESP8266), `node-a-scale` and `node-a-sim` (ESP32, kept because Wokwi has no ESP8266). Runs in Wokwi on the ESP32 pins. Never on a board |
+| Firmware, Node B | **Written.** Compiles (core 2.0.17, no warnings). Its upload format was checked against the running backend by a script that builds the same bytes. Never on a board |
+| Mobile app | Not started. Planned in [APP-PLAN.md](APP-PLAN.md) (Expo SDK 57) |
+| Hardware | **In hand from the lab**, photographed 23 Oct: see `/workbench/parts`. HX711, second button and microSD come 26 Oct |
 
 ## What the owner is likely to ask next
 
@@ -35,8 +48,8 @@ In the order the project needs them:
    0 and 1 written in full, the rest drafts filled from `research/2026-10-25-*.md`).
    **Follow [APP-PLAN.md](APP-PLAN.md)** (25 Oct: server v2 with accounts, the Expo app,
    the scale's Wi-Fi setup and pairing; Supabase for auth, database and photos) and
-   **[BUILD-PLAN.md](BUILD-PLAN.md)** (the HX711 now comes 26 Oct): today (23 Oct) everything but the scale
-   reading, with the pretend scale; tomorrow (24 Oct) the owner brings the HX711, the second
+   **[BUILD-PLAN.md](BUILD-PLAN.md)** (the HX711 now comes 26 Oct): today (25 Oct) everything but the scale
+   reading, with the pretend scale; tomorrow (26 Oct) the owner brings the HX711, the second
    button and a microSD card, and the build is finished.
 1. **Get an HX711.** The lab's form ticked one, but it is not in the photos and not on
    the load cell's wires; the faculty was closed on 23 October. Nothing in the kit can
@@ -47,10 +60,10 @@ In the order the project needs them:
    sheet for the lab is `/workbench/missing`, built from `kit.ts` and `missing.ts`. What the kit
    can build is in
    [research/2026-10-23-can-the-kit-build-the-prototype.md](research/2026-10-23-can-the-kit-build-the-prototype.md).
-2. **Node A on a real board**: flash it from `/workbench/flash`, then check each part and
-   calibrate on `/workbench/bench`. The firmware's serial line format and commands are
+2. **Node A on a real board**: Claude flashes it with `board.py`, then checks each part and
+   calibrates (`board.py counts`); `/workbench/flash` and `/workbench/bench` are the owner's fallback. The firmware's serial line format and commands are
    in `firmware/node-a-scale/README.md`; the bench page speaks them.
-3. **Node B on a real board**: flash it from `/workbench/flash`, set the hotspot and
+3. **Node B on a real board**: Claude flashes it with `board.py`; the owner types the Wi-Fi password once on `/workbench/bench`; set the hotspot and
    the backend's address on `/workbench/bench` (saved on the board, not compiled in),
    take a test photo, then tune the light's settle time and the JPEG quality in
    `firmware/node-b-camera/include/config.h` from real photos. Then both boards

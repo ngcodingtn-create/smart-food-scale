@@ -8,6 +8,11 @@ and step; `/admin/build` draws it (the map, each milestone, each step with the o
 photos, the wiring lit, the checks, what the board should show, and the live tool). This
 file says why it is ordered so, and where each milestone's detail comes from.
 
+**Who does what.** Each step says it: "You do" is only what needs hands (plug in, wire,
+press, look, the hotspot, the one Wi-Fi password, the firewall prompt, the weights);
+"Claude does" is everything from the laptop (the port, flashing, boot lines, commands,
+tests, calibration), with `firmware/tools/board.py`.
+
 ## The milestones
 
 | # | Milestone | When | Detail from |

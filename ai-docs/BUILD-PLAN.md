@@ -92,17 +92,21 @@ jumpers from the base's sockets.
 The NodeMCU runs the **pretend scale** today: the weight is typed on the Test and
 calibrate page instead of measured. Everything else is real.
 
-### The owner
+### The owner, with Claude at the laptop
+
+The owner's hands do the plugging, wiring, pressing and looking, plus the hotspot, the
+Wi-Fi password (typed once on the bench page) and the firewall's Allow. Claude flashes,
+reads and tests the boards with `firmware/tools/board.py` (RUNBOOK, "Driving the boards").
 
 | # | Step | Where | Done when |
 | --- | --- | --- | --- |
-| 1 | Plug in the NodeMCU with a data cable. A new COM port appears (CH340). If not, install WCH's CH340 driver | Windows | A port is listed on Flash it |
-| 2 | Flash **The pretend scale** to the NodeMCU | `/workbench/flash` | The log says `E boot node=a fw=0.2.1 … simulated=1` |
+| 1 | Plug in the NodeMCU with a data cable and say so. Claude finds the CH340 port (`board.py ports`); if none, the other cable, then WCH's CH340 driver | Laptop | Claude names the port |
+| 2 | Claude flashes **The pretend scale** (`board.py flash node-a-nodemcu-sim`). The owner does nothing unless asked to hold FLASH and tap RST | Laptop | Claude reads `E boot node=a fw=0.2.1 … simulated=1` |
 | 3 | Wire the rails, the display, the tare button (D5) and the buzzer with its transistor, diode and 1 kΩ. Skip the HX711 and load-cell lines | `/workbench/wire` | Ticks on Wire it |
-| 4 | Connect the board, set the pretend weight to 150, press TARE then the board's own FLASH button (it is PHOTO until the second button comes) | `/workbench/bench` | The display shows the weight; tare zeroes it; the buzzer beeps; PHOTO says `NO CAMERA` (no camera yet) |
+| 4 | Claude runs the pretend meal (`board.py meal-test --no-camera`); the owner watches the display and listens | Laptop | The display shows the weight; tare zeroes it; the buzzer beeps; PHOTO says `NO CAMERA` (no camera yet) |
 | 5 | Turn on the phone hotspot **on 2.4 GHz** (the ESP32-CAM cannot see 5 GHz; on an iPhone, "Maximise compatibility"). Join it with the laptop | Phone, laptop | Laptop online through the phone |
 | 6 | Start the backend so the camera can reach it: the `backend-lan` configuration (or `--host 0.0.0.0`). Allow Python through Windows Firewall on private networks when asked. Note the laptop's address on the hotspot (`ipconfig`, Wi-Fi adapter, IPv4) | Laptop | `http://<that address>:8000/docs` opens from the phone's browser |
-| 7 | Seat the ESP32-CAM on its MB base, flash **The camera** | `/workbench/flash` | `E boot node=b … camera=1` |
+| 7 | The owner seats the ESP32-CAM on its MB base and plugs it in; Claude flashes **The camera** (`board.py flash node-b-camera`) | Laptop | `E boot node=b … camera=1` |
 | 8 | Set hotspot name, password and backend `http://<address>:8000` | `/workbench/bench` | `Wi-Fi up` |
 | 9 | Take a test photo with 150 g | `/workbench/bench` | `last upload: 150 g · saved by the backend · HTTP 201`, and the meal is in `/docs` → `GET /meals` |
 | 10 | Wire the light: six LEDs with their 100 Ω, the second 2N2222A, 470 Ω and 10 kΩ on IO13 | `/workbench/wire` (Node B) | `Light on` lights all six |

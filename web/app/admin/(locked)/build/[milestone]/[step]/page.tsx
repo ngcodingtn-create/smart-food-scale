@@ -76,14 +76,28 @@ export default async function StepPage({ params }: { params: Params }) {
                 <PartChips ids={step.parts} />
               </section>
             ) : null}
-            {step.actions?.length ? (
-              <section>
-                <h2>Do</h2>
-                <ol className="step-actions">
-                  {step.actions.map((action) => (
-                    <li key={action}>{action}</li>
-                  ))}
-                </ol>
+            {step.actions?.length || step.claude?.length ? (
+              <section className="step-roles">
+                {step.actions?.length ? (
+                  <div className="step-role" data-who="you">
+                    <h2>You do</h2>
+                    <ol className="step-actions">
+                      {step.actions.map((action) => (
+                        <li key={action}>{action}</li>
+                      ))}
+                    </ol>
+                  </div>
+                ) : null}
+                {step.claude?.length ? (
+                  <div className="step-role" data-who="claude">
+                    <h2>Claude does, from the laptop</h2>
+                    <ul className="step-actions">
+                      {step.claude.map((action) => (
+                        <li key={action}>{action}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
               </section>
             ) : null}
             {step.expect ? (

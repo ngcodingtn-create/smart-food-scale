@@ -443,3 +443,22 @@ with the owner's photos and interactive SVG)
 - Checked: tsc, build; desktop 1280 and phone 375 widths on the map, a milestone, three steps,
   the plan and parts (no sideways scroll); the done states by ticking checks in the built-in
   browser, whose test ticks were then cleared.
+
+**Same day: Claude drives the boards** (asked: push to prod; keep localhost running; "you do
+everything yourself, flashing etc., I just plug the node in")
+
+- Pushed `363b2c0`. The dev server now runs in a Terminal tab of the app ("site
+  (localhost:3000)"), not as a preview process the app stops at the end of a turn;
+  `.claude/launch.json` "web" attaches to http://localhost:3000, "web-start" still starts one.
+- `firmware/tools/board.py`, run with `firmware/.venv/Scripts/python`: `ports`, `flash <env>`
+  (PlatformIO upload), `listen --reset`, `send "<cmd>" --expect`, `meal-test [--no-camera]`,
+  `counts --grams` (median steady net count, and the counts per gram it implies). Finds the one
+  USB board by itself (CH340, CH9102, CP210x); opens the port without pulsing DTR/RTS; refuses
+  to send `pass`, so the Wi-Fi password stays with the owner.
+- `roadmap.ts`: a `claude` field on each step. Step pages show "You do" (hands only: plug in,
+  wire, press, look, the hotspot, the one password, the firewall prompt, the weights) and
+  "Claude does, from the laptop". M1 rewritten that way; M2–M5's flashing, checks and
+  calibration too. The flash button and the bench stay on the steps as "or do it yourself".
+- `plan.ts`: flashing, the server on the network and the board tests moved to Claude's list.
+- Checked: `tsc`, build; two step pages in the browser; `board.py` with no board attached
+  (clear messages, right exit codes). **Not run against a board yet.**

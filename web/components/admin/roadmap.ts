@@ -6,6 +6,11 @@
  * route is never typed twice. Hotspots are percentages of the owner's own
  * photo (public/workbench/kit/), measured on a grid on 25 October 2026.
  *
+ * The owner does only what needs hands: plugging in, wiring, pressing, looking.
+ * Claude does the rest from the laptop with firmware/tools/board.py and
+ * PlatformIO: finding the port, flashing, reading the boot line, sending
+ * commands, running the tests. Each step says which is which.
+ *
  * Steps marked `draft` have their title and goal only: their detail comes from
  * the research of 25 October (ai-docs/research/2026-10-25-*.md) as the work
  * reaches them.
@@ -47,7 +52,10 @@ export type Step = {
   /** wiring.ts ids lit in the drawing. */
   wires?: { node: 'a' | 'b'; ids: string[] };
   photo?: Photo;
+  /** What the owner does: only what needs hands, eyes or ears. */
   actions?: string[];
+  /** What Claude does from the laptop: flashing, reading the board, sending it commands, checking. */
+  claude?: string[];
   expect?: Expected;
   checks?: string[];
   trouble?: { symptom: string; fix: string }[];
@@ -215,27 +223,24 @@ export const MILESTONES: Milestone[] = [
         title: 'Plug it in, find the port',
         goal: 'The laptop sees the NodeMCU.',
         parts: ['devkit', 'usb-cable'],
-        actions: [
-          'Plug the NodeMCU into the laptop with a USB cable.',
-          'Open Flash it in Chrome or Edge and press Install: a list of ports appears.',
-          'No port: try the other cable (one may only charge). Still none: Windows needs the CH340 driver from WCH.',
+        actions: ['Plug the NodeMCU into the laptop with a USB cable.', 'Tell Claude: “plugged in”.'],
+        claude: [
+          'Finds the board’s port (board.py ports) and tells you its name.',
+          'No port: asks you to try the other cable, one may only charge. Still none: Windows needs the CH340 driver from WCH.',
         ],
-        expect: { kind: 'page', lines: ['USB-SERIAL CH340 (COMx)'], caption: 'The port’s name in the list. COMx is a number.' },
-        checks: ['A CH340 port is in the list'],
-        tool: SIM,
+        expect: { kind: 'page', lines: ['COM5\tCH340\tUSB-SERIAL CH340 (COM5)'], caption: 'What Claude sees. The number after COM can differ.' },
+        checks: ['Claude found a CH340 port'],
       },
       {
         id: 'flash',
         title: 'Flash the pretend scale',
         goal: 'The NodeMCU runs our firmware, with a typed weight instead of the load cell.',
         parts: ['devkit'],
-        actions: ['On Flash it, under Node A, press Install on “The pretend scale”.', 'Pick the CH340 port. Accept the erase. Wait about a minute.'],
-        expect: { kind: 'serial', lines: ['E boot node=a fw=0.2.1 calibrated=1 cpg=100.000000 simulated=1'], caption: 'Its first line on Test and calibrate, once connected.' },
-        checks: ['Install finished', 'The bench page shows the boot line'],
-        trouble: [
-          { symptom: 'Install cannot connect', fix: 'Hold FLASH, press and let go of RST, let go of FLASH, then press Install again.' },
-          { symptom: 'Nothing on the bench page', fix: 'Only one page at a time can use the port: close Flash it first.' },
-        ],
+        actions: ['Nothing, unless Claude asks: then hold FLASH, press and let go of RST, let go of FLASH.'],
+        claude: ['Flashes the pretend scale over USB (board.py flash node-a-nodemcu-sim).', 'Restarts the board and reads its boot line.'],
+        expect: { kind: 'serial', lines: ['E boot node=a fw=0.2.1 calibrated=1 cpg=100.000000 simulated=1'], caption: 'The boot line Claude reads back.' },
+        checks: ['Claude read the boot line'],
+        trouble: [{ symptom: 'Flashing cannot connect', fix: 'Claude asks you to hold FLASH and tap RST, then tries again.' }],
         tool: SIM,
       },
       {
@@ -247,9 +252,11 @@ export const MILESTONES: Milestone[] = [
         actions: [
           'Unplug USB before wiring. Always.',
           'The NodeMCU stays off the breadboard: female–male jumpers from its pins.',
-          'Keep the two + rails apart: one is 3.3 V, the other 5 V. Joining them destroys the board.',
+          'Make the three wires below. Keep the two + rails apart: one is 3.3 V, the other 5 V.',
+          'Plug USB back in and tell Claude.',
         ],
-        checks: ['3V to one + rail', 'G to the − rail', 'VIN to the other + rail', 'The two + rails are not joined'],
+        claude: ['Restarts the board and checks it still boots: a short circuit stops it.'],
+        checks: ['3V to one + rail', 'G to the − rail', 'VIN to the other + rail', 'The two + rails are not joined', 'Claude says it still boots'],
       },
       {
         id: 'display',
@@ -257,7 +264,8 @@ export const MILESTONES: Milestone[] = [
         goal: 'Four wires, and the display lights up with a weight.',
         parts: ['oled'],
         wires: { node: 'a', ids: ['a-oled-vcc', 'a-oled-gnd', 'a-oled-scl', 'a-oled-sda'] },
-        actions: ['Wire in the order on your display: VCC, GND, SCL, SDA.', 'Plug USB back in.'],
+        actions: ['USB out. Wire in the order on your display: VCC, GND, SCL, SDA.', 'USB back in. Look at the display.'],
+        claude: ['Restarts the board and reads its boot: no “E error no-display” means the board found the display.'],
         expect: { kind: 'display', lines: ['CAMERA ?', '0.0 g', 'READY'], caption: 'Top line, the weight, the state.' },
         checks: ['The display lights up', 'It shows 0.0 g'],
         trouble: [
@@ -271,7 +279,8 @@ export const MILESTONES: Milestone[] = [
         goal: 'Pressing it zeroes the scale.',
         parts: ['push-button'],
         wires: { node: 'a', ids: ['a-tare', 'a-tare-gnd'] },
-        actions: ['Put the button across the centre gap.', 'One leg to D5; the leg diagonally opposite to ground.', 'Unplug USB first, plug it back after.'],
+        actions: ['USB out. Put the button across the centre gap.', 'One leg to D5; the leg diagonally opposite to ground.', 'USB back in. When Claude says “now”, press it.'],
+        claude: ['Listens to the board and tells you when it hears the press (E tare).'],
         expect: { kind: 'display', lines: ['CAMERA ?', '0.0 g', 'TARE OK'] },
         checks: ['Pressing it shows TARE OK'],
         trouble: [{ symptom: 'Nothing happens', fix: 'Turn the button a quarter turn: the two legs you used may be always joined.' }],
@@ -287,8 +296,10 @@ export const MILESTONES: Milestone[] = [
           'Middle leg (B), through the 1 kΩ resistor, to D8.',
           'Right leg (C) to the buzzer’s −. The buzzer’s S to the 5 V rail. Its middle pin empty.',
           'The diode across − and S, its band towards S.',
+          'USB back in, then listen.',
         ],
-        checks: ['A short beep on TARE'],
+        claude: ['Sends the board “tare”: you should hear a short beep.'],
+        checks: ['A short beep when Claude sends tare'],
         trouble: [
           { symptom: 'No beep', fix: 'Turn the transistor round: a few makers swap its outer legs.' },
           { symptom: 'The board will not start', fix: 'D8 must be low at power-on: check D8 goes only to the resistor.' },
@@ -298,7 +309,8 @@ export const MILESTONES: Milestone[] = [
         id: 'bench',
         title: 'Try it on the bench page',
         goal: 'The whole front panel, with a typed weight.',
-        actions: ['On Test and calibrate, connect the board.', 'Set the pretend weight to 150, then TARE, then FLASH.'],
+        actions: ['Watch the display and listen while Claude runs it.'],
+        claude: ['Runs the whole test from the laptop (board.py meal-test --no-camera): a 420 g plate, tare, 150 g of food, a photo.', 'Reads every line the board prints and tells you what passed.'],
         expect: { kind: 'display', lines: ['CAMERA ?', '150.0 g', 'NO CAMERA'], caption: 'NO CAMERA is right: there is no camera yet.' },
         checks: ['The display showed 150.0 g', 'TARE zeroed it', 'PHOTO gave a long low beep and NO CAMERA'],
         tool: BENCH,
@@ -314,11 +326,11 @@ export const MILESTONES: Milestone[] = [
     parts: ['esp32-cam', 'esp32-cam-mb', 'usb-cable'],
     doneWhen: 'A test photo with 150 g appears as a meal in the backend.',
     steps: [
-      { id: 'flash-camera', title: 'Flash the camera on its base', goal: 'The camera runs our firmware.', tool: CAMERA, expect: { kind: 'serial', lines: ['E boot node=b fw=0.1.0 psram=1 camera=1 card=0', 'E wifi not-set'] }, checks: ['camera=1 in the boot line'] },
-      { id: 'hotspot', title: 'Phone hotspot on 2.4 GHz', goal: 'A network the camera can see, with the laptop on it.', checks: ['Hotspot on, 2.4 GHz', 'Laptop joined'] },
-      { id: 'backend', title: 'The server on the laptop, reachable', goal: 'The camera can reach the laptop’s server.', checks: ['http://<laptop>:8000/docs opens on the phone'], draft: true },
-      { id: 'wifi', title: 'Wi-Fi and server address on the camera', goal: 'The camera says Wi-Fi up.', tool: BENCH, expect: { kind: 'serial', lines: ['E wifi up ch=6 ip=192.168.x.y'], caption: 'The channel and address are the hotspot’s.' }, checks: ['Wi-Fi up'] },
-      { id: 'test-photo', title: 'A test photo', goal: 'A meal in the backend.', tool: BENCH, expect: { kind: 'serial', lines: ['E photo bytes=… ms=…', 'E upload g=150.0 status=201 outcome=saved'] }, checks: ['outcome=saved'] },
+      { id: 'flash-camera', title: 'Flash the camera on its base', goal: 'The camera runs our firmware.', actions: ['Seat the camera on its MB base, plug the base in, tell Claude.'], claude: ['Flashes the camera over USB (board.py flash node-b-camera) and reads its boot line.'], tool: CAMERA, expect: { kind: 'serial', lines: ['E boot node=b fw=0.1.0 psram=1 camera=1 card=0', 'E wifi not-set'] }, checks: ['camera=1 in the boot line'] },
+      { id: 'hotspot', title: 'Phone hotspot on 2.4 GHz', goal: 'A network the camera can see, with the laptop on it.', actions: ['Turn on the phone’s hotspot, 2.4 GHz (on an iPhone: Maximise compatibility).', 'Join it with the laptop.'], claude: ['Checks the laptop is on it and finds the laptop’s address.'], checks: ['Hotspot on, 2.4 GHz', 'Laptop joined'] },
+      { id: 'backend', title: 'The server on the laptop, reachable', goal: 'The camera can reach the laptop’s server.', actions: ['When Windows asks whether Python may use the network, click Allow (private networks).'], claude: ['Starts the server in a Terminal tab where the camera can reach it.', 'Checks it answers from the hotspot’s address.'], checks: ['http://<laptop>:8000/docs opens on the phone'], draft: true },
+      { id: 'wifi', title: 'Wi-Fi and server address on the camera', goal: 'The camera says Wi-Fi up.', actions: ['Type the hotspot’s password once, on Test and calibrate. Only you type passwords.'], claude: ['Sends the hotspot’s name and the server’s address, then watches for Wi-Fi up.'], tool: BENCH, expect: { kind: 'serial', lines: ['E wifi up ch=6 ip=192.168.x.y'], caption: 'The channel and address are the hotspot’s.' }, checks: ['Wi-Fi up'] },
+      { id: 'test-photo', title: 'A test photo', goal: 'A meal in the backend.', actions: ['Point the camera at something.'], claude: ['Asks the camera for a test photo with 150 g and checks the meal arrived in the server.'], tool: BENCH, expect: { kind: 'serial', lines: ['E photo bytes=… ms=…', 'E upload g=150.0 status=201 outcome=saved'] }, checks: ['outcome=saved'] },
     ],
   },
   {
@@ -332,7 +344,7 @@ export const MILESTONES: Milestone[] = [
     steps: [
       { id: 'off-the-base', title: 'The camera onto the breadboard', goal: 'Reach IO13, keep USB through the base.', draft: true },
       { id: 'light-wires', title: 'The light’s transistor and LEDs', goal: 'IO13 switches six LEDs.', wires: { node: 'b', ids: ['b-light-base', 'b-light-pulldown', 'b-light-emitter', 'b-light-leds', 'b-light-collector'] }, draft: true },
-      { id: 'light-on', title: 'Light on', goal: 'All six light.', tool: BENCH, draft: true },
+      { id: 'light-on', title: 'Light on', goal: 'All six light.', actions: ['Look at the LEDs.'], claude: ['Sends the camera “light on”, then “light off”.'], tool: BENCH, draft: true },
     ],
   },
   {
@@ -344,8 +356,8 @@ export const MILESTONES: Milestone[] = [
     parts: ['devkit', 'esp32-cam'],
     doneWhen: 'The whole-meal test ticks all six steps.',
     steps: [
-      { id: 'find', title: 'The scale finds the camera', goal: 'CAMERA ch N on the display.', draft: true },
-      { id: 'meal-test', title: 'The whole-meal test', goal: 'Six checks, from the scale to the server.', tool: BENCH, draft: true },
+      { id: 'find', title: 'The scale finds the camera', goal: 'CAMERA ch N on the display.', actions: ['Both boards plugged in, the camera on Wi-Fi.'], claude: ['Sends the scale “find” and waits for E link found.'], draft: true },
+      { id: 'meal-test', title: 'The whole-meal test', goal: 'Six checks, from the scale to the server.', actions: ['Watch the display.'], claude: ['Runs the whole-meal test from the laptop (board.py meal-test) and reads every line.'], tool: BENCH, draft: true },
     ],
   },
   {
@@ -361,10 +373,10 @@ export const MILESTONES: Milestone[] = [
       { id: 'hx711-wires', title: 'Wire the HX711', goal: 'Four wires to the NodeMCU.', wires: { node: 'a', ids: ['a-hx-vcc', 'a-hx-gnd', 'a-hx-dt', 'a-hx-sck', 'a-hx-caps'] }, draft: true },
       { id: 'cell-wires', title: 'The load cell’s four wires', goal: 'Red, black, white, green to the HX711.', wires: { node: 'a', ids: ['a-cell-red', 'a-cell-black', 'a-cell-white', 'a-cell-green'] }, draft: true },
       { id: 'photo-button', title: 'The second button', goal: 'A real PHOTO button on D3.', wires: { node: 'a', ids: ['a-capture', 'a-capture-gnd'] }, draft: true },
-      { id: 'flash-real', title: 'Flash the real scale', goal: 'Raw counts on the display.', tool: SCALE, draft: true },
-      { id: 'sign', title: 'Check the sign', goal: 'Pressing the cell makes the counts rise.', draft: true },
+      { id: 'flash-real', title: 'Flash the real scale', goal: 'Raw counts on the display.', actions: ['Plug the NodeMCU back in.'], claude: ['Flashes the real image (board.py flash node-a-nodemcu) and reads the counts.'], tool: SCALE, draft: true },
+      { id: 'sign', title: 'Check the sign', goal: 'Pressing the cell makes the counts rise.', actions: ['Press the free end of the cell gently when Claude says “now”.', 'If Claude says they fall: USB out, swap white and green.'], claude: ['Watches the raw counts and says whether they rise.'], draft: true },
       { id: 'mount', title: 'Mount the cell', goal: 'Fixed at one end, free at the other.', draft: true },
-      { id: 'calibrate', title: 'Calibrate', goal: 'Grams, from known masses.', tool: BENCH, draft: true },
+      { id: 'calibrate', title: 'Calibrate', goal: 'Grams, from known masses.', actions: ['Empty plate. Then put on each known mass when Claude asks, and say its weight.'], claude: ['Tares, reads the steady counts for each mass (board.py counts --grams), works out the counts per gram and saves it (cal).', 'Checks every mass again and reports the error in grams.'], tool: BENCH, draft: true },
       { id: 'card', title: 'The microSD card', goal: 'Photos kept when Wi-Fi is down.', draft: true },
     ],
   },
