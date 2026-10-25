@@ -519,3 +519,18 @@ no console errors, no sideways scroll at 1280 and 375 px.
   as "Every step, animated".
 - Checked: tsc, build; each scene frame by frame in the browser (seeking, since the hidden pane
   throttles animation); a step at 375 px with no sideways scroll.
+
+**Same day: the NodeMCU on the laptop, first time** (the owner plugged it in)
+
+- Windows saw a CH340 (`USB\VID_1A86&PID_7523`) with no driver; the owner installed WCH's
+  CH341SER. Then `board.py ports`: COM5, CH340.
+- Flashed `node-a-nodemcu-sim` (ESP8266EX, MAC dc:4f:22:42:db:16, hash verified). It answered
+  `info`: fw 0.3.0, calibrated, simulated.
+- Found on the board: at power-on it read 840.0 g with nothing on it (untared: the pretend
+  zero is 84 000 counts). Node A 0.3.1 tares itself at power-on, like a kitchen scale; a tare
+  with no fresh readings now says `E error no-readings` instead of reading past an array; a
+  blank line before the boot line so it does not join the ESP8266's start-up noise.
+- `board.py`: strips that noise from the front of a line, and no longer crashes printing it on
+  a cp1252 console.
+- On the board, 0.3.1: `E boot node=a fw=0.3.1 calibrated=1 cpg=100.000000 simulated=1`,
+  `E tare offset=84001`, `E link none`; `sim 150` read 150.0 g, steady. Steps 1.1 and 1.2 done.

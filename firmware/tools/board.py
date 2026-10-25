@@ -94,6 +94,12 @@ def read_lines(link: serial.Serial, seconds: float, until: str | None = None):
         while b'\n' in buffer:
             raw, buffer = buffer.split(b'\n', 1)
             line = raw.decode('utf-8', 'replace').strip()
+            # After a restart the chip's own start-up noise can sit in front of the first line.
+            for mark in ('E ', 'R '):
+                at = line.find(mark)
+                if at > 0 and not line.startswith(('E ', 'R ')):
+                    line = line[at:]
+                    break
             if not line:
                 continue
             yield line
@@ -238,6 +244,8 @@ def cmd_counts(args):
 
 
 def main():
+    # The board's start-up noise is not text; never let it stop the tool on a Windows console.
+    sys.stdout.reconfigure(encoding='utf-8', errors='replace')
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = parser.add_subparsers(dest='what', required=True)
     sub.add_parser('ports').set_defaults(run=cmd_ports)

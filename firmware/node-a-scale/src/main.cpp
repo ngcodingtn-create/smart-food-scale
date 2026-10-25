@@ -415,13 +415,22 @@ long freshMedian(int count) {
     if (millis() - start > 3000) break;  // the HX711 stopped answering
     delay(1);
   }
+  if (readingsTaken == from) return tareOffset;  // nothing new: keep what we had
   return recentMedian(min<int>(count, readingsTaken - from));
 }
 
 void tare() {
   note = "TARING";
   show();
-  tareOffset = freshMedian(config::kCaptureSamples);
+  uint32_t before = readingsTaken;
+  long offset = freshMedian(config::kCaptureSamples);
+  if (readingsTaken == before) {
+    Serial.println("E error no-readings");
+    note = "NO READINGS";
+    beepError();
+    return;
+  }
+  tareOffset = offset;
   tared = true;
   note = "TARE OK";
   Serial.printf("E tare offset=%ld\n", tareOffset);
@@ -563,6 +572,7 @@ void readConsole() {
 
 void setup() {
   Serial.begin(115200);
+  Serial.println();  // ends the chip's own start-up noise, so the boot line starts a line
   pinMode(PIN_BUTTON_TARE, INPUT_PULLUP);
   pinMode(PIN_BUTTON_CAPTURE, INPUT_PULLUP);
   pinMode(PIN_BUZZER, OUTPUT);
@@ -608,6 +618,8 @@ void setup() {
   );
   note = "STARTING";
   show();
+  // Like a kitchen scale: whatever is on it at power-on is zero. Hold the button 5 s to zero again.
+  tare();
   findCamera();
   note = "READY";
   show();
