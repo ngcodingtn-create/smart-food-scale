@@ -41,6 +41,13 @@ owner's own messages are the `type:"user"` lines. Mine it with Python run as `py
   with `sharp` (both in `web/node_modules`). Recreate it if needed; it is faster and more
   reliable than seeking scenes in the hidden browser pane.
 - Not done: the HX711 is drawn as a generic module; redraw it from a photo when it arrives.
+- **Bench Photos** artifact, for the owner to send photos of the bench:
+  <https://claude.ai/artifact/KAKPb1zWgcn6Tv6pjPx9fV> (source `ai-docs/artifacts/bench-photos.html`,
+  capabilities `db` + `assets`). Each photo is a doc in collection `photos`
+  `{asset, step, stepTitle, note, at, status: new|seen|answered, reply}`. To look: `ArtifactData`
+  list `photos`, then `Artifact` read with `path` = the asset id, then Read the saved image.
+  To answer: `ArtifactData` update with `status: "answered"` and `reply` (pin `if_version`).
+  It belongs to the second account; another account must recreate it.
 
 ---
 
