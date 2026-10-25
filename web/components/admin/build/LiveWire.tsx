@@ -87,7 +87,17 @@ function readDisplay(result: Result, history: string[]): Verdict {
   if (!sda && scl)
     return { pass: false, lights, say: 'Power and SCL reach the display. The SDA wire, from D2, does not.', fix: [...loose, 'D2’s wire in the SDA row: same row of five as the display’s SDA pin.', 'The display’s SDA pin down in its hole.', 'The socket all the way onto D2: row next to the breadboard, 3rd pin from the far end.', 'Still not? A fresh female–male jumper for D2.'] };
   if (swapped.includes('3c')) return { pass: false, lights, say: 'Both wires reach the display, but crossed: SDA and SCL are swapped.', fix: ['Swap the two yellow wires’ breadboard ends: D1 goes to SCL, D2 to SDA.'] };
-  return { pass: false, lights, say: 'Both signal wires reach the display, but it does not answer.', fix: ['The GND row → the − rail: power needs ground as well.', 'The display’s GND pin down in its hole.'] };
+  return {
+    pass: false,
+    lights,
+    say: 'Both signal wires reach the display, but it does not answer.',
+    fix: [
+      'The GND row → the − rail, and the − rail → G on the NodeMCU: the display needs ground as well as power.',
+      'The display’s GND pin down in its hole.',
+      'Each yellow in its own row: D2 in the SDA row, D1 in the SCL row. A yellow in the VCC row, or on the + rail, looks connected to the board.',
+      'Still nothing with all of that right? The display itself may be damaged.',
+    ],
+  };
 }
 
 function readAlive(result: Result): Verdict {

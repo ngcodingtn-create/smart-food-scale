@@ -58,6 +58,29 @@ owner's own messages are the `type:"user"` lines. Mine it with Python run as `py
 
 ---
 
+## 0b. Later the same night: the display step, live
+
+- **The owner is on step 1.4, the display.** Their bench: NodeMCU **upside down, pins up, USB
+  away**; display in the breadboard turned round (from the far end: SDA, SCL, GND, VCC); 3V and
+  G taken from the **outer** row (pins 10 and 11 from the far end), VIN the outer row's last pin;
+  yellows on D1 and D2 (2nd and 3rd pins of the row next to the breadboard).
+- **Latest reading (firmware 0.3.5):** `sda_pullup=1 scl_pullup=1 sda_ground=0 scl_ground=0
+  found=none`: both signal wires reach a powered display but **nothing answers**. Suspects, in
+  order: the display's GND row not reaching ground; a yellow in the VCC row or on the + rail
+  (also reads high); a damaged display. Ask for a photo straight down on the display's rows.
+- **Wire it, live** (`/admin/wire`, `components/admin/build/LiveWire.tsx`, `lib/board.ts`,
+  `app/admin/api/board/route.ts`): milestone 1 end to end with the board read live by the
+  laptop's server through `board.py`. Laptop only. It holds COM5 while open on the display or
+  button step: **close that tab before running board.py yourself.**
+- Firmware commands added: `i2c` (0.3.3, ground flags 0.3.5), `button`, `beep` (0.3.4).
+- The wiring close-ups now draw the NodeMCU upside down (`NodeMCUBack` in `closeup.tsx`);
+  pins are described as "Nth pin from the far end".
+- Lessons: a `board.py send` can hang if the USB is jostled and keeps COM5; killing it was
+  refused by the safety classifier, so ask the owner to unplug and replug. "No USB board" after
+  a replug was a plug not fully in.
+- Artifacts: Display Fix (SCL checks, 2.5D) and Bench Photos (the owner's photos; answered
+  through ArtifactData). Both in this second account.
+
 ## 1. Where things are, right now
 
 ### The physical build (the owner is mid-step)

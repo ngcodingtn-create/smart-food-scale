@@ -572,3 +572,22 @@ carry on the build from the rails step)
   nothing wired). Node A 0.3.2 probes the display on I2C first; flashed and confirmed with no
   display: the error shows.
 - Step 1.3 rails: the owner wired 3V, G, VIN; the board boots and reads 0.0 g steady.
+
+**Same night: the display step, with the board checking itself** (the owner: "still nothing,
+figure out all possible causes"; then "an artifact from start to end that checks if I did it
+right")
+
+- Bench Photos (artifact, db + assets): the owner photographs the bench; Claude reads and
+  answers under each photo. Display Fix (artifact): the answer in 2.5D on the owner's bench,
+  later the SCL checks.
+- Found from photos: the display's pins bare; the NodeMCU kept upside down (its rows swap
+  sides); 3V and G jumpers lying flat (female ends).
+- Firmware 0.3.3 to 0.3.5: `i2c` (pull-up test per line, ground test, bus scan both ways,
+  switches a late display on), `button`, `beep`. On the bench: SCL missing, then flickering,
+  then held to ground (a 25 s scan), then both lines fine but no answer.
+- `/admin/wire`, "Wire it, live": milestone 1 end to end; each step's close-up (NodeMCU now
+  drawn upside down) and a live panel fed by `/admin/api/board` (board.py, one at a time,
+  killed with its tree on timeout, laptop only). Checked against the real board: it reads
+  Power, SDA, SCL, Answers and gives the matching advice.
+- Not done: the display still does not answer (GND row, a yellow in the wrong row, or a
+  damaged display).
