@@ -18,7 +18,7 @@ import './workbench.css';
 const STORE = 'sfs-wired-v1';
 
 /** The ids of the wires already made. Kept in localStorage; works without it. */
-function useDone() {
+export function useDone() {
   const [done, setDone] = useState<ReadonlySet<string>>(new Set());
 
   // After mount, so the server's markup and the first client render agree.
@@ -58,20 +58,36 @@ function route(node: NodeWiring, wire: Wire) {
   return `${endName(node, wire.from)}${middle}${endName(node, wire.to)}`;
 }
 
-function Drawing({ node, current, done, onPick }: { node: NodeWiring; current: Wire | null; done: ReadonlySet<string>; onPick: (wire: Wire) => void }) {
+/**
+ * The board with its wires. `current` singles one out; `lit`, a step's own
+ * wires (the admin build pages), lights several at once.
+ */
+export function WireDrawing({
+  node,
+  current,
+  done,
+  onPick,
+  lit,
+}: {
+  node: NodeWiring;
+  current: Wire | null;
+  done: ReadonlySet<string>;
+  onPick: (wire: Wire) => void;
+  lit?: ReadonlySet<string>;
+}) {
   const art = ART[node.id];
   return (
     <svg
       className="fig wire-fig"
       viewBox={art.viewBox}
-      data-mode={current ? 'step' : 'all'}
+      data-mode={current || lit ? 'step' : 'all'}
       role="img"
       aria-label={`${node.title}, ${node.board.name}, with its ${wiresOf(node).length} wires. The list beside the drawing gives every one in words.`}
     >
       {art.parts}
       {wiresOf(node).map((wire) => {
         const shape = art.wires[wire.id];
-        const state = wire === current ? 'current' : done.has(wire.id) ? 'done' : 'todo';
+        const state = wire === current || lit?.has(wire.id) ? 'current' : done.has(wire.id) ? 'done' : 'todo';
         return (
           <g key={wire.id} className="wire" data-state={state} data-colour={wire.colour} onClick={() => onPick(wire)}>
             {/* a wide, invisible stroke: something to hit with a finger */}
@@ -208,7 +224,7 @@ export function WireIt() {
         </div>
 
         <div className="wireit-canvas">
-          <Drawing node={node} current={current} done={done} onPick={(wire) => setIndex(wires.indexOf(wire))} />
+          <WireDrawing node={node} current={current} done={done} onPick={(wire) => setIndex(wires.indexOf(wire))} />
         </div>
 
         <div className="wireit-list">

@@ -13,6 +13,8 @@ export type NavItem = {
   /** Shown beside the label in the sidebar. Optional — a link works without one. */
   icon?: IconName;
   badge?: { text: string; tone: 'done' | 'wip' | 'todo' | 'alert' };
+  /** Also current on the pages under it (a milestone and its steps). */
+  prefix?: boolean;
 };
 
 export type NavGroup = {

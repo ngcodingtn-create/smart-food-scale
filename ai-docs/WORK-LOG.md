@@ -404,3 +404,42 @@ protected, with a sidebar whose first route is the plan)
 - The plan's links to public tools (Flash it, Wire it, Test and calibrate) open in a new tab.
 - Checked: sidebar marks Our parts, 21 cards and 14 photos, the To check filter shows 6, no
   console errors, no sideways scroll; the public parts page still renders; `tsc` clean.
+
+**Same day: the build companion** (asked: plan the project end to end, research it with as
+many subagents as possible, milestones in /admin built one step at a time, explained visually
+with the owner's photos and interactive SVG)
+
+- Research: five subagents on the default model and five on Sonnet all failed at once
+  (`model_not_found`); four forks of this session ran and wrote
+  `research/2026-10-25-{hardware-build-guide,firmware-connectivity,backend-hosting-auth,mobile-app}.md`.
+  The admin design was written here: `research/2026-10-25-admin-build-companion.md`.
+- [ROADMAP.md](ROADMAP.md): ten milestones, why in that order, what the research changed
+  (SDK 57 for Expo Go, Supabase's new keys, 201 `to_name`, `eaten_at`, Vercel's two CA roots,
+  the setup-mode channel, our own captive portal, missing camera-on-breadboard wires).
+- `web/components/admin/roadmap.ts`: milestones 0 and 1 in full (13 steps), the rest as drafts.
+  Hotspots on the owner's photos measured on a percent grid, with a `view` window per photo.
+- `/admin/build`, `/admin/build/[milestone]`, `/admin/build/[milestone]/[step]`; components in
+  `web/components/admin/build/` (PhotoHotspots, StepWiring reusing Wire it's drawing and ticks,
+  StepChecks, Expected drawn like the OLED or the serial log, PartChip, StepTool embedding the
+  flash button or the bench, MilestoneMap, StepKeys for the arrow keys). Sidebar: Build map and
+  a Milestones group; `NavItem.prefix` keeps a milestone current on its steps.
+- `Bench.tsx` renamed `SerialBench.tsx` (Windows could not tell it from `bench.ts`).
+- Checked: `tsc`, build; in the browser the map, a photo step (10 dots, the window frames the
+  board), a wiring step (4 wires lit and listed), the flash and bench steps, no console errors in
+  a fresh tab, no sideways scroll.
+
+**Same day: the stepper redesign** (asked: better UI and UX, a stepper end to end, bars you can see)
+
+- `components/admin/build/Stepper.tsx` + `stepper.css`: ProgressBar (visible track, count and
+  percent), MilestoneStepper (ten circles on a line, a progress arc, the current one ringed),
+  StepStepper (a milestone's steps as dots on a line), OverallCard (whole-build progress and
+  "Continue where you left off", from `nextUp()` in progress.ts), MilestoneBadge (done/total in
+  the sidebar; `Sidebar` takes an `extra` renderer).
+- Step pages: the step stepper under the title; a sticky footer (back, step n of m with a bar,
+  next) whose Next turns primary when the checks are done; a "Step done" card in the checks.
+- Milestone pages: the milestone stepper on top, steps as a vertical stepper with Start/Continue
+  on the next one, then the parts on the desk.
+- Fixed: grid children of .admin-page could not shrink, so the stepper widened the page on a phone.
+- Checked: tsc, build; desktop 1280 and phone 375 widths on the map, a milestone, three steps,
+  the plan and parts (no sideways scroll); the done states by ticking checks in the built-in
+  browser, whose test ticks were then cleared.

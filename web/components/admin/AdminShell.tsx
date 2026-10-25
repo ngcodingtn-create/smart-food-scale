@@ -6,6 +6,7 @@ import { Icon } from '@/components/icons';
 import { MobileBar, Sidebar, type SidebarParts } from '@/components/Sidebar';
 import { ThemeSwitch } from '@/components/ThemeToggle';
 import { ADMIN_NAV } from '@/lib/admin-nav';
+import { MilestoneBadge } from './build/Stepper';
 import './admin.css';
 
 function AdminBrand({ onNavigate }: { onNavigate?: () => void }) {
@@ -44,6 +45,7 @@ const PARTS: SidebarParts = {
   label: 'Builder’s area',
   head: (onNavigate) => <AdminBrand onNavigate={onNavigate} />,
   foot: <AdminFoot />,
+  extra: (item) => (item.href.startsWith('/admin/build/') ? <MilestoneBadge href={item.href} /> : null),
 };
 
 /** The frame of /admin: its own sidebar, the same look as the public site. */

@@ -1,0 +1,632 @@
+/* ---------------------------------------------------------------------------
+   /admin/build: the milestone map, a milestone, a step. The site's tokens.
+   Copper (accent) means "this now", teal (tip) means done or measured.
+--------------------------------------------------------------------------- */
+
+/* --- the map ------------------------------------------------------------ */
+.milestone-map {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.milestone-row {
+  display: grid;
+  grid-template-columns: 2.4rem 1fr;
+  gap: 0.9rem;
+  position: relative;
+  padding-bottom: 0.9rem;
+}
+.milestone-row::before {
+  content: '';
+  position: absolute;
+  left: 1.2rem;
+  top: 2.4rem;
+  bottom: 0;
+  width: 2px;
+  translate: -1px 0;
+  background: var(--rule);
+}
+.milestone-row:last-child::before {
+  display: none;
+}
+.milestone-dot {
+  display: grid;
+  place-items: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 50%;
+  border: 2px solid var(--rule-strong);
+  background: var(--paper);
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+  font-weight: 600;
+  z-index: 1;
+}
+.milestone-row[data-state='done'] .milestone-dot {
+  background: var(--tip);
+  border-color: var(--tip);
+  color: var(--paper);
+}
+.milestone-row[data-state='now'] .milestone-dot {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
+}
+.milestone-card {
+  display: grid;
+  gap: 0.3rem;
+  padding: 0.9rem 1rem 1rem;
+  border: 1px solid var(--rule);
+  border-radius: calc(var(--radius) * 1.25);
+  background: var(--paper-raised);
+  color: var(--ink);
+  text-decoration: none;
+  min-width: 0;
+}
+.milestone-card:hover {
+  border-color: var(--rule-strong);
+}
+.milestone-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.milestone-row[data-state='now'] .milestone-card {
+  border-color: var(--accent);
+  box-shadow: var(--shadow-sm);
+}
+.milestone-row[data-state='later'] .milestone-card {
+  background: transparent;
+}
+.milestone-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.milestone-row[data-state='now'] .milestone-state {
+  color: var(--accent-ink);
+}
+.milestone-row[data-state='done'] .milestone-state {
+  color: var(--tip-ink);
+}
+.milestone-card strong {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  line-height: 1.2;
+}
+.milestone-goal {
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+}
+.milestone-bar {
+  display: block;
+  height: 0.35rem;
+  margin-top: 0.3rem;
+  border-radius: 999px;
+  background: var(--paper-sunken);
+  overflow: hidden;
+}
+.milestone-bar span {
+  display: block;
+  height: 100%;
+  background: var(--tip);
+  border-radius: 999px;
+}
+.milestone-count {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--ink-faint);
+}
+
+/* --- a milestone --------------------------------------------------------- */
+.milestone-done-when {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.9rem 1rem;
+  border-left: 4px solid var(--tip);
+  background: var(--paper-raised);
+  max-width: 44rem;
+}
+.milestone-done-when p {
+  margin: 0;
+}
+.milestone-section {
+  display: grid;
+  gap: 0.75rem;
+}
+.milestone-section h2,
+.step-text h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  color: var(--ink);
+}
+.milestone-start {
+  justify-self: start;
+}
+.milestone-steps {
+  display: grid;
+  gap: 0.5rem;
+}
+.milestone-steps ol {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.milestone-steps a {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--paper-raised);
+  color: var(--ink);
+  text-decoration: none;
+}
+.milestone-steps a:hover {
+  border-color: var(--rule-strong);
+}
+.milestone-steps li[data-state='draft'] a {
+  background: transparent;
+  color: var(--ink-soft);
+}
+.step-num {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 1.7rem;
+  height: 1.7rem;
+  border-radius: 50%;
+  background: var(--paper-sunken);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+.milestone-steps li[data-state='done'] .step-num {
+  background: var(--tip);
+  color: var(--paper);
+}
+.step-row-text {
+  display: grid;
+  gap: 0.1rem;
+  flex: 1;
+  min-width: 0;
+}
+.step-row-text span {
+  font-size: 0.85rem;
+  color: var(--ink-faint);
+}
+.step-draft {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+/* --- part chips ---------------------------------------------------------- */
+.part-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+.part-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  max-width: 100%;
+  padding: 0.25rem 0.75rem 0.25rem 0.25rem;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: var(--paper-raised);
+  color: var(--ink);
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+.part-chip:hover {
+  border-color: var(--rule-strong);
+}
+.part-chip img,
+.part-chip-blank {
+  flex: none;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--paper-sunken);
+}
+.part-chip span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* --- a step -------------------------------------------------------------- */
+.step-grid {
+  display: grid;
+  gap: 1.5rem;
+  align-items: start;
+}
+@media (min-width: 60rem) {
+  .step-grid {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  }
+  .step-grid-single {
+    grid-template-columns: minmax(0, 44rem);
+  }
+  .step-visual {
+    position: sticky;
+    top: 1.5rem;
+  }
+}
+.step-visual,
+.step-text {
+  display: grid;
+  gap: 1.25rem;
+  min-width: 0;
+}
+.step-text section {
+  display: grid;
+  gap: 0.6rem;
+}
+.step-actions {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding-left: 1.3rem;
+  color: var(--ink);
+}
+.step-actions li::marker {
+  font-family: var(--font-mono);
+  color: var(--accent-ink);
+}
+.step-draft-note {
+  margin: 0;
+  padding: 0.9rem 1rem;
+  border-left: 4px solid var(--caution);
+  background: var(--caution-wash);
+  color: var(--caution-ink);
+  max-width: 44rem;
+}
+
+/* photo with numbered points */
+.hotspots {
+  display: grid;
+  gap: 0.6rem;
+}
+.hotspots-photo {
+  position: relative;
+  border-radius: calc(var(--radius) * 1.25);
+  overflow: hidden;
+  border: 1px solid var(--rule);
+  background: var(--paper-sunken);
+}
+.hotspots-photo img {
+  position: absolute;
+  display: block;
+  max-width: none;
+  height: auto;
+}
+.hotspot {
+  position: absolute;
+  translate: -50% -50%;
+  display: grid;
+  place-items: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  background: color-mix(in oklch, var(--accent) 85%, transparent);
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.45);
+  cursor: pointer;
+}
+.hotspot[aria-pressed='true'] {
+  background: var(--tip);
+  scale: 1.18;
+}
+.hotspot:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .hotspot {
+    transition: scale 0.15s ease;
+  }
+}
+.hotspot-now {
+  margin: 0;
+  padding: 0.6rem 0.8rem;
+  border-radius: var(--radius);
+  background: var(--paper-raised);
+  border: 1px solid var(--rule);
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+}
+.hotspot-now strong {
+  color: var(--ink);
+}
+.hotspot-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.hotspot-list button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.6rem 0.2rem 0.25rem;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: var(--paper-raised);
+  color: var(--ink-soft);
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+.hotspot-list button[aria-pressed='true'] {
+  border-color: var(--tip);
+  color: var(--ink);
+}
+.hotspot-num {
+  display: grid;
+  place-items: center;
+  width: 1.2rem;
+  height: 1.2rem;
+  border-radius: 50%;
+  background: var(--paper-sunken);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+}
+
+/* the wiring for this step */
+.step-wiring {
+  display: grid;
+  gap: 0.75rem;
+}
+.step-wiring-drawing {
+  overflow-x: auto;
+  border: 1px solid var(--rule);
+  border-radius: calc(var(--radius) * 1.25);
+  background: var(--paper-raised);
+  padding: 0.5rem;
+}
+.step-wiring-drawing svg {
+  min-width: 20rem;
+}
+.step-wiring-note {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--ink-faint);
+}
+.step-wires,
+.step-checks {
+  display: grid;
+  gap: 0.3rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.step-wires label,
+.step-checks label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--paper-raised);
+  cursor: pointer;
+}
+.step-wires input,
+.step-checks input {
+  margin-top: 0.25rem;
+  accent-color: var(--tip);
+  width: 1.05rem;
+  height: 1.05rem;
+  flex: none;
+}
+.step-checks input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+.step-check-box {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-top: 0.1rem;
+  border: 1.5px solid var(--rule-strong);
+  border-radius: 0.3rem;
+  background: var(--paper);
+  color: transparent;
+}
+.step-checks input:checked + .step-check-box {
+  background: var(--tip);
+  border-color: var(--tip);
+  color: var(--paper);
+}
+.step-checks input:focus-visible + .step-check-box {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.step-checks li[data-done='true'] span:last-child,
+.step-wires li[data-done='true'] .step-wire-text > span {
+  color: var(--ink-faint);
+}
+.step-wire-dot {
+  flex: none;
+  width: 0.8rem;
+  height: 0.8rem;
+  margin-top: 0.3rem;
+  border-radius: 50%;
+  border: 1px solid color-mix(in oklch, var(--ink) 45%, transparent);
+  background: var(--w, var(--ink-soft));
+}
+.step-wire-text {
+  display: grid;
+  gap: 0.15rem;
+  font-size: 0.92rem;
+  color: var(--ink);
+}
+.step-wire-text small {
+  font-size: 0.8rem;
+  color: var(--ink-faint);
+}
+
+/* what the board should show */
+.expected {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0;
+}
+.expected-label {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.oled {
+  display: grid;
+  gap: 0.35rem;
+  width: min(100%, 17rem);
+  aspect-ratio: 2 / 1;
+  padding: 0.6rem 0.8rem;
+  border: 6px solid #1c2731;
+  border-radius: 0.5rem;
+  background: #000;
+  color: #f2f6f8;
+  font-family: var(--font-mono);
+  align-content: space-between;
+}
+.oled-small {
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+}
+.oled-big {
+  font-size: 1.6rem;
+  font-weight: 500;
+  line-height: 1;
+}
+.expected-lines {
+  margin: 0;
+  padding: 0.7rem 0.85rem;
+  border-radius: var(--radius);
+  background: var(--paper-sunken);
+  border: 1px solid var(--rule);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  line-height: 1.55;
+  color: var(--ink);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.expected figcaption {
+  font-size: 0.82rem;
+  color: var(--ink-faint);
+}
+
+/* trouble */
+.step-trouble {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+}
+.step-trouble div {
+  padding: 0.6rem 0.8rem;
+  border-left: 3px solid var(--caution);
+  background: var(--paper-raised);
+}
+.step-trouble dt {
+  font-weight: 600;
+  color: var(--ink);
+}
+.step-trouble dd {
+  margin: 0.15rem 0 0;
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+}
+
+/* the live tool */
+.step-tool {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px dashed var(--rule-strong);
+  border-radius: calc(var(--radius) * 1.25);
+}
+.step-tool-label {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent-ink);
+}
+
+/* previous / next */
+.build-pager {
+  display: grid;
+  gap: 0.6rem;
+  grid-template-columns: 1fr 1fr;
+  padding-top: 1rem;
+  border-top: 1px solid var(--rule);
+}
+.build-pager a {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--paper-raised);
+  color: var(--ink);
+  text-decoration: none;
+  min-width: 0;
+}
+.build-pager a:hover {
+  border-color: var(--rule-strong);
+}
+.build-pager span {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.build-pager-next {
+  text-align: right;
+  grid-column: 2;
+}
+@media (max-width: 30rem) {
+  .build-pager {
+    grid-template-columns: 1fr;
+  }
+  .build-pager-next {
+    grid-column: 1;
+  }
+}
+.admin-page-head .label a {
+  color: inherit;
+}

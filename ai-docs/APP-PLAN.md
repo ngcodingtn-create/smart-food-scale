@@ -4,6 +4,11 @@ Written 25 October 2026. Asked: "I want a perfect mobile app, with auth and a pe
 where people put their meals and track them"; everything today, with the load cell
 simulated, so that tomorrow (26 October) the HX711 is only added.
 
+**Corrected by the research of 25 October**: start the app on Expo **SDK 57** (what Expo Go
+runs now), use Supabase's **publishable/secret** keys (the anon/service_role keys are being
+retired), keep unrecognised meals with **201 `to_name`**, and send **`eaten_at`**. See
+[ROADMAP.md](ROADMAP.md).
+
 This plan covers the server, the app, the camera's Wi-Fi setup and the pairing of a scale
 to an account. The hardware steps stay in [BUILD-PLAN.md](BUILD-PLAN.md).
 

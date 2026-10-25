@@ -480,6 +480,11 @@
   display: grid;
   gap: 1.5rem;
 }
+/* Grid children may shrink below their content, so a wide stepper scrolls in
+   its own strip instead of widening the page. */
+.admin-page > * {
+  min-width: 0;
+}
 .admin-page-head {
   display: grid;
   gap: 0.5rem;

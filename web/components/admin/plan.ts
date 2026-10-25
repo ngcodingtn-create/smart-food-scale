@@ -59,6 +59,7 @@ export const DAYS: Day[] = [
       { id: 'c-bench', title: 'Bench page: whole-meal test, pretend weight, any command', status: 'done' },
       { id: 'c-gemini', title: 'Gemini recogniser, tested against a fake Gemini', status: 'done' },
       { id: 'c-admin', title: 'This builder’s area, behind a password', status: 'done' },
+      { id: 'c-companion', title: 'The build companion: milestones 0–9, steps with your photos and the wiring', status: 'done' },
       { id: 'c-server', title: 'Server v2: accounts, pairing, the “to name” inbox, photos, Postgres', status: 'todo' },
       { id: 'c-fake', title: 'The fake scale: sends meals as if it were your paired scale', status: 'todo' },
       { id: 'c-app', title: 'App v1 in Expo: all nine screens, French first', status: 'todo' },

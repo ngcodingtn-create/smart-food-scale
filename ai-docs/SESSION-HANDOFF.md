@@ -31,7 +31,9 @@ the rest is as it stood.
 
 In the order the project needs them:
 
-0. **Follow [APP-PLAN.md](APP-PLAN.md)** (25 Oct: server v2 with accounts, the Expo app,
+0. **The build companion**: [ROADMAP.md](ROADMAP.md) and `/admin/build` (milestones 0–9;
+   0 and 1 written in full, the rest drafts filled from `research/2026-10-25-*.md`).
+   **Follow [APP-PLAN.md](APP-PLAN.md)** (25 Oct: server v2 with accounts, the Expo app,
    the scale's Wi-Fi setup and pairing; Supabase for auth, database and photos) and
    **[BUILD-PLAN.md](BUILD-PLAN.md)** (the HX711 now comes 26 Oct): today (23 Oct) everything but the scale
    reading, with the pretend scale; tomorrow (24 Oct) the owner brings the HX711, the second

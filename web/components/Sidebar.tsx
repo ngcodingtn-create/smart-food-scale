@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Brand } from '@/components/Brand';
 import { Icon } from '@/components/icons';
 import { ThemeSwitch, ThemeToggle } from '@/components/ThemeToggle';
-import { NAV, REPO_URL, type NavGroup } from '@/lib/nav';
+import { NAV, REPO_URL, type NavGroup, type NavItem } from '@/lib/nav';
 
 /**
  * What a frame puts in its sidebar. The public site uses the defaults; /admin
@@ -18,9 +18,21 @@ export type SidebarParts = {
   label?: string;
   head?: (onNavigate?: () => void) => React.ReactNode;
   foot?: React.ReactNode;
+  /** Something live beside a link, such as a milestone's progress. */
+  extra?: (item: NavItem) => React.ReactNode;
 };
 
-function NavList({ onNavigate, groups = NAV, label = 'Documentation' }: { onNavigate?: () => void; groups?: NavGroup[]; label?: string }) {
+function NavList({
+  onNavigate,
+  groups = NAV,
+  label = 'Documentation',
+  extra,
+}: {
+  onNavigate?: () => void;
+  groups?: NavGroup[];
+  label?: string;
+  extra?: SidebarParts['extra'];
+}) {
   const pathname = usePathname();
 
   return (
@@ -30,7 +42,7 @@ function NavList({ onNavigate, groups = NAV, label = 'Documentation' }: { onNavi
           <h2 className="nav-label label">{group.label}</h2>
           <ul className="nav-list">
             {group.items.map((item) => {
-              const active = pathname === item.href;
+              const active = pathname === item.href || (item.prefix === true && pathname.startsWith(`${item.href}/`));
               return (
                 <li key={item.href}>
                   <Link
@@ -41,6 +53,7 @@ function NavList({ onNavigate, groups = NAV, label = 'Documentation' }: { onNavi
                   >
                     {item.icon ? <Icon name={item.icon} size={17} /> : null}
                     <span className="nav-text">{item.label}</span>
+                    {extra ? extra(item) : null}
                     {item.badge ? (
                       <span className="nav-badge" data-tone={item.badge.tone}>
                         {item.badge.text}
@@ -70,12 +83,12 @@ function SidebarFoot() {
 }
 
 /** Desktop: fixed to the left edge, full height. Hidden below 64rem. */
-export function Sidebar({ groups, label, head, foot }: SidebarParts = {}) {
+export function Sidebar({ groups, label, head, foot, extra }: SidebarParts = {}) {
   return (
     <aside className="sidebar">
       <div className="sidebar-head">{head ? head() : <Brand />}</div>
       <div className="sidebar-scroll">
-        <NavList groups={groups} label={label} />
+        <NavList groups={groups} label={label} extra={extra} />
       </div>
       {foot ?? <SidebarFoot />}
     </aside>
@@ -89,7 +102,7 @@ export function Sidebar({ groups, label, head, foot }: SidebarParts = {}) {
  * closes it on Esc and makes the page behind it inert — none of it is
  * re-implemented here.
  */
-export function MobileBar({ groups, label, head, foot }: SidebarParts = {}) {
+export function MobileBar({ groups, label, head, foot, extra }: SidebarParts = {}) {
   const drawer = useRef<HTMLDialogElement>(null);
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
@@ -155,7 +168,7 @@ export function MobileBar({ groups, label, head, foot }: SidebarParts = {}) {
             </button>
           </div>
           <div className="sidebar-scroll">
-            <NavList onNavigate={close} groups={groups} label={label} />
+            <NavList onNavigate={close} groups={groups} label={label} extra={extra} />
           </div>
           {foot ?? <SidebarFoot />}
         </div>
