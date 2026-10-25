@@ -1,11 +1,13 @@
 import Link from 'next/link';
 import { Icon } from '@/components/icons';
+import { SiteShell } from '@/components/SiteShell';
 
 export const metadata = { title: 'Page not found' };
 
+// Rendered under the root layout alone, so it brings the site's frame itself.
 export default function NotFound() {
   return (
-    <>
+    <SiteShell>
       <p className="lost-readout" aria-hidden="true">
         0.0 g <small>nothing on the scale</small>
       </p>
@@ -24,6 +26,6 @@ export default function NotFound() {
           <Icon name="arrow-right" size={16} />
         </Link>
       </p>
-    </>
+    </SiteShell>
   );
 }

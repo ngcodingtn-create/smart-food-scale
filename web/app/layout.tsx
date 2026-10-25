@@ -1,12 +1,7 @@
 import type { Metadata } from 'next';
 import { Fraunces, IBM_Plex_Mono, Instrument_Sans } from 'next/font/google';
 import './globals.css';
-import { Breadcrumb } from '@/components/Breadcrumb';
 import { InlineScript } from '@/components/InlineScript';
-import { PageNav } from '@/components/PageNav';
-import { MobileBar, Sidebar } from '@/components/Sidebar';
-import { Toc } from '@/components/Toc';
-import { REPO_URL } from '@/lib/nav';
 
 // Three faces, two voices (see the token notes in globals.css). next/font
 // downloads them at build time and serves them from this origin, so a reader's
@@ -73,35 +68,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           Skip to content
         </a>
 
-        <div className="shell">
-          <Sidebar />
-
-          <div className="shell-main">
-            <MobileBar />
-
-            {/* One column, or article + outline on wide screens. The footer is
-                a third grid child and lands under the article. */}
-            <div className="page">
-              <main id="content" tabIndex={-1} className="min-w-0 outline-none">
-                <Breadcrumb />
-                <article className="prose">{children}</article>
-                <PageNav />
-              </main>
-
-              <Toc />
-
-              <footer className="site-foot">
-                <span>
-                  University IoT team project · the camera answers <em>what</em>, the load cell
-                  answers <em>how much</em>
-                </span>
-                <a href={REPO_URL} target="_blank" rel="noreferrer noopener">
-                  Source on GitHub
-                </a>
-              </footer>
-            </div>
-          </div>
-        </div>
+        {/* The frame is the section's own: app/(site)/layout.tsx for the public
+            site, app/admin/(locked)/layout.tsx for the builder's area. */}
+        {children}
       </body>
     </html>
   );

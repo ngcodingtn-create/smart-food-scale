@@ -135,6 +135,8 @@ const PATHS = {
     </>
   ),
   check: <path d="m5 12.5 4.5 4.5L19 7.5" />,
+  lock: <path d="M7 11V8a5 5 0 0 1 10 0v3M5.5 11h13v9h-13zM12 14.5v2.5" />,
+  logout: <path d="M14 5H6v14h8M10.5 12H20M16.5 8.5 20 12l-3.5 3.5" />,
   play: <path d="M8 5.5v13l11-6.5z" />,
   reset: <path d="M4.5 12a7.5 7.5 0 1 0 2.3-5.4M4.5 5v4h4" />,
   plus: <path d="M12 5v14M5 12h14" />,

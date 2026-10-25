@@ -348,3 +348,59 @@ everything needed today; emulate the load cell with a script so tomorrow it is o
   sockets, not tried); the buzzer module reads −, middle, S, with the + moulded on the S
   side, so `wiring.ts` now names S and leaves the middle empty.
 - A "what to have on the table today" list in the plan.
+
+**24 October 2026: the shop list** (asked: a page in French to show the shopkeeper)
+
+- A private claude.ai page, https://claude.ai/artifact/7dsJYCyuuMqi3SevoRg3Ps: HX711 ×1, push
+  button ×1, 100 nF ×4, 1000 µF 16 V ×2, each with a photo, a drawing of the marking to
+  check, what also works, and what does not. Photos: Tuni Smart Innovation's product pages
+  (credited and linked), Commons for the ceramic, the owner's own button.
+- Reference prices read from Tuni Smart's product data on 24 October: HX711 7.100 DT,
+  button 6x6 0.500, "100 nF" 0.350 (its photo is a red film capacitor marked 104, not a
+  ceramic: fine for decoupling), 1000 µF 16 V 0.900. About 10.800 DT for the list.
+- Tuni Smart's "Condensateur Chimique 0.1uF/50V" is an electrolytic: the page says not that one.
+
+**25 October 2026: the plan for the app and the hosted server** (asked: everything today,
+including a "perfect" mobile app with accounts, with the load cell simulated)
+
+- [APP-PLAN.md](APP-PLAN.md): Supabase (Postgres, Auth, Storage, one free project) instead of
+  Neon; the FastAPI server hosted on Vercel and still the only thing the app talks to; the
+  scale paired to an account through the camera's Wi-Fi setup page and a six-character code;
+  unrecognised meals kept as "to name"; the app's nine screens in French first; the order of
+  work for today and tomorrow.
+- Facts read on 25 October: Expo SDK 58 (`expo` 58.0.19 on npm); Supabase free: 50,000
+  monthly active users, 500 MB database, 1 GB storage, paused after a week unused; Clerk free:
+  50,000 monthly retained users. Web search and fetch were down; app-store rules and UI
+  patterns are from general knowledge and marked so in the plan.
+- BUILD-PLAN.md's dates moved: the HX711 comes 26 October.
+
+**Same day: /admin, the builder's area** (asked: a separate layout at /admin, password
+protected, with a sidebar whose first route is the plan)
+
+- The public pages moved into `web/app/(site)/` (a route group: no URL changed), whose
+  layout is the old shell, now `components/SiteShell.tsx`. The root layout keeps only
+  `<html>`, fonts and the theme script. `not-found.tsx` wraps itself in `SiteShell`.
+- `/admin`: `app/admin/login` (sign-in, no sidebar), `app/admin/(locked)/` (layout with
+  `components/admin/AdminShell.tsx`, the same `Sidebar` component fed `lib/admin-nav.ts`),
+  `/admin` redirects to `/admin/plan`. `components/Sidebar.tsx` now takes optional groups,
+  header and footer.
+- The password is `SFS_ADMIN_PASSWORD`: `web/.env.local` locally (git-ignored), the Vercel
+  project's environment variables in production. Unset means locked. `lib/admin-auth.ts`
+  signs a 7-day cookie (expiry + HMAC keyed by the password), checked by `web/proxy.ts`
+  (Next 16's renamed middleware) and again by the locked layout. A wrong password waits
+  0.9 s. The owner chose an 8-digit password "for now"; it is weak for a public address.
+- `/admin/plan`: `components/admin/plan.ts` (the tasks, the source) drawn by
+  `PlanBoard.tsx`. The owner's ticks live in that browser's localStorage.
+- Checked: wrong password refused, right one opens the plan, sidebar marks the current
+  page, ticks save, no console errors, no sideways scroll; `tsc`; build (public pages
+  still static, /admin dynamic, the proxy built). Not checked: production, which has no
+  `SFS_ADMIN_PASSWORD` yet, so /admin there stays locked until the owner adds it.
+
+**Same day: Our parts inside /admin** (asked: remove the public links from the admin sidebar, add our parts, staying in admin)
+
+- The admin sidebar is one group, Build: The plan, Our parts. Every link stays in /admin.
+- `/admin/parts`: the same cards as the public page (`KitCards.tsx`, renamed from `Kit.tsx`,
+  which Windows could not tell from `kit.ts`), with filter tabs as links (`?status=check` …).
+- The plan's links to public tools (Flash it, Wire it, Test and calibrate) open in a new tab.
+- Checked: sidebar marks Our parts, 21 cards and 14 photos, the To check filter shows 6, no
+  console errors, no sideways scroll; the public parts page still renders; `tsc` clean.

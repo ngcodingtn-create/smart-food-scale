@@ -63,6 +63,13 @@ netstat -ano | grep LISTENING | grep -E ":(3000|8000) "
 A new route folder (for example `app/prototype/`) created while the dev server is
 running may 404 until the server is restarted.
 
+## The builder's area, /admin
+
+Password protected. The password is `SFS_ADMIN_PASSWORD`, read when the server starts:
+put it in `web/.env.local` (git ignores it) and restart `npm run dev`; in production, in
+the Vercel project's environment variables, then redeploy. Without it, /admin stays
+locked. Sessions last 7 days; changing the password signs everyone out.
+
 ## Check it
 
 Run all of these before saying something works. Each has caught a real problem.

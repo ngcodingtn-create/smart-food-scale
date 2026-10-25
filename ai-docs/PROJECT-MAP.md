@@ -151,3 +151,14 @@ map, which is drawn twice (760 wide and 360 tall) from the same tables.
   false precision the project exists to avoid.
 - **`Scene.tsx` is written as dense one-liners.** That is the file's existing style;
   match it there, and nowhere else.
+
+## The builder's area (/admin), added 25 October 2026
+
+| What | Where |
+| --- | --- |
+| Public pages (unchanged URLs) | `web/app/(site)/`, frame in `web/components/SiteShell.tsx` |
+| Admin pages | `web/app/admin/` (`login/`, `(locked)/`), frame in `web/components/admin/AdminShell.tsx` |
+| Admin sidebar | `web/lib/admin-nav.ts` (every link stays in /admin) |
+| Our parts (admin) | `web/app/admin/(locked)/parts/page.tsx`, cards from `web/components/workbench/KitCards.tsx` |
+| The plan's tasks | `web/components/admin/plan.ts` (the source), drawn by `PlanBoard.tsx` |
+| Password check | `web/lib/admin-auth.ts`, `web/proxy.ts`; password in `SFS_ADMIN_PASSWORD` |

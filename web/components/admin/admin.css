@@ -1,0 +1,553 @@
+/* ---------------------------------------------------------------------------
+   /admin, the builder's area. The public site's tokens and sidebar, with its
+   own frame: no breadcrumb, no outline, a wider working column.
+--------------------------------------------------------------------------- */
+
+/* --- the sign-in page -------------------------------------------------- */
+.admin-login {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 2rem max(16px, env(safe-area-inset-left, 0px));
+  background: var(--paper);
+}
+.admin-login-card {
+  width: min(100%, 24rem);
+  display: grid;
+  gap: 1rem;
+  padding: 2rem 1.75rem 1.5rem;
+  background: var(--paper-raised);
+  border: 1px solid var(--rule);
+  border-radius: calc(var(--radius) * 1.5);
+  box-shadow: var(--shadow-md);
+}
+.admin-login-mark {
+  margin: 0;
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+}
+.admin-login-card h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  line-height: 1.1;
+  color: var(--ink);
+}
+.admin-login-lede {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+}
+.admin-login-form {
+  display: grid;
+  gap: 0.5rem;
+}
+.admin-login-form label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+.admin-login-form input {
+  font: inherit;
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  letter-spacing: 0.15em;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius);
+  background: var(--paper);
+  color: var(--ink);
+}
+.admin-login-form input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.admin-login-form .btn {
+  margin-top: 0.4rem;
+  justify-content: center;
+}
+.admin-login-error {
+  margin: 0;
+  padding: 0.5rem 0.7rem;
+  border-radius: var(--radius);
+  background: var(--danger-wash);
+  color: var(--danger-ink);
+  font-size: 0.88rem;
+}
+.admin-login-back {
+  justify-self: center;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+
+/* --- the frame ---------------------------------------------------------- */
+.admin-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  color: var(--ink);
+  text-decoration: none;
+}
+.admin-brand-mark {
+  display: grid;
+  place-items: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: 0.6rem;
+  background: var(--accent);
+  color: var(--on-accent);
+  flex: none;
+}
+.admin-brand-text {
+  display: grid;
+  gap: 0.15rem;
+  line-height: 1.1;
+}
+.admin-brand-text strong {
+  font-family: var(--font-display);
+  font-size: 1.02rem;
+}
+.admin-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  width: fit-content;
+  padding: 0.05rem 0.4rem;
+  border-radius: 0.3rem;
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.admin-signout {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+.admin-signout:hover {
+  color: var(--ink);
+}
+.admin-main {
+  display: block;
+  max-width: 68rem;
+  margin: 0 auto;
+  padding-block: 2rem 4rem;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+@media (min-width: 64rem) {
+  .admin-main {
+    padding-left: 2.5rem;
+    padding-right: 2.5rem;
+  }
+}
+
+/* --- the plan ----------------------------------------------------------- */
+.plan {
+  display: grid;
+  gap: 2.5rem;
+}
+.plan-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+.plan-head-text {
+  display: grid;
+  gap: 0.5rem;
+  max-width: 40rem;
+  min-width: 0;
+}
+.plan-head h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  line-height: 1.05;
+  text-wrap: balance;
+  color: var(--ink);
+}
+.plan-goal {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 1.05rem;
+}
+.plan-progress {
+  display: flex;
+  gap: 1rem;
+}
+.plan-progress > div {
+  display: grid;
+  justify-items: center;
+  gap: 0.2rem;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+}
+.plan-ring {
+  width: 4.5rem;
+  height: 4.5rem;
+}
+.plan-ring-bg {
+  fill: none;
+  stroke: var(--rule);
+  stroke-width: 7;
+}
+.plan-ring-fg {
+  fill: none;
+  stroke: var(--tip);
+  stroke-width: 7;
+  stroke-linecap: round;
+  transition: stroke-dasharray 0.3s ease;
+}
+.plan-ring text {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  fill: var(--ink);
+}
+@media (prefers-reduced-motion: reduce) {
+  .plan-ring-fg {
+    transition: none;
+  }
+}
+
+.plan-day {
+  display: grid;
+  gap: 1rem;
+}
+.plan-day-head {
+  display: grid;
+  gap: 0.3rem;
+}
+.plan-day h2,
+.plan-two h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  line-height: 1.2;
+  color: var(--ink);
+}
+.plan-day h2 span {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--ink-faint);
+  margin-left: 0.35rem;
+}
+.plan-day-head p {
+  margin: 0;
+  color: var(--ink-soft);
+  max-width: 65ch;
+}
+
+.plan-lanes {
+  display: grid;
+  gap: 1rem;
+}
+@media (min-width: 52rem) {
+  .plan-lanes {
+    grid-template-columns: 3fr 2fr;
+    align-items: start;
+  }
+}
+.plan-lane {
+  display: grid;
+  gap: 0.6rem;
+  padding: 1rem;
+  border: 1px solid var(--rule);
+  border-radius: calc(var(--radius) * 1.25);
+  background: var(--paper-raised);
+  min-width: 0;
+}
+.plan-lane h3 {
+  margin: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent-ink);
+}
+.plan-lane[data-who='claude'] h3 {
+  color: var(--measure-ink);
+}
+.plan-lane h3 span {
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.plan-list,
+.plan-accounts {
+  display: grid;
+  gap: 0.15rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.plan-task,
+.plan-account {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.45rem 0.4rem;
+  border-radius: var(--radius);
+}
+.plan-task:hover {
+  background: var(--paper-sunken);
+}
+.plan-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  flex: 1;
+  min-width: 0;
+  cursor: pointer;
+}
+.plan-check input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+.plan-box {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 1.15rem;
+  height: 1.15rem;
+  margin-top: 0.15rem;
+  border: 1.5px solid var(--rule-strong);
+  border-radius: 0.3rem;
+  color: transparent;
+  background: var(--paper);
+}
+.plan-check input:checked + .plan-box {
+  background: var(--tip);
+  border-color: var(--tip);
+  color: var(--paper);
+}
+.plan-check input:focus-visible + .plan-box {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.plan-task-text {
+  display: grid;
+  gap: 0.1rem;
+  min-width: 0;
+}
+.plan-task-title {
+  color: var(--ink);
+  font-size: 0.95rem;
+  line-height: 1.35;
+}
+.plan-task-when {
+  color: var(--ink-faint);
+  font-size: 0.8rem;
+  line-height: 1.35;
+}
+.plan-task[data-done='true'] .plan-task-title,
+.plan-account[data-done='true'] .plan-task-title {
+  color: var(--ink-faint);
+  text-decoration: line-through;
+  text-decoration-color: var(--rule-strong);
+}
+.plan-go {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 1.8rem;
+  height: 1.8rem;
+  border-radius: 50%;
+  color: var(--ink-soft);
+}
+.plan-go:hover {
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+}
+.plan-status {
+  flex: none;
+  margin-top: 0.1rem;
+  padding: 0.05rem 0.45rem;
+  border-radius: 0.3rem;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  background: var(--paper-sunken);
+  color: var(--ink-soft);
+}
+.plan-status[data-status='done'] {
+  background: var(--tip-wash);
+  color: var(--tip-ink);
+}
+.plan-status[data-status='doing'] {
+  background: var(--measure-soft);
+  color: var(--measure-ink);
+}
+.plan-status[data-status='waiting'] {
+  background: var(--caution-wash);
+  color: var(--caution-ink);
+}
+
+.plan-accounts {
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 0.75rem;
+}
+.plan-account {
+  padding: 0.9rem;
+  border: 1px solid var(--rule);
+  border-radius: calc(var(--radius) * 1.25);
+  background: var(--paper-raised);
+}
+.plan-secret {
+  margin-top: 0.25rem;
+  color: var(--accent-ink);
+  font-size: 0.78rem;
+}
+
+.plan-two {
+  display: grid;
+  gap: 1.5rem;
+}
+@media (min-width: 52rem) {
+  .plan-two {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.plan-two > div {
+  display: grid;
+  gap: 0.75rem;
+  align-content: start;
+}
+.plan-plain {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding-left: 1.1rem;
+  color: var(--ink-soft);
+}
+.plan-plain strong {
+  color: var(--ink);
+}
+.plan-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.plan-chips li {
+  padding: 0.15rem 0.65rem;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: var(--paper-raised);
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+.plan-foot {
+  margin: 0;
+  color: var(--ink-faint);
+  font-size: 0.82rem;
+}
+.plan-foot code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+}
+.plan .label {
+  margin: 0;
+}
+
+/* --- an admin page: header, filter tabs --------------------------------- */
+.admin-page {
+  display: grid;
+  gap: 1.5rem;
+}
+.admin-page-head {
+  display: grid;
+  gap: 0.5rem;
+  max-width: 44rem;
+}
+.admin-page-head .label {
+  margin: 0;
+}
+.admin-page-head h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 2.6rem);
+  line-height: 1.05;
+  color: var(--ink);
+}
+.admin-page-lede {
+  margin: 0;
+  color: var(--ink-soft);
+}
+.admin-page-lede code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+}
+.admin-page .kit-counts {
+  margin: 0;
+}
+.admin-page .prose .kit {
+  margin-top: 0;
+}
+.admin-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 0.75rem;
+}
+.admin-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.8rem;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: var(--paper-raised);
+  color: var(--ink-soft);
+  font-size: 0.88rem;
+  text-decoration: none;
+}
+.admin-tab span {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+.admin-tab:hover {
+  border-color: var(--rule-strong);
+  color: var(--ink);
+}
+.admin-tab[aria-current='page'] {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+.admin-tab[aria-current='page'] span {
+  color: var(--paper);
+  opacity: 0.75;
+}
+.admin-tab:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}

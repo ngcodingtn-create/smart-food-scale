@@ -34,10 +34,12 @@ export function KitCounts() {
   );
 }
 
-export function Kit() {
+/** Every part, or only those with one status (the admin page's filter). */
+export function Kit({ status }: { status?: KitStatus } = {}) {
+  const items = status ? KIT.filter((item) => item.status === status) : KIT;
   return (
     <ul className="kit">
-      {KIT.map((item) => {
+      {items.map((item) => {
         const info = part(item.bom);
         return (
           <li key={item.id} className="kit-card" data-status={item.status} id={item.id}>

@@ -6,14 +6,26 @@ import { useEffect, useRef, useState } from 'react';
 import { Brand } from '@/components/Brand';
 import { Icon } from '@/components/icons';
 import { ThemeSwitch, ThemeToggle } from '@/components/ThemeToggle';
-import { NAV, REPO_URL } from '@/lib/nav';
+import { NAV, REPO_URL, type NavGroup } from '@/lib/nav';
 
-function NavList({ onNavigate }: { onNavigate?: () => void }) {
+/**
+ * What a frame puts in its sidebar. The public site uses the defaults; /admin
+ * passes its own groups, header and footer, so both share one component.
+ */
+export type SidebarParts = {
+  groups?: NavGroup[];
+  /** The navigation landmark's name, for screen readers. */
+  label?: string;
+  head?: (onNavigate?: () => void) => React.ReactNode;
+  foot?: React.ReactNode;
+};
+
+function NavList({ onNavigate, groups = NAV, label = 'Documentation' }: { onNavigate?: () => void; groups?: NavGroup[]; label?: string }) {
   const pathname = usePathname();
 
   return (
-    <nav aria-label="Documentation">
-      {NAV.map((group) => (
+    <nav aria-label={label}>
+      {groups.map((group) => (
         <div key={group.label} className="nav-group">
           <h2 className="nav-label label">{group.label}</h2>
           <ul className="nav-list">
@@ -58,16 +70,14 @@ function SidebarFoot() {
 }
 
 /** Desktop: fixed to the left edge, full height. Hidden below 64rem. */
-export function Sidebar() {
+export function Sidebar({ groups, label, head, foot }: SidebarParts = {}) {
   return (
     <aside className="sidebar">
-      <div className="sidebar-head">
-        <Brand />
-      </div>
+      <div className="sidebar-head">{head ? head() : <Brand />}</div>
       <div className="sidebar-scroll">
-        <NavList />
+        <NavList groups={groups} label={label} />
       </div>
-      <SidebarFoot />
+      {foot ?? <SidebarFoot />}
     </aside>
   );
 }
@@ -79,7 +89,7 @@ export function Sidebar() {
  * closes it on Esc and makes the page behind it inert — none of it is
  * re-implemented here.
  */
-export function MobileBar() {
+export function MobileBar({ groups, label, head, foot }: SidebarParts = {}) {
   const drawer = useRef<HTMLDialogElement>(null);
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
@@ -105,7 +115,7 @@ export function MobileBar() {
   return (
     <>
       <header className="topbar">
-        <Brand />
+        {head ? head() : <Brand />}
         <div className="topbar-actions">
           <ThemeToggle />
           <button
@@ -139,15 +149,15 @@ export function MobileBar() {
       >
         <div className="drawer-panel">
           <div className="drawer-head">
-            <Brand onNavigate={close} />
+            {head ? head(close) : <Brand onNavigate={close} />}
             <button type="button" className="icon-btn" aria-label="Close navigation" onClick={close}>
               <Icon name="close" />
             </button>
           </div>
           <div className="sidebar-scroll">
-            <NavList onNavigate={close} />
+            <NavList onNavigate={close} groups={groups} label={label} />
           </div>
-          <SidebarFoot />
+          {foot ?? <SidebarFoot />}
         </div>
       </dialog>
     </>

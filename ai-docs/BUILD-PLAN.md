@@ -1,4 +1,8 @@
-# Build plan: 23 and 24 October 2026
+# Build plan: 25 and 26 October 2026
+
+**Moved.** Written for 23 and 24 October; the HX711 could not be found on the 24th and
+comes on **26 October**. Read "today" as 25 October and "tomorrow" as 26 October.
+The app, the server and the scale's Wi-Fi setup are planned in [APP-PLAN.md](APP-PLAN.md).
 
 Written 23 October 2026. The goal: by the evening of 24 October, **one whole meal
 through the real hardware** — food weighed on the load cell, photographed by the
