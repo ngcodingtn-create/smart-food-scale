@@ -1,0 +1,13 @@
+{
+  "sfs-build-checks-v1": {
+    "m1-scale-brain/port": [
+      0
+    ],
+    "m1-scale-brain/flash": [
+      0
+    ],
+    "m1-scale-brain/rails": []
+  },
+  "updated": "2026-10-25T20:18:05.444Z",
+  "sfs-wired-v1": []
+}

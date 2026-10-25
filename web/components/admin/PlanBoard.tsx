@@ -4,11 +4,13 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { Icon } from '@/components/icons';
 import { ACCOUNTS, DAYS, DECISIONS, GOAL, LATER, PLAN_UPDATED, type Status, type Task } from './plan';
+import { saveToFile, syncWithFile } from './saved';
 
 const KEY = 'sfs-admin-plan-ticks';
 
-// The owner's ticks, in this browser only. Storage can be missing or refuse
-// (private windows): the page still works, it just forgets.
+// The owner's ticks, in this browser and in web/data/progress.json on the laptop
+// (see saved.ts). Storage can be missing or refuse (private windows): the page
+// still works, it just forgets.
 function loadTicks(): Record<string, boolean> {
   try {
     return JSON.parse(localStorage.getItem(KEY) ?? '{}') as Record<string, boolean>;
@@ -78,7 +80,10 @@ function ClaudeTask({ task }: { task: Task }) {
 
 export function PlanBoard() {
   const [ticks, setTicks] = useState<Record<string, boolean>>({});
-  useEffect(() => setTicks(loadTicks()), []);
+  useEffect(() => {
+    setTicks(loadTicks());
+    syncWithFile(KEY).then(() => setTicks(loadTicks()));
+  }, []);
 
   const tick = (id: string, value: boolean) => {
     setTicks((current) => {
@@ -88,6 +93,7 @@ export function PlanBoard() {
       } catch {
         // Not saved; the tick still shows until the page is closed.
       }
+      saveToFile(KEY, next);
       return next;
     });
   };

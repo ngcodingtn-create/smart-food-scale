@@ -12,7 +12,7 @@ import '@/components/figure.css';
  */
 export function StepWiring({ node: nodeId, ids }: { node: 'a' | 'b'; ids: string[] }) {
   const node = NODES.find((item) => item.id === nodeId) ?? NODES[0];
-  const [done, update] = useDone();
+  const [done, update] = useDone(true);
   const wires = useMemo(() => {
     const all = wiresOf(node);
     return ids.map((id) => {

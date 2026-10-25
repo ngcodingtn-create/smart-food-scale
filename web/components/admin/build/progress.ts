@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { MILESTONES, type Milestone, type Step } from '../roadmap';
+import { saveToFile, syncWithFile } from '../saved';
 
 /**
- * The owner's ticks on the build pages, in this browser only, like Wire it's.
+ * The owner's ticks on the build pages: in this browser, and on the laptop in
+ * web/data/progress.json (see ../saved.ts), so they survive a closed browser.
  * One entry per step: the indexes of its checks ticked. Storage can be missing
  * (private windows): the ticks then last until the page closes.
  */
@@ -30,6 +32,7 @@ export function useTicks() {
   useEffect(() => {
     const load = () => setTicks(read());
     load();
+    syncWithFile(KEY).then(load);
     window.addEventListener(EVENT, load);
     window.addEventListener('storage', load);
     return () => {
@@ -49,6 +52,7 @@ export function useTicks() {
     } catch {
       // Not saved; the page still shows it.
     }
+    saveToFile(KEY, next);
     setTicks(next);
     window.dispatchEvent(new Event(EVENT));
   }

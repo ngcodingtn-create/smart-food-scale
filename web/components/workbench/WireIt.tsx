@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Icon } from '@/components/icons';
 import { ART } from './boards';
+import { saveToFile, syncWithFile } from '@/components/admin/saved';
 import { NODES, endName, wiresOf, type NodeId, type NodeWiring, type Wire } from './wiring';
 import '../figure.css';
 import './workbench.css';
@@ -17,19 +18,26 @@ import './workbench.css';
 
 const STORE = 'sfs-wired-v1';
 
-/** The ids of the wires already made. Kept in localStorage; works without it. */
-export function useDone() {
+/**
+ * The ids of the wires already made. Kept in localStorage; works without it.
+ * `mirror`: also kept in web/data/progress.json on the laptop (the /admin pages only).
+ */
+export function useDone(mirror = false) {
   const [done, setDone] = useState<ReadonlySet<string>>(new Set());
 
   // After mount, so the server's markup and the first client render agree.
   useEffect(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem(STORE) ?? '[]');
-      if (Array.isArray(saved)) setDone(new Set(saved.filter((id) => typeof id === 'string')));
-    } catch {
-      // Private window, or storage blocked: the ticks last until the page closes.
-    }
-  }, []);
+    const load = () => {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORE) ?? '[]');
+        if (Array.isArray(saved)) setDone(new Set(saved.filter((id) => typeof id === 'string')));
+      } catch {
+        // Private window, or storage blocked: the ticks last until the page closes.
+      }
+    };
+    load();
+    if (mirror) syncWithFile(STORE).then(load);
+  }, [mirror]);
 
   function update(change: (next: Set<string>) => void) {
     setDone((current) => {
@@ -40,6 +48,7 @@ export function useDone() {
       } catch {
         // See above.
       }
+      if (mirror) saveToFile(STORE, [...next]);
       return next;
     });
   }
