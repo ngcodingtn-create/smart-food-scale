@@ -251,6 +251,73 @@
   white-space: nowrap;
 }
 
+/* Parts as cards: photos big enough to find the part on the desk. */
+.part-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(7.5rem, 1fr));
+  gap: 0.6rem;
+}
+.part-card {
+  display: grid;
+  align-content: start;
+  gap: 0.45rem;
+  padding: 0.45rem;
+  border: 1px solid var(--rule);
+  border-radius: 0.7rem;
+  background: var(--paper-raised);
+  color: var(--ink);
+  font-size: 0.85rem;
+  line-height: 1.3;
+  text-decoration: none;
+}
+.part-card:hover {
+  border-color: var(--accent);
+}
+.part-card img,
+.part-card-blank {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 0.45rem;
+  object-fit: cover;
+  background: var(--paper-sunken);
+}
+.part-groups {
+  display: grid;
+  gap: 1rem;
+}
+.part-group {
+  display: grid;
+  gap: 0.55rem;
+  padding: 0.8rem;
+  border: 1px solid var(--rule);
+  border-radius: 0.8rem;
+}
+.part-group h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin: 0;
+  font-size: 1rem;
+}
+.part-group-number {
+  display: grid;
+  place-items: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+}
+.part-group-count {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--ink-muted, var(--ink));
+  opacity: 0.7;
+}
+
 /* --- a step -------------------------------------------------------------- */
 .step-grid {
   display: grid;

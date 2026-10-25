@@ -52,6 +52,8 @@ export type Step = {
   /** wiring.ts ids lit in the drawing. */
   wires?: { node: 'a' | 'b'; ids: string[] };
   photo?: Photo;
+  /** The parts, sorted into groups on the desk; shown instead of a flat `parts` list. */
+  partGroups?: { title: string; ids: string[] }[];
   /** What the owner does: only what needs hands, eyes or ears. */
   actions?: string[];
   /** What Claude does from the laptop: flashing, reading the board, sending it commands, checking. */
@@ -117,6 +119,11 @@ export const MILESTONES: Milestone[] = [
         title: 'Lay everything out',
         goal: 'Three groups on the desk: the scale, the camera, the small parts.',
         parts: ['devkit', 'oled', 'push-button', 'buzzer', 'esp32-cam', 'esp32-cam-mb', 'led-white'],
+        partGroups: [
+          { title: 'The scale', ids: ['devkit', 'oled', 'push-button', 'buzzer', 'load-cell'] },
+          { title: 'The camera', ids: ['esp32-cam', 'esp32-cam-mb', 'led-white'] },
+          { title: 'Small parts', ids: ['transistor', 'diode', 'resistor', 'cap-10u', 'breadboard', 'usb-cable'] },
+        ],
         actions: [
           'Clear the desk. Work on wood or a mat, not on metal: a board’s pins touching metal can short.',
           'Scale group: the NodeMCU, the display, the button, the buzzer module, the load cell.',

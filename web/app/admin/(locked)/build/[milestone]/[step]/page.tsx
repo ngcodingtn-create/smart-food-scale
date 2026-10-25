@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Expected } from '@/components/admin/build/Expected';
-import { PartChips } from '@/components/admin/build/PartChip';
+import { PartCards, PartGroups } from '@/components/admin/build/PartChip';
 import { PhotoHotspots } from '@/components/admin/build/PhotoHotspots';
 import { StepChecks } from '@/components/admin/build/StepChecks';
 import { StepFooter } from '@/components/admin/build/StepFooter';
@@ -70,10 +70,15 @@ export default async function StepPage({ params }: { params: Params }) {
           ) : null}
 
           <div className="step-text">
-            {step.parts?.length ? (
+            {step.partGroups?.length ? (
+              <section>
+                <h2>You need, in {step.partGroups.length} groups</h2>
+                <PartGroups groups={step.partGroups} />
+              </section>
+            ) : step.parts?.length ? (
               <section>
                 <h2>You need</h2>
-                <PartChips ids={step.parts} />
+                <PartCards ids={step.parts} />
               </section>
             ) : null}
             {step.actions?.length || step.claude?.length ? (
