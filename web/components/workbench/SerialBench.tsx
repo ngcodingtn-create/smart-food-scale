@@ -373,7 +373,7 @@ export function Bench() {
 
       mark(1, 'running');
       send(`sim ${PLATE_G}`);
-      await pause(1500);
+      await pause(2500); // the pretend plate wobbles for about 1.5 s, like a real one
       const tareLine = waitFor((text) => text.startsWith('E tare'), 6000);
       send('tare');
       const tared = await tareLine;

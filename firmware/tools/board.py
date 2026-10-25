@@ -182,7 +182,7 @@ def cmd_meal_test(args):
     if not report('it is calibrated', field(info, 'calibrated') == '1', f'cpg={field(info, "cpg")}'):
         sys.exit(1)
     send(link, f'sim {args.plate}')
-    time.sleep(1.5)
+    time.sleep(2.5)  # the pretend plate wobbles for about 1.5 s, like a real one
     tare = expect(link, 'tare', 'E tare', 6)
     if not report(f'plate {args.plate} g, tare', bool(tare), tare or ''):
         sys.exit(1)

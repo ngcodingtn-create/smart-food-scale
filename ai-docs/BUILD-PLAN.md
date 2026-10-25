@@ -4,6 +4,11 @@
 comes on **26 October**. Read "today" as 25 October and "tomorrow" as 26 October.
 The app, the server and the scale's Wi-Fi setup are planned in [APP-PLAN.md](APP-PLAN.md).
 
+**The real weight is now last** (asked 25 October). The HX711 sections below still hold,
+but they run after everything else: the server, the app, pairing, the second button, the
+microSD and the rig, all on the pretend scale. The order is milestone 9 on `/admin/build`;
+the stand-in is in [research/2026-10-25-simulating-the-weight.md](research/2026-10-25-simulating-the-weight.md).
+
 Written 23 October 2026. The goal: by the evening of 24 October, **one whole meal
 through the real hardware** — food weighed on the load cell, photographed by the
 camera board, saved by the backend with its grams — on a calibrated scale.
@@ -101,7 +106,7 @@ reads and tests the boards with `firmware/tools/board.py` (RUNBOOK, "Driving the
 | # | Step | Where | Done when |
 | --- | --- | --- | --- |
 | 1 | Plug in the NodeMCU with a data cable and say so. Claude finds the CH340 port (`board.py ports`); if none, the other cable, then WCH's CH340 driver | Laptop | Claude names the port |
-| 2 | Claude flashes **The pretend scale** (`board.py flash node-a-nodemcu-sim`). The owner does nothing unless asked to hold FLASH and tap RST | Laptop | Claude reads `E boot node=a fw=0.2.1 … simulated=1` |
+| 2 | Claude flashes **The pretend scale** (`board.py flash node-a-nodemcu-sim`). The owner does nothing unless asked to hold FLASH and tap RST | Laptop | Claude reads `E boot node=a fw=0.2.2 … simulated=1` |
 | 3 | Wire the rails, the display, the tare button (D5) and the buzzer with its transistor, diode and 1 kΩ. Skip the HX711 and load-cell lines | `/workbench/wire` | Ticks on Wire it |
 | 4 | Claude runs the pretend meal (`board.py meal-test --no-camera`); the owner watches the display and listens | Laptop | The display shows the weight; tare zeroes it; the buzzer beeps; PHOTO says `NO CAMERA` (no camera yet) |
 | 5 | Turn on the phone hotspot **on 2.4 GHz** (the ESP32-CAM cannot see 5 GHz; on an iPhone, "Maximise compatibility"). Join it with the laptop | Phone, laptop | Laptop online through the phone |
@@ -145,7 +150,7 @@ bench page into the chat.
 | --- | --- | --- |
 | 1 | Wire the HX711 (VCC 3V3, GND, DT D6, SCK D7) and the load cell's four wires (red E+, black E−, white A−, green A+), with the 100 µF across the HX711's VCC and GND | Ticks on Wire it |
 | 2 | Second button on D3 (PHOTO) | Pressing it does what FLASH did |
-| 3 | Flash **The scale** (the real build) | `E boot node=a fw=0.2.1 calibrated=0` and raw counts on the display |
+| 3 | Flash **The scale** (the real build) | `E boot node=a fw=0.2.2 calibrated=0` and raw counts on the display |
 | 4 | Press on the cell: counts should rise. If they fall, swap white and green | Counts rise under load |
 | 5 | Mount the cell between base and top plate | Readings settle (`settled` on the bench page) |
 | 6 | Calibrate: TARE empty, then three to five known masses, Save | `calibrated=1`; a known mass reads within a gram or two |

@@ -94,11 +94,12 @@ answers. The channel is saved on the board. The display's top line shows it:
 | --- | --- |
 | `tare` | The same as the TARE button |
 | `capture` | The same as the PHOTO button |
-| `cal <counts per gram>` | Sets the calibration and saves it on the board |
-| `cal clear` | Forgets it |
+| `cal <counts per gram>` | Sets the calibration and saves it on the board. The `-sim` builds keep it until the next restart only and answer `saved=0` |
+| `cal clear` | Forgets it (the `-sim` builds: uncalibrated until the next `cal` or restart) |
 | `info` | Prints the settings |
 | `find` | Searches for Node B again |
-| `sim <grams>` | The `node-a-sim` build only: sets the pretend weight |
+| `sim <grams>` | The `-sim` builds only: sets the pretend weight. It lands like a plate: overshoots about 16 %, within a gram in about 1.3 s |
+| `sim sign <1\|-1>` | The `-sim` builds only: `-1` plays a cell with white and green swapped, so the counts fall as weight goes on |
 
 Calibration is a straight line through zero: tare the empty plate, put known masses
 on, read `net=` for each, and the slope is counts per gram. Decision D13 asks for five

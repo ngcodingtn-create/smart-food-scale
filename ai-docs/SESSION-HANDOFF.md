@@ -10,7 +10,7 @@ says so where it matters. **Rewrite this file when you stop**; history belongs i
   `363b2c0`: `/admin` and the build companion. `/admin` stays locked on production until
   the owner adds `SFS_ADMIN_PASSWORD` in Vercel (website project, Settings, Environment
   Variables, then redeploy). Offered; not done; changing it needs their yes.
-- **After `363b2c0`, committed but not pushed:** Claude drives the boards. Step pages say
+- **After `363b2c0`, committed but not pushed:** the real weight moved last, the pretend scale made realistic (0.2.2), and Claude drives the boards. Step pages say
   "You do" (hands only) and "Claude does, from the laptop"; `firmware/tools/board.py` finds,
   flashes, reads and tests the boards (RUNBOOK, "Driving the boards"). Never run on a real
   board yet.
@@ -21,8 +21,12 @@ says so where it matters. **Rewrite this file when you stop**; history belongs i
 - **The owner's working model**: they plug in, wire, press, look, turn on the hotspot,
   type the Wi-Fi password once and click Allow on the firewall prompt. Claude does the
   rest: port, flashing, boot lines, commands, the tests, calibration from their weights.
-- **Today** the NodeMCU runs the pretend scale (M1); then the camera (M2), the light (M3),
-  both boards (M4). **26 Oct**: the HX711, the second button and the microSD arrive (M5).
+- **The real weight is the last milestone** (M9), asked 25 Oct: M0–M4 on the boards today,
+  then the server (M5), the app (M6), pairing (M7), the finished scale with the second
+  button and microSD (M8), all on the pretend scale; the HX711 and load cell only at the end.
+  The pretend scale (firmware 0.2.2) lands like a real plate, can play a backwards cell
+  (`sim sign -1`) and takes a calibration it never saves; M4's third step rehearses M9 on
+  it. Why this stand-in and no other: research/2026-10-25-simulating-the-weight.md.
 
 ## Where things stood before 25 October
 

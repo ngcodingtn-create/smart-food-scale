@@ -21,16 +21,18 @@ tests, calibration), with `firmware/tools/board.py`.
 | 1 | The scale's brain (pretend scale, display, tare, buzzer) | 25 Oct | Written in full: 7 steps |
 | 2 | The camera online (flash, hotspot, laptop server, test photo) | 25 Oct | 4 written, 1 draft; [hardware guide](research/2026-10-25-hardware-build-guide.md) §3 |
 | 3 | The light (camera on the breadboard, six LEDs) | 25 Oct | Drafts; hardware guide §3.4–3.6 |
-| 4 | Both boards together (ESP-NOW, the whole-meal test) | 25 Oct | Drafts; hardware guide §3.7 |
-| 5 | Real weight (HX711, load cell, second button, mount, calibrate, microSD) | 26 Oct | Drafts; hardware guide §4–6, §8.1 |
-| 6 | The server online (Supabase, Vercel, Gemini, accounts, fake scale) | after M4 | Drafts; [backend research](research/2026-10-25-backend-hosting-auth.md) |
-| 7 | The app (Expo, sign-in, Aujourd'hui, À nommer) | after M6 | Drafts; [app research](research/2026-10-25-mobile-app.md) |
-| 8 | The scale joins your account (setup Wi-Fi, pairing, https) | after M5 and M7 | Drafts; [firmware research](research/2026-10-25-firmware-connectivity.md) |
-| 9 | Finished scale (own power, rig, accuracy, demo) | last | Drafts; hardware guide §7–8 |
+| 4 | Both boards together (ESP-NOW, the whole-meal test, rehearsing the real weight on the pretend one) | 25 Oct | Drafts, and the rehearsal written; [simulating the weight](research/2026-10-25-simulating-the-weight.md) |
+| 5 | The server online (Supabase, Vercel, Gemini, accounts, fake scale) | after M4 | Drafts; [backend research](research/2026-10-25-backend-hosting-auth.md) |
+| 6 | The app (Expo, sign-in, Aujourd'hui, À nommer) | after M5 | Drafts; [app research](research/2026-10-25-mobile-app.md) |
+| 7 | The scale joins your account (setup Wi-Fi, pairing, https) | after M6 | Drafts; [firmware research](research/2026-10-25-firmware-connectivity.md) |
+| 8 | Finished scale (second button, microSD, own power, rig) | after M7 | Drafts; hardware guide §7, §8.1 |
+| 9 | **Real weight, last** (HX711, load cell, sign, mount, calibrate, accuracy, demo) | last, with the HX711 | Drafts; hardware guide §4–6, §8 |
 
-Order: hardware first while the parts are on the desk and the HX711 is a day away; the
-server before the app because the app is useless without it; pairing last because it
-needs the real scale, the online server and the app.
+Order: hardware first while the parts are on the desk; the server before the app because
+the app is useless without it; pairing once the server and the app exist; **the real
+weight last**, as the owner asked on 25 October. Until then the pretend scale stands in
+for the HX711 and the load cell, and lands like a real plate
+([why that, and not something else](research/2026-10-25-simulating-the-weight.md)).
 
 A draft step shows its title and goal and says it is being written. Its detail is filled
 in from the research file named above when the build reaches it.

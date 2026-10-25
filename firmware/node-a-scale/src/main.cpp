@@ -47,7 +47,10 @@
 #ifndef SIMULATE_SCALE
 HX711 cell;
 #else
-float simGrams = 0;  // set from the console with `sim <grams>`
+float simGrams = 0;   // where the weight is going: `sim <grams>`
+float simNow = 0;     // where it is, while it lands
+float simSpeed = 0;
+int simSign = 1;      // -1 plays a cell with its white and green swapped: `sim sign -1`
 #endif
 
 // The last readings, newest last. Raw counts straight from the converter.
@@ -148,7 +151,10 @@ bool readCell() {
   static uint32_t last = 0;
   if (millis() - last < 100) return false;  // the real converter's 10 per second
   last = millis();
-  raw = config::kSimZeroCounts + lroundf(simGrams * config::kSimCountsPerGram) + random(-3, 4);
+  // A weight does not arrive at once: it overshoots and wobbles, then settles.
+  simSpeed += (simGrams - simNow) * config::kSimSpring - simSpeed * config::kSimDamping;
+  simNow += simSpeed;
+  raw = config::kSimZeroCounts + simSign * lroundf(simNow * config::kSimCountsPerGram) + random(-3, 4);
   overloaded = false;
 #endif
   if (historyCount == kHistory) {
@@ -467,27 +473,40 @@ void command(String text) {
 #endif
     );
   } else if (text == "cal clear") {
+#ifdef SIMULATE_SCALE
+    countsPerGram = NAN;  // uncalibrated until `cal`, as a fresh real scale would be
+#else
     saveCountsPerGram(NAN);
     countsPerGram = SFS_COUNTS_PER_GRAM;
+#endif
     Serial.println("E cal cleared");
   } else if (text.startsWith("cal ")) {
     float value = text.substring(4).toFloat();
     if (value > 0) {
       countsPerGram = value;
+#ifdef SIMULATE_SCALE
+      // A rehearsal: kept until the next restart, never saved, so nothing from the
+      // pretend scale is left for the real one to read.
+      Serial.printf("E cal cpg=%.6f saved=0\n", value);
+#else
       saveCountsPerGram(value);
       Serial.printf("E cal cpg=%.6f\n", value);
+#endif
     } else {
       Serial.println("E error cal-needs-a-positive-number");
     }
   }
 #ifdef SIMULATE_SCALE
-  else if (text.startsWith("sim ")) {
+  else if (text.startsWith("sim sign ")) {
+    simSign = text.substring(9).toInt() < 0 ? -1 : 1;
+    Serial.printf("E sim sign=%d\n", simSign);
+  } else if (text.startsWith("sim ")) {
     simGrams = text.substring(4).toFloat();
     Serial.printf("E sim g=%.1f\n", simGrams);
   }
 #endif
   else if (text.length()) {
-    Serial.println("E help tare | capture | find | info | cal <counts per gram> | cal clear | sim <grams>");
+    Serial.println("E help tare | capture | find | info | cal <counts per gram> | cal clear | sim <grams> | sim sign <1|-1>");
   }
 }
 

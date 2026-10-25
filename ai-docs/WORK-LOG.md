@@ -462,3 +462,21 @@ everything yourself, flashing etc., I just plug the node in")
 - `plan.ts`: flashing, the server on the network and the board tests moved to Claude's list.
 - Checked: `tsc`, build; two step pages in the browser; `board.py` with no board attached
   (clear messages, right exit codes). **Not run against a board yet.**
+
+**Same day: the real weight last** (asked: make Real weight the last milestone; research the
+best way to stand in for the HX711 meanwhile, with what is in hand)
+
+- Milestones reordered: 5 server, 6 app, 7 pairing, 8 finished scale (second button,
+  microSD, power, rig), 9 real weight (HX711, cell, sign, mount, calibrate, accuracy, demo).
+  Ids renamed to match their numbers; none had ticks (all drafts). `plan.ts`: tomorrow keeps
+  the HX711 in its bag; a new last day holds its tasks.
+- [research/2026-10-25-simulating-the-weight.md](research/2026-10-25-simulating-the-weight.md):
+  keep the pretend scale and make it behave like a cell; A0 without the HX711, a fallback
+  image, the ESP32-CAM faking an HX711 and a potentiometer were set aside, each with why.
+- Node A 0.2.2, `-sim` builds only: a weight lands with a damped wobble (16 % overshoot,
+  within 1 g by 1.3 s, checked by stepping the equations in Python); `sim sign -1`; `cal`
+  kept in memory only (`saved=0`), `cal clear` leaves it uncalibrated. Both whole-meal
+  tests wait 2.5 s before TARE. All images rebuilt and published, no warnings.
+- M4 gained a written step, "Rehearse the real weight on the pretend one".
+- Checked: `tsc`, build, firmware builds; the map, the rehearsal step and the plan in the
+  browser. **The wobble and the rehearsal have not run on the board yet.**

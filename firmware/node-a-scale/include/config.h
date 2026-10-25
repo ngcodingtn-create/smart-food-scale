@@ -6,7 +6,7 @@
 #include <math.h>
 #include <stdint.h>
 
-#define SFS_FIRMWARE_VERSION "0.2.1"
+#define SFS_FIRMWARE_VERSION "0.2.2"
 
 // Counts per gram, until the scale is calibrated and the real value is saved on
 // the board. Unknown by default, on purpose: an uncalibrated scale shows raw
@@ -52,5 +52,10 @@ constexpr uint8_t kOledAddress = 0x3C;
 namespace config {
 constexpr float kSimCountsPerGram = 100.0f;  // made up, and only used by the simulation
 constexpr long kSimZeroCounts = 84000;       // likewise
+// How a weight lands, per reading (10 a second): pulled towards the new weight,
+// slowed by the damping. These two overshoot about 15 % and settle within a gram
+// in about 1.5 s. Chosen to look like a plate set down, not measured on our arm.
+constexpr float kSimSpring = 0.5f;
+constexpr float kSimDamping = 0.6f;
 }  // namespace config
 #endif
