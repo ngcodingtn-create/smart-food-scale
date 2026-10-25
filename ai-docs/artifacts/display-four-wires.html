@@ -1,0 +1,455 @@
+<title>Display, Four Wires</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,650&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  /* Layout: the 3D bench first, full width; the step under it; the four wires as a table at the end.
+     The Smart Food Scale palette: terracotta for what your hands do, teal for what Claude checks. */
+  :root {
+    --ink: oklch(0.2 0.012 60); --ink-soft: oklch(0.42 0.014 62); --ink-faint: oklch(0.54 0.012 65);
+    --paper: oklch(0.985 0.006 85); --raised: oklch(1 0 0); --sunken: oklch(0.964 0.008 82);
+    --rule: oklch(0.905 0.008 78); --rule-strong: oklch(0.83 0.01 75);
+    --accent: oklch(0.56 0.16 42); --accent-soft: oklch(0.955 0.03 60); --accent-ink: oklch(0.45 0.15 40); --on-accent: oklch(0.99 0.005 80);
+    --measure: oklch(0.52 0.085 188); --measure-soft: oklch(0.95 0.025 188); --measure-ink: oklch(0.4 0.075 190);
+    --display: "Fraunces", Georgia, serif;
+    --body: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: oklch(0.94 0.008 80); --ink-soft: oklch(0.77 0.01 75); --ink-faint: oklch(0.63 0.01 75);
+      --paper: oklch(0.17 0.008 70); --raised: oklch(0.212 0.009 70); --sunken: oklch(0.145 0.008 70);
+      --rule: oklch(0.275 0.01 70); --rule-strong: oklch(0.37 0.012 70);
+      --accent: oklch(0.73 0.14 50); --accent-soft: oklch(0.275 0.045 48); --accent-ink: oklch(0.81 0.115 58); --on-accent: oklch(0.18 0.02 50);
+      --measure: oklch(0.76 0.09 182); --measure-soft: oklch(0.255 0.03 188); --measure-ink: oklch(0.83 0.08 180);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: oklch(0.94 0.008 80); --ink-soft: oklch(0.77 0.01 75); --ink-faint: oklch(0.63 0.01 75);
+    --paper: oklch(0.17 0.008 70); --raised: oklch(0.212 0.009 70); --sunken: oklch(0.145 0.008 70);
+    --rule: oklch(0.275 0.01 70); --rule-strong: oklch(0.37 0.012 70);
+    --accent: oklch(0.73 0.14 50); --accent-soft: oklch(0.275 0.045 48); --accent-ink: oklch(0.81 0.115 58); --on-accent: oklch(0.18 0.02 50);
+    --measure: oklch(0.76 0.09 182); --measure-soft: oklch(0.255 0.03 188); --measure-ink: oklch(0.83 0.08 180);
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--paper); color: var(--ink); font: 16px/1.5 var(--body);
+    padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 18px 44px;
+  }
+  .page { max-width: 980px; margin: 0 auto; display: grid; gap: 18px; }
+  .eyebrow { font: 500 12px/1.2 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); }
+  h1 { font: 650 clamp(28px, 6vw, 42px)/1.05 var(--display); margin: 6px 0 0; text-wrap: balance; letter-spacing: -0.01em; }
+  h2 { font: 650 22px/1.2 var(--display); margin: 0; }
+  p { margin: 0; }
+  .lede { color: var(--ink-soft); max-width: 64ch; margin-top: 8px; }
+
+  .stage { position: relative; border-radius: 14px; overflow: hidden; border: 1px solid var(--rule); background: #c9a679; aspect-ratio: 16 / 10; max-width: 100%; touch-action: none; }
+  @media (max-width: 560px) { .stage { aspect-ratio: 4 / 5; } }
+  .stage canvas { display: block; width: 100%; height: 100%; }
+  .tags { position: absolute; inset: 0; pointer-events: none; }
+  .tag {
+    position: absolute; transform: translate(-50%, -100%); white-space: nowrap; font: 600 13px/1.2 var(--body);
+    padding: 5px 9px; border-radius: 8px; background: rgba(255, 250, 242, 0.94); color: #2b2420; border: 1px solid rgba(0, 0, 0, 0.12);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); margin-top: -10px;
+  }
+  .tag small { display: block; font: 500 11px/1.3 var(--mono); color: #6b625a; }
+  .tag.you { background: #fbe7d6; color: #8a4518; border-color: #e7b48f; }
+  .tag.ok { background: #dff1e7; color: #1d6b42; border-color: #a8d8bb; }
+  .hint { position: absolute; right: 10px; bottom: 10px; font: 500 12px var(--mono); color: rgba(40, 25, 10, 0.75); background: rgba(255, 250, 242, 0.7); padding: 4px 8px; border-radius: 6px; }
+  .nogl { position: absolute; inset: 0; display: grid; place-items: center; padding: 20px; text-align: center; color: #2b2420; }
+
+  .steps { display: flex; flex-wrap: wrap; gap: 6px; }
+  .pill { font: 500 13px/1 var(--mono); border-radius: 999px; padding: 8px 11px; border: 1px solid var(--rule-strong); background: var(--raised); color: var(--ink-soft); cursor: pointer; }
+  .pill[aria-current="step"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+  .pill.seen { border-color: var(--accent); color: var(--accent-ink); }
+  .caption { display: grid; gap: 8px; min-height: 104px; }
+  .caption h3 { font: 600 19px/1.3 var(--body); margin: 0; }
+  .doer { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; align-items: start; }
+  .who { font: 500 11px/1 var(--mono); letter-spacing: 0.06em; text-transform: uppercase; border-radius: 6px; padding: 5px 7px; margin-top: 3px; }
+  .who.you { background: var(--accent-soft); color: var(--accent-ink); }
+  .who.claude { background: var(--measure-soft); color: var(--measure-ink); }
+  .doer ol { margin: 0; padding-left: 18px; display: grid; gap: 3px; }
+  .nav { display: flex; gap: 10px; flex-wrap: wrap; }
+  .btn { font: 600 15px/1 var(--body); border-radius: 10px; border: 1px solid var(--rule-strong); background: var(--raised); color: var(--ink); padding: 12px 16px; cursor: pointer; min-height: 46px; }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); flex: 1 1 180px; }
+  .btn:disabled { opacity: 0.45; cursor: default; }
+  .btn:focus-visible, .pill:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+  .wires { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+  .wire { border: 1px solid var(--rule); border-radius: 12px; padding: 12px 14px; background: var(--raised); display: grid; gap: 4px; }
+  .wire b { font: 600 17px/1.2 var(--body); display: flex; align-items: center; gap: 8px; }
+  .wire b i { width: 14px; height: 14px; border-radius: 4px; display: inline-block; }
+  .wire span { color: var(--ink-soft); font-size: 14px; }
+  .wire code { font: 500 13px var(--mono); }
+  .note { color: var(--ink-soft); font-size: 14px; max-width: 70ch; }
+</style>
+
+<div class="page">
+  <header>
+    <span class="eyebrow">Smart Food Scale · step 1.4, the display</span>
+    <h1>Display, four wires</h1>
+    <p class="lede">The breadboard out of the display’s path: four female–female jumpers, each display pin straight to a pin of your upside-down NodeMCU. All four go to the same row, the one next to the breadboard. Drag the bench to turn it; scroll or pinch to zoom.</p>
+  </header>
+
+  <div class="stage" id="stage">
+    <canvas id="gl" aria-label="Your bench in 3D: the NodeMCU upside down, pins up, the breadboard beside it, and the display with its four wires."></canvas>
+    <div class="tags" id="tags"></div>
+    <span class="hint">drag to turn · scroll to zoom</span>
+  </div>
+  <div class="steps" id="pills" aria-label="Steps"></div>
+  <div class="caption" id="caption" aria-live="polite"></div>
+  <div class="nav">
+    <button class="btn" id="prev" type="button">← Back</button>
+    <button class="btn" id="replay" type="button">Replay</button>
+    <button class="btn primary" id="next" type="button">Next step →</button>
+  </div>
+
+  <section style="display:grid;gap:10px" aria-labelledby="w-title">
+    <h2 id="w-title">The four wires</h2>
+    <div class="wires">
+      <div class="wire"><b><i style="background:#d0453c"></i>VCC → 6th pin</b><span>That pin is <code>3V</code>, the power.</span></div>
+      <div class="wire"><b><i style="background:#2b2b2b"></i>GND → 7th pin</b><span>That pin is <code>G</code>, ground.</span></div>
+      <div class="wire"><b><i style="background:#3f9b5a"></i>SCL → 2nd pin</b><span>That pin is <code>D1</code>, the clock.</span></div>
+      <div class="wire"><b><i style="background:#3b6fd0"></i>SDA → 3rd pin</b><span>That pin is <code>D2</code>, the data.</span></div>
+    </div>
+    <p class="note">Counted on the NodeMCU’s row next to the breadboard, from the far end (the end without the USB). Any jumper colours work: the colours here only tell the wires apart. Your 3V, G and VIN wires to the rails stay as they are.</p>
+  </section>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(() => {
+  // ---------------------------------------------------------------------------------
+  // The steps. Units are millimetres. X: across (the breadboard is on the +X side),
+  // Y: up, Z: towards you (the NodeMCU's far end is towards you, its USB away).
+  // ---------------------------------------------------------------------------------
+  const D_ROW_X = 11.43, OUT_ROW_X = -11.43;
+  const pinZ = (i) => 17.78 - i * 2.54;                   // i = 0 is the far end's first pin
+  const D_ROW = ['D0', 'D1', 'D2', 'D3', 'D4', '3V', 'G', 'D5', 'D6', 'D7', 'D8', 'RX', 'TX', 'G', '3V'];
+  const OUT_ROW = ['A0', 'G', 'VU', 'S3', 'S2', 'S1', 'SC', 'S0', 'SK', 'G', '3V', 'EN', 'RST', 'G', 'VIN'];
+  const PCB_TOP = 5;           // the board lies on its Wi-Fi module, back side up
+  const PIN_TIP = PCB_TOP + 8.5;
+  const DISP = { x: 14, z: 52, y: 14.5 };                  // the display, screen up, standing on its four plugs
+  const DPIN = (k) => [DISP.x - 3.81 + k * 2.54, DISP.y, DISP.z - 12];
+  const WIRES = [
+    { name: 'VCC', pin: 5, colour: 0xd0453c, label: 'VCC → 6th pin', small: 'that pin is 3V' },
+    { name: 'GND', pin: 6, colour: 0x2b2b2b, label: 'GND → 7th pin', small: 'that pin is G' },
+    { name: 'SCL', pin: 1, colour: 0x3f9b5a, label: 'SCL → 2nd pin', small: 'that pin is D1' },
+    { name: 'SDA', pin: 2, colour: 0x3b6fd0, label: 'SDA → 3rd pin', small: 'that pin is D2' },
+  ];
+  const STEPS = [
+    { title: 'Your bench, as it is', who: 'you', text: ['The NodeMCU upside down, pins up, its USB away from you. The breadboard on its right. The display in the breadboard.'], cam: [[10, 125, 170], [28, 0, -10]], T: 1.5 },
+    { title: 'USB out, display out', who: 'you', text: ['Unplug the USB from the NodeMCU.', 'Pull out the display’s four wires and the two yellow wires.', 'Lift the display out of the breadboard.'], cam: [[10, 115, 160], [28, 0, 0]], T: 2.6 },
+    { title: 'Four sockets onto the display', who: 'you', text: ['Hold the display screen up: its four long pins point down.', 'Push a female socket onto each pin: VCC, GND, SCL, SDA.', 'Set it down in front of the NodeMCU, standing on its four plugs.'], cam: [[52, 16, 92], [13, 7, 40]], T: 3.4 },
+    { title: 'VCC → 6th pin', who: 'you', wire: 0, text: ['On the NodeMCU’s row next to the breadboard, count from the far end to the 6th pin.', 'That pin is 3V. Push VCC’s socket all the way onto it.'], cam: [[-62, 72, 38], [10, 9, 10]], T: 2.6 },
+    { title: 'GND → 7th pin', who: 'you', wire: 1, text: ['Same row, the next pin: the 7th. That pin is G.', 'Push GND’s socket all the way onto it.'], cam: [[-62, 72, 38], [10, 9, 10]], T: 2.6 },
+    { title: 'SCL → 2nd pin', who: 'you', wire: 2, text: ['Same row, back towards the far end: the 2nd pin. That pin is D1.', 'Push SCL’s socket all the way onto it.'], cam: [[-62, 72, 48], [10, 9, 16]], T: 2.6 },
+    { title: 'SDA → 3rd pin', who: 'you', wire: 3, text: ['The 3rd pin, next to it. That pin is D2.', 'Push SDA’s socket all the way onto it.'], cam: [[-62, 72, 48], [10, 9, 16]], T: 2.6 },
+    { title: 'USB in: it lights up', who: 'claude', text: ['Plug the USB back in. The display shows CAMERA ?, 0.0 g, READY.', 'Tell Claude “display done”. Wire it, live (step 3) turns green too.'], cam: [[10, 115, 165], [18, 0, 8]], T: 2.4 },
+  ];
+
+  // --- the player's chrome, which works without WebGL ---------------------------------
+  const pills = document.getElementById('pills'), caption = document.getElementById('caption');
+  const seen = new Set([0]);
+  let step = 0, start = performance.now();
+  STEPS.forEach((s, i) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'pill'; b.textContent = i === 0 ? 'Bench' : String(i);
+    b.setAttribute('aria-label', s.title);
+    b.addEventListener('click', () => go(i));
+    pills.append(b);
+  });
+  function go(i) {
+    step = Math.max(0, Math.min(STEPS.length - 1, i));
+    seen.add(step);
+    start = performance.now();
+    flyTo(STEPS[step].cam);
+    const s = STEPS[step];
+    caption.innerHTML = `<h3>${step ? step + '. ' : ''}${s.title}</h3><div class="doer"><span class="who ${s.who}">${s.who === 'you' ? 'You do' : 'Claude'}</span>` +
+      (s.text.length > 1 ? `<ol>${s.text.map((t) => `<li>${t}</li>`).join('')}</ol>` : `<p>${s.text[0]}</p>`) + '</div>';
+    [...pills.children].forEach((b, k) => { b.toggleAttribute('aria-current', k === step); if (k === step) b.setAttribute('aria-current', 'step'); b.classList.toggle('seen', seen.has(k) && k !== step); });
+    document.getElementById('prev').disabled = step === 0;
+    const next = document.getElementById('next');
+    next.disabled = step === STEPS.length - 1;
+    next.textContent = step === STEPS.length - 1 ? 'That’s all' : 'Next step →';
+  }
+  document.getElementById('prev').addEventListener('click', () => go(step - 1));
+  document.getElementById('next').addEventListener('click', () => go(step + 1));
+  document.getElementById('replay').addEventListener('click', () => { start = performance.now(); flyTo(STEPS[step].cam); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'ArrowRight') go(step + 1); if (e.key === 'ArrowLeft') go(step - 1); });
+
+  let flyTo = () => {};
+  const stage = document.getElementById('stage');
+  if (!window.THREE || !(() => { try { return document.createElement('canvas').getContext('webgl'); } catch { return null; } })()) {
+    stage.insertAdjacentHTML('beforeend', '<p class="nogl">This browser cannot draw the 3D bench. The steps below still say what to do.</p>');
+    go(0);
+    return;
+  }
+
+  // --- the scene ------------------------------------------------------------------------
+  const canvas = document.getElementById('gl');
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
+  renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0xc9a679);
+  const camera = new THREE.PerspectiveCamera(38, 16 / 10, 1, 2000);
+  camera.position.set(...STEPS[0].cam[0]);
+  const controls = new THREE.OrbitControls(camera, canvas);
+  controls.target.set(...STEPS[0].cam[1]);
+  controls.enableDamping = true;
+  controls.maxPolarAngle = Math.PI * 0.47;
+  controls.minDistance = 35;
+  controls.maxDistance = 400;
+
+  scene.add(new THREE.HemisphereLight(0xfff6e8, 0x6b5136, 0.75));
+  const sun = new THREE.DirectionalLight(0xffffff, 0.85);
+  sun.position.set(-60, 140, 90);
+  sun.castShadow = true;
+  sun.shadow.mapSize.set(2048, 2048);
+  Object.assign(sun.shadow.camera, { left: -140, right: 140, top: 140, bottom: -140, near: 10, far: 400 });
+  scene.add(sun);
+
+  const mat = (color, extra = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.6, metalness: 0.05, ...extra });
+  const BLACK = mat(0x17181b), HEADER = mat(0x26282c), GOLD = mat(0xd9b44a, { metalness: 0.7, roughness: 0.35 }), PCB = mat(0x121316), METAL = mat(0xb8bec3, { metalness: 0.8, roughness: 0.3 });
+  function box(w, h, d, material, x, y, z, shadow = true) {
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), material);
+    mesh.position.set(x, y + h / 2, z);
+    mesh.castShadow = shadow;
+    mesh.receiveShadow = true;
+    scene.add(mesh);
+    return mesh;
+  }
+  function textTexture(draw, w, h) {
+    const c = document.createElement('canvas');
+    c.width = w; c.height = h;
+    draw(c.getContext('2d'), w, h);
+    const t = new THREE.CanvasTexture(c);
+    t.encoding = THREE.sRGBEncoding;
+    t.anisotropy = 4;
+    return t;
+  }
+
+  // the desk
+  const deskTex = textTexture((g, w, h) => {
+    g.fillStyle = '#c9a679'; g.fillRect(0, 0, w, h);
+    for (let i = 0; i < 70; i++) { g.strokeStyle = `rgba(120,80,40,${0.05 + Math.random() * 0.06})`; g.lineWidth = 1 + Math.random() * 2; g.beginPath(); const y = Math.random() * h; g.moveTo(0, y); g.bezierCurveTo(w * 0.3, y + 10, w * 0.6, y - 10, w, y + 4); g.stroke(); }
+  }, 1024, 1024);
+  const desk = new THREE.Mesh(new THREE.PlaneGeometry(900, 900), new THREE.MeshStandardMaterial({ map: deskTex, roughness: 0.85 }));
+  desk.rotation.x = -Math.PI / 2;
+  desk.receiveShadow = true;
+  scene.add(desk);
+
+  // the breadboard, on the NodeMCU's right
+  const BB = { x: 27, z: -40, w: 55, l: 165, h: 9 };
+  const bbTex = textTexture((g, w, h) => {
+    const sx = w / BB.w, sz = h / BB.l;
+    g.fillStyle = '#f3f1ea'; g.fillRect(0, 0, w, h);
+    g.fillStyle = '#e1ddd1'; g.fillRect(26.2 * sx, 0, 2.6 * sx, h);
+    const line = (x, c) => { g.fillStyle = c; g.fillRect(x * sx, 4 * sz, 0.6 * sx, h - 8 * sz); };
+    line(1.6, '#d0453c'); line(8.4, '#3b6fd0'); line(46, '#3b6fd0'); line(53, '#d0453c');
+    g.fillStyle = '#3a372f';
+    const cols = [4, 6.5, 12, 14.54, 17.08, 19.62, 22.16, 32.3, 34.84, 37.38, 39.92, 42.46, 48.5, 51];
+    for (let r = 0; r < 63; r++) for (const c of cols) { if ((c < 8 || c > 46) && r % 6 === 5) continue; g.fillRect((c - 0.5) * sx, (3.5 + r * 2.54) * sz, 1 * sx, 1 * sz); }
+  }, 512, 1536);
+  const bbMats = [mat(0xe6e2d6), mat(0xe6e2d6), new THREE.MeshStandardMaterial({ map: bbTex, roughness: 0.7 }), mat(0xe6e2d6), mat(0xe6e2d6), mat(0xe6e2d6)];
+  const bb = new THREE.Mesh(new THREE.BoxGeometry(BB.w, BB.h, BB.l), bbMats);
+  bb.position.set(BB.x + BB.w / 2, BB.h / 2, BB.z);
+  bb.castShadow = true; bb.receiveShadow = true;
+  scene.add(bb);
+
+  // the NodeMCU, upside down: lying on its Wi-Fi module, back up, pins up, USB away
+  box(16, 3.4, 24, METAL, 0, 0, 8);
+  box(31, 1.6, 58, PCB, 0, 3.4, 0);
+  const label = textTexture((g, w, h) => {
+    g.fillStyle = '#121316'; g.fillRect(0, 0, w, h);
+    g.fillStyle = '#e7e9ec'; g.font = 'bold 44px monospace'; g.textAlign = 'center';
+    g.save(); g.translate(w / 2, h / 2); g.rotate(-Math.PI / 2); g.fillText('NodeMcu V3', 0, 14); g.restore();
+  }, 256, 512);
+  const back = new THREE.Mesh(new THREE.PlaneGeometry(16, 40), new THREE.MeshStandardMaterial({ map: label, roughness: 0.6 }));
+  back.rotation.x = -Math.PI / 2;
+  back.position.set(0, PCB_TOP + 0.02, 0);
+  back.scale.x = -1;  // the canvas text would read mirrored on this face
+  back.material.side = THREE.DoubleSide;
+  scene.add(back);
+  box(8, 3, 7, METAL, 0, 1.2, -31);                                  // the USB socket, at the far side
+  const usb = new THREE.Group();
+  const plug = new THREE.Mesh(new THREE.BoxGeometry(10, 6, 14), BLACK); plug.position.set(0, 2.8, -42); plug.castShadow = true; usb.add(plug);
+  const cable = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 2.2, 120, 12), BLACK); cable.rotation.x = Math.PI / 2; cable.position.set(0, 2.4, -109); usb.add(cable);
+  scene.add(usb);
+  for (const x of [D_ROW_X, OUT_ROW_X]) {
+    box(2.54, 2.5, 15 * 2.54, HEADER, x, PCB_TOP, pinZ(7));
+    for (let i = 0; i < 15; i++) box(0.64, 6, 0.64, GOLD, x, PCB_TOP + 2.5, pinZ(i), false);
+  }
+  // the three rail wires the owner already has, from the outer row: G, 3V, VIN (left as they are)
+  const railWires = new THREE.Group();
+  scene.add(railWires);
+
+  // --- jumpers ----------------------------------------------------------------------------
+  function socket(x, y, z, up = true) {
+    const g = new THREE.Group();
+    const body = new THREE.Mesh(new THREE.BoxGeometry(2.6, 14, 2.6), BLACK);
+    body.position.y = up ? 7 : -7;
+    body.castShadow = true;
+    g.add(body);
+    g.position.set(x, y, z);
+    scene.add(g);
+    return g;
+  }
+  function tube(points, colour) {
+    const curve = new THREE.CatmullRomCurve3(points.map((p) => new THREE.Vector3(...p)));
+    const geometry = new THREE.TubeGeometry(curve, 120, 0.75, 10, false);
+    const mesh = new THREE.Mesh(geometry, mat(colour, { roughness: 0.45 }));
+    mesh.castShadow = true;
+    scene.add(mesh);
+    return mesh;
+  }
+  for (const [i, colour, to] of [[9, 0x8d949a, [BB.x + 4, BB.h, -40]], [10, 0x1fa99a, [BB.x + 1.6, BB.h, -45]], [14, 0x8a5cc8, [BB.x + BB.w - 2, BB.h, -60]]]) {
+    const p = [OUT_ROW_X, PCB_TOP + 2.5, pinZ(i)];
+    socket(p[0], p[1], p[2]);
+    tube([[p[0], p[1] + 14, p[2]], [p[0] - 6, p[1] + 30, p[2] - 10], [to[0] - 10, 45, to[2] + 10], [to[0], to[1] + 22, to[2]], [to[0], to[1] + 10, to[2]]], colour);
+    box(2.6, 9, 2.6, BLACK, to[0], to[1], to[2]);
+  }
+
+  // the display: screen up, standing on its four plugs; first in the breadboard
+  const display = new THREE.Group();
+  const dpcb = new THREE.Mesh(new THREE.BoxGeometry(27, 1.6, 27), mat(0x1f4fa0));
+  dpcb.castShadow = true; display.add(dpcb);
+  const screenOff = textTexture((g, w, h) => { g.fillStyle = '#05070a'; g.fillRect(0, 0, w, h); }, 64, 64);
+  const screenOn = textTexture((g, w, h) => {
+    g.fillStyle = '#05070a'; g.fillRect(0, 0, w, h);
+    g.fillStyle = '#9fd8ff'; g.font = '34px monospace'; g.fillText('CAMERA ?', 18, 52);
+    g.font = 'bold 82px monospace'; g.fillText('0.0 g', 18, 150); g.font = '34px monospace'; g.fillText('READY', 18, 214);
+  }, 512, 256);
+  const glassMat = new THREE.MeshStandardMaterial({ map: screenOff, roughness: 0.2, emissive: 0x000000, emissiveMap: screenOn, emissiveIntensity: 0 });
+  const glass = new THREE.Mesh(new THREE.BoxGeometry(25, 1, 18), glassMat);
+  glass.position.set(0, 1.2, 2.5); display.add(glass);
+  const pinLabels = textTexture((g, w, h) => {
+    g.fillStyle = '#1f4fa0'; g.fillRect(0, 0, w, h); g.fillStyle = '#e9eef7'; g.font = 'bold 30px monospace'; g.textAlign = 'center';
+    ['VCC', 'GND', 'SCL', 'SDA'].forEach((n, k) => g.fillText(n, w / 2 - 75 + k * 50, 44));
+  }, 256, 64);
+  const plate = new THREE.Mesh(new THREE.PlaneGeometry(22, 5.5), new THREE.MeshStandardMaterial({ map: pinLabels }));
+  plate.rotation.x = -Math.PI / 2; plate.position.set(0, 0.81, -8.5); display.add(plate);
+  for (let k = 0; k < 4; k++) {
+    const leg = new THREE.Mesh(new THREE.BoxGeometry(0.64, 9, 0.64), GOLD);
+    leg.position.set(-3.81 + k * 2.54, -4.5, -12); display.add(leg);
+    const hdr = new THREE.Mesh(new THREE.BoxGeometry(2.54, 2.5, 2.54), mat(0xe2c35a));
+    hdr.position.set(-3.81 + k * 2.54, -1.3, -12); display.add(hdr);
+  }
+  scene.add(display);
+  const DISP_IN_BB = new THREE.Vector3(BB.x + 20, BB.h + 3.3, -10);
+  const DISP_OUT = new THREE.Vector3(DISP.x, DISP.y, DISP.z);
+
+  // the four new wires: a socket on each display pin (wire leaves at the bottom), one on each NodeMCU pin
+  const built = WIRES.map((w, k) => {
+    const from = DPIN(k), to = [D_ROW_X, PCB_TOP + 2.5, pinZ(w.pin)];
+    const dSock = socket(from[0], from[1] - 0.5, from[2], false);
+    const nSock = socket(to[0], to[1] + 4, to[2]);
+    const pts = [[from[0], 0.8, from[2]], [from[0], 0.8, from[2] - 6 - k * 1.5], [(from[0] + to[0]) / 2 + 4, 6 + k * 3, (from[2] + to[2]) / 2 + 6], [to[0] + 2, to[1] + 30 + k * 2, to[2] + 3], [to[0], to[1] + 20, to[2]]];
+    const wire = tube(pts, w.colour);
+    return { dSock, nSock, wire, count: wire.geometry.index.count, to };
+  });
+
+  // a ring that pulses round a pin
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(2.4, 0.35, 8, 32), new THREE.MeshBasicMaterial({ color: 0xff8a3d }));
+  ring.rotation.x = Math.PI / 2;
+  scene.add(ring);
+
+  // --- labels in the page, pinned to points in 3D ---------------------------------------------
+  const tagsEl = document.getElementById('tags');
+  function tags(list) {
+    const rect = canvas.getBoundingClientRect();
+    tagsEl.innerHTML = list.map(({ at, text, small, tone }) => {
+      const v = new THREE.Vector3(...at).project(camera);
+      if (v.z > 1) return '';
+      const x = (v.x * 0.5 + 0.5) * rect.width, y = (-v.y * 0.5 + 0.5) * rect.height;
+      return `<span class="tag ${tone || ''}" style="left:${x.toFixed(0)}px;top:${y.toFixed(0)}px">${text}${small ? `<small>${small}</small>` : ''}</span>`;
+    }).join('');
+  }
+
+  // --- the camera between steps ------------------------------------------------------------
+  let fly = null;
+  flyTo = ([pos, target]) => { fly = { t0: performance.now(), p0: camera.position.clone(), q0: controls.target.clone(), p1: new THREE.Vector3(...pos), q1: new THREE.Vector3(...target) }; };
+  controls.addEventListener('start', () => { fly = null; });
+  const ease = (t) => (t <= 0 ? 0 : t >= 1 ? 1 : t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+  const seg = (t, a, b) => ease(Math.min(1, Math.max(0, (t - a) / (b - a))));
+
+  function resize() {
+    const r = stage.getBoundingClientRect();
+    renderer.setSize(r.width, r.height, false);
+    camera.aspect = r.width / r.height;
+    camera.updateProjectionMatrix();
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function frame(now, once = false) {
+    const s = STEPS[step];
+    const t = reduce ? 1 : Math.min(1, (now - start) / 1000 / s.T);
+    if (fly) {
+      const k = reduce ? 1 : ease(Math.min(1, (now - fly.t0) / 1100));
+      camera.position.lerpVectors(fly.p0, fly.p1, k);
+      controls.target.lerpVectors(fly.q0, fly.q1, k);
+      if (k >= 1) fly = null;
+    }
+    controls.update();
+
+    // where the display is
+    const out = step === 0 ? 0 : step === 1 ? seg(t, 0.45, 1) : 1;
+    const lift = step === 1 ? Math.sin(Math.PI * out) * 30 : 0;
+    display.position.lerpVectors(DISP_IN_BB, DISP_OUT, out);
+    display.position.y += lift;
+    // USB: in, out, back in at the end
+    const usbOut = step === 0 ? 0 : step === 1 ? seg(t, 0, 0.35) : step === 7 ? 1 - seg(t, 0, 0.4) : 1;
+    usb.position.z = -usbOut * 16;
+    // the four new wires
+    built.forEach((b, k) => {
+      const dsOn = step >= 3 || (step === 2 && t > 0.15 + k * 0.18);
+      b.dSock.visible = dsOn;
+      const wireStep = 3 + k;
+      const prog = step > wireStep ? 1 : step === wireStep ? seg(t, 0.1, 0.75) : 0;
+      b.wire.visible = prog > 0;
+      b.wire.geometry.setDrawRange(0, Math.floor(b.count * prog / 6) * 6);
+      b.nSock.visible = prog >= 1 || (step === wireStep && t > 0.75);
+      b.nSock.position.y = PCB_TOP + 6.5 + (step === wireStep ? (1 - seg(t, 0.75, 0.95)) * 10 : 0);
+    });
+    // the screen
+    const lit = step === 7 ? seg(t, 0.45, 0.8) : 0;
+    glassMat.emissive.setHex(lit > 0 ? 0xffffff : 0x000000);
+    glassMat.emissiveIntensity = lit;
+
+    // highlight and labels
+    const list = [];
+    ring.visible = s.wire !== undefined;
+    if (s.wire !== undefined) {
+      const b = built[s.wire];
+      ring.position.set(b.to[0], PCB_TOP + 2.6, b.to[2]);
+      ring.scale.setScalar(1 + Math.sin(now / 160) * 0.12);
+      const w = WIRES[s.wire];
+      list.push({ at: [b.to[0], PCB_TOP + 24, b.to[2]], text: w.label, small: w.small, tone: 'you' });
+      list.push({ at: [D_ROW_X + 3, PCB_TOP + 3, pinZ(0) + 3], text: 'far end', small: 'count from here' });
+    }
+    if (step === 0) list.push({ at: [D_ROW_X, PCB_TOP + 14, pinZ(0)], text: 'row next to the breadboard', small: 'all four new wires go here' }, { at: [0, 6, -40], text: 'USB, away from you' });
+    if (step === 1 && t > 0.3) list.push({ at: [0, 8, -60], text: 'USB out', tone: 'you' });
+    if (step === 2) list.push({ at: [DISP.x, DISP.y + 6, DISP.z - 12], text: 'a socket on each pin', small: 'VCC  GND  SCL  SDA', tone: 'you' });
+    if (step === 7 && t > 0.7) list.push({ at: [DISP.x, DISP.y + 8, DISP.z], text: 'CAMERA ?  0.0 g  READY', tone: 'ok' }, { at: [0, 8, -40], text: 'USB in' });
+    tags(list);
+
+    renderer.render(scene, camera);
+    if (!once) requestAnimationFrame(frame);
+  }
+  go(0);
+  frame(performance.now(), true);  // drawn once now, so the bench shows even where animation frames are paused
+  requestAnimationFrame(frame);
+  // For checking a step by hand: fourWires.show(step, 0..1).
+  window.fourWires = { show: (i, t = 1) => { go(i); start = performance.now() - t * STEPS[i].T * 1000; fly = null; camera.position.set(...STEPS[i].cam[0]); controls.target.set(...STEPS[i].cam[1]); frame(performance.now(), true); } };
+})();
+</script>

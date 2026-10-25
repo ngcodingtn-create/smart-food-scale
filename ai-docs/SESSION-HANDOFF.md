@@ -80,6 +80,11 @@ owner's own messages are the `type:"user"` lines. Mine it with Python run as `py
   a replug was a plug not fully in.
 - Artifacts: Display Fix (SCL checks, 2.5D) and Bench Photos (the owner's photos; answered
   through ArtifactData). Both in this second account.
+- **Next fix proposed (not yet done by the owner):** take the breadboard out of the display's
+  path: four female–female jumpers, display VCC → 6th pin (3V), GND → 7th (G), SCL → 2nd (D1),
+  SDA → 3rd (D2), all on the D row (next to the breadboard), counted from the far end. Shown in
+  3D in **Display, Four Wires** (<https://claude.ai/artifact/Ape5eHUNFwnXMfbNmTy84M>, source
+  `ai-docs/artifacts/display-four-wires.html`, three.js r128 + OrbitControls 0.128).
 
 ## 1. Where things are, right now
 
