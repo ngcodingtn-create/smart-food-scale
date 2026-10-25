@@ -37,8 +37,22 @@
     "m1-scale-brain/display": [
       0,
       1
+    ],
+    "m1-scale-brain/tare": [
+      0,
+      1
     ]
   },
-  "updated": "2026-10-25T23:39:39.193Z",
-  "sfs-wired-v1": []
+  "updated": "2026-10-25T23:53:13.645Z",
+  "sfs-wired-v1": [
+    "a-3v3",
+    "a-5v",
+    "a-gnd",
+    "a-oled-gnd",
+    "a-oled-scl",
+    "a-oled-sda",
+    "a-oled-vcc",
+    "a-tare",
+    "a-tare-gnd"
+  ]
 }
