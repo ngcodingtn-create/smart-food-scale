@@ -82,13 +82,13 @@ export type Milestone = {
 
 const NODEMCU_SPOTS: Spot[] = [
   { x: 47.6, y: 28.6, label: 'Micro-USB', note: 'Power and flashing, from the laptop. Use a cable that carries data.' },
-  { x: 38.1, y: 31.1, label: 'FLASH button', note: 'Joined to D3: a second PHOTO button, already on the board.' },
+  { x: 38.1, y: 31.1, label: 'FLASH button', note: 'Used only while Claude flashes the board, and only if Claude asks. It is also joined to D3, so pressing it takes a photo, like a click on your own button. Otherwise ignore it.' },
   { x: 55.7, y: 31.4, label: 'RST button', note: 'Restarts the board. Nothing is lost.' },
   { x: 50.5, y: 37.1, label: 'CH340 chip', note: 'The USB chip. Windows names the board’s port after it.' },
   { x: 61.4, y: 35.4, label: 'VIN', note: '5 V from USB: the buzzer’s rail.' },
   { x: 32.9, y: 53.4, label: '3V and G', note: 'The 3.3 V rail and ground, for the display and, in milestone 9, the HX711.' },
-  { x: 32.9, y: 47, label: 'D5 to D8', note: 'D5 the button · D6 and D7 the HX711 · D8 the buzzer.' },
-  { x: 32.9, y: 58.6, label: 'D3', note: 'The board’s FLASH button. An optional second button, at the very end.' },
+  { x: 32.9, y: 47, label: 'D5 to D8', note: 'D5 your one button (click: photo · hold 5 s: tare) · D6 and D7 the HX711, in milestone 9 · D8 the buzzer.' },
+  { x: 32.9, y: 58.6, label: 'D3', note: 'Already joined to the FLASH button. Nothing to wire here now; a second button may go here in milestone 9, if you want one.' },
   { x: 32.9, y: 61.8, label: 'D1, D2', note: 'The display: D1 is SCL, D2 is SDA.' },
   { x: 50, y: 62.1, label: 'ESP8266', note: 'The brain, with Wi-Fi built in. It talks to the camera by radio (ESP-NOW).' },
 ];
@@ -135,11 +135,11 @@ export const MILESTONES: Milestone[] = [
       {
         id: 'nodemcu',
         title: 'The NodeMCU: the scale’s brain',
-        goal: 'Find its USB socket, its two buttons, and the pins the scale uses.',
+        goal: 'Find its USB socket, its two small buttons (FLASH and RST), and the pins the scale uses.',
         parts: ['devkit'],
         photo: { file: 'devkit.jpg', alt: 'The NodeMCU board, USB socket at the top, two rows of pins down its sides', size: [1050, 1400], view: [27, 25, 41, 52], spots: NODEMCU_SPOTS },
         actions: ['Tap each numbered dot on the photo, then find the same thing on your board.', 'Read the pin names printed beside the pins: D1, D2 and so on.'],
-        checks: ['I found the USB socket and both buttons', 'I can find D1, D2, D5 to D8, 3V, G and VIN'],
+        checks: ['I found the USB socket, FLASH and RST', 'I can find D1, D2, D5 to D8, 3V, G and VIN'],
       },
       {
         id: 'camera',
