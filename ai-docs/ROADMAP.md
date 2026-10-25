@@ -25,8 +25,8 @@ tests, calibration), with `firmware/tools/board.py`.
 | 5 | The server online (Supabase, Vercel, Gemini, accounts, fake scale) | after M4 | Drafts; [backend research](research/2026-10-25-backend-hosting-auth.md) |
 | 6 | The app (Expo, sign-in, Aujourd'hui, À nommer) | after M5 | Drafts; [app research](research/2026-10-25-mobile-app.md) |
 | 7 | The scale joins your account (setup Wi-Fi, pairing, https) | after M6 | Drafts; [firmware research](research/2026-10-25-firmware-connectivity.md) |
-| 8 | Finished scale (second button, microSD, own power, rig) | after M7 | Drafts; hardware guide §7, §8.1 |
-| 9 | **Real weight, last** (HX711, load cell, sign, mount, calibrate, accuracy, demo) | last, with the HX711 | Drafts; hardware guide §4–6, §8 |
+| 8 | Finished scale (microSD, own power, rig; still the pretend weight and one button) | after M7 | Drafts; hardware guide §7, §8.1 |
+| 9 | **Real weight, last** (HX711, load cell, one button or two, sign, mount, calibrate, accuracy, demo) | last, with the HX711 | Drafts; hardware guide §4–6, §8 |
 
 Order: hardware first while the parts are on the desk; the server before the app because
 the app is useless without it; pairing once the server and the app exist; **the real

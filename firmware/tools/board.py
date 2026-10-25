@@ -219,18 +219,20 @@ def cmd_meal_test(args):
 
 
 def cmd_counts(args):
-    """Calibration, one mass at a time: the median net count while it sits still.
+    """Calibration, one mass at a time: the median net count over the last half of the window.
     With --grams, also the counts per gram it implies; `send "cal <that>"` saves it."""
     link = open_port(pick_port(args.port), False)
+    # The board only marks readings steady once calibrated, so judge steadiness
+    # here: the second half of the window, and how far it spreads.
     nets = []
     for line in read_lines(link, args.seconds):
-        if line.startswith('R ') and field(line, 'stable') == '1':
+        if line.startswith('R '):
             nets.append(int(field(line, 'net') or 0))
     if not nets:
-        sys.exit('No steady reading. Is anything touching the plate, and is the scale tared?')
-    nets.sort()
+        sys.exit('No readings. Is the scale image running?')
+    nets = sorted(nets[len(nets) // 2:])
     net = nets[len(nets) // 2]
-    print(f'net={net} from {len(nets)} steady readings')
+    print(f'net={net} spread={nets[-1] - nets[0]} from {len(nets)} readings')
     if args.grams:
         print(f'cpg={net / args.grams:.6f} for {args.grams} g')
 

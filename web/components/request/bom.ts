@@ -154,7 +154,7 @@ export const PARTS: Part[] = [
     qty: 2,
     where: 'Node A',
     source: 'lab',
-    role: 'Tare and capture.',
+    role: 'A click is PHOTO, a 5-second hold is TARE. The second, optional, is PHOTO alone.',
     swap: 'Any push button that springs back.',
     note: 'No resistors: the ESP32’s internal pull-ups do the job.',
   },

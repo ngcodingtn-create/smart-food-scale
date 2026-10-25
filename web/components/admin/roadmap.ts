@@ -86,7 +86,7 @@ const NODEMCU_SPOTS: Spot[] = [
   { x: 55.7, y: 31.4, label: 'RST button', note: 'Restarts the board. Nothing is lost.' },
   { x: 50.5, y: 37.1, label: 'CH340 chip', note: 'The USB chip. Windows names the board’s port after it.' },
   { x: 61.4, y: 35.4, label: 'VIN', note: '5 V from USB: the buzzer’s rail.' },
-  { x: 32.9, y: 53.4, label: '3V and G', note: 'The 3.3 V rail and ground, for the display and, tomorrow, the HX711.' },
+  { x: 32.9, y: 53.4, label: '3V and G', note: 'The 3.3 V rail and ground, for the display and, in milestone 9, the HX711.' },
   { x: 32.9, y: 47, label: 'D5 to D8', note: 'D5 the button · D6 and D7 the HX711 · D8 the buzzer.' },
   { x: 32.9, y: 58.6, label: 'D3', note: 'The board’s FLASH button. An optional second button, at the very end.' },
   { x: 32.9, y: 61.8, label: 'D1, D2', note: 'The display: D1 is SCL, D2 is SDA.' },
@@ -95,7 +95,7 @@ const NODEMCU_SPOTS: Spot[] = [
 
 const CAMERA_SPOTS: Spot[] = [
   { x: 46.2, y: 48.9, label: 'Camera', note: 'OV2640, 2 megapixels. It photographs the plate from above.' },
-  { x: 56.2, y: 42.9, label: 'microSD slot', note: 'Under the camera. The card, from tomorrow, keeps photos when Wi-Fi is down.' },
+  { x: 56.2, y: 42.9, label: 'microSD slot', note: 'Under the camera. The card, in milestone 8, keeps photos when Wi-Fi is down.' },
   { x: 33.1, y: 44.6, label: '5V and GND', note: 'Power in.' },
   { x: 33.1, y: 47.9, label: 'IO12', note: 'Left empty: the board reads it at power-on.' },
   { x: 33.1, y: 50, label: 'IO13', note: 'Switches the six-LED light, through a transistor.' },
@@ -223,7 +223,7 @@ export const MILESTONES: Milestone[] = [
     goal: 'The NodeMCU runs the pretend scale: the display shows a weight, TARE works, the buzzer beeps.',
     when: '25 Oct',
     parts: ['devkit', 'usb-cable', 'oled', 'push-button', 'buzzer', 'transistor', 'diode', 'resistor', 'breadboard'],
-    doneWhen: 'With 150 g typed on the bench page, the display shows 150.0 g; holding the button 5 s beeps and shows TARE OK.',
+    doneWhen: 'With 150 g set from the laptop, the display shows 150.0 g; holding the button 5 s beeps and shows TARE OK.',
     steps: [
       {
         id: 'port',
@@ -277,7 +277,7 @@ export const MILESTONES: Milestone[] = [
         checks: ['The display lights up', 'It shows 0.0 g'],
         trouble: [
           { symptom: 'Black display', fix: 'Check VCC and GND first, then SCL on D1 and SDA on D2. Swapped SCL and SDA is the usual cause.' },
-          { symptom: 'The bench page says no-display', fix: 'Same: the board cannot hear it. Recheck the four wires.' },
+          { symptom: 'Claude reads E error no-display', fix: 'Same: the board cannot hear it. Recheck the four wires.' },
         ],
       },
       {
@@ -290,11 +290,11 @@ export const MILESTONES: Milestone[] = [
           'USB out. Put the button across the centre gap.',
           'One leg to D5; the leg diagonally opposite to ground.',
           'USB back in. When Claude says “now”, hold the button down: the display counts 5, 4, 3, 2, 1, then TARE OK.',
-          'Then click it once, quickly: that is PHOTO. No camera yet, so it says NO CAMERA.',
+          'Then click it once, quickly: that is PHOTO. Nothing is on the scale, so it says NOTHING ON IT. That is right.',
         ],
-        claude: ['Listens to the board: E tare for the hold, E capture for the click.'],
+        claude: ['Listens to the board: E tare for the hold; for the click, E capture then E error too-light.'],
         expect: { kind: 'display', lines: ['CAMERA ?', '0.0 g', 'HOLD: TARE IN 3 s'], caption: 'While you hold it. Let go before 0 and nothing happens.' },
-        checks: ['Holding it 5 s shows TARE OK', 'A quick click shows NO CAMERA'],
+        checks: ['Holding it 5 s shows TARE OK', 'A quick click shows NOTHING ON IT'],
         trouble: [{ symptom: 'Nothing happens', fix: 'Turn the button a quarter turn: the two legs you used may be always joined.' }],
       },
       {
@@ -319,12 +319,12 @@ export const MILESTONES: Milestone[] = [
       },
       {
         id: 'bench',
-        title: 'Try it on the bench page',
-        goal: 'The whole front panel, with a typed weight.',
+        title: 'The whole test, from the laptop',
+        goal: 'The whole front panel, with a pretend weight Claude sets.',
         actions: ['Watch the display and listen while Claude runs it.'],
         claude: ['Runs the whole test from the laptop (board.py meal-test --no-camera): a 420 g plate, tare, 150 g of food, a photo.', 'Reads every line the board prints and tells you what passed.'],
         expect: { kind: 'display', lines: ['CAMERA ?', '150.0 g', 'NO CAMERA'], caption: 'NO CAMERA is right: there is no camera yet.' },
-        checks: ['The display showed 150.0 g', 'TARE zeroed it', 'PHOTO gave a long low beep and NO CAMERA'],
+        checks: ['The display showed 150.0 g', 'The tare zeroed the plate', 'The photo gave a long low beep and NO CAMERA'],
         tool: BENCH,
       },
     ],
@@ -341,7 +341,7 @@ export const MILESTONES: Milestone[] = [
       { id: 'flash-camera', title: 'Flash the camera on its base', goal: 'The camera runs our firmware.', actions: ['Seat the camera on its MB base, plug the base in, tell Claude.'], claude: ['Flashes the camera over USB (board.py flash node-b-camera) and reads its boot line.'], tool: CAMERA, expect: { kind: 'serial', lines: ['E boot node=b fw=0.1.0 psram=1 camera=1 card=0', 'E wifi not-set'] }, checks: ['camera=1 in the boot line'] },
       { id: 'hotspot', title: 'Phone hotspot on 2.4 GHz', goal: 'A network the camera can see, with the laptop on it.', actions: ['Turn on the phone’s hotspot, 2.4 GHz (on an iPhone: Maximise compatibility).', 'Join it with the laptop.'], claude: ['Checks the laptop is on it and finds the laptop’s address.'], checks: ['Hotspot on, 2.4 GHz', 'Laptop joined'] },
       { id: 'backend', title: 'The server on the laptop, reachable', goal: 'The camera can reach the laptop’s server.', actions: ['When Windows asks whether Python may use the network, click Allow (private networks).'], claude: ['Starts the server in a Terminal tab where the camera can reach it.', 'Checks it answers from the hotspot’s address.'], checks: ['http://<laptop>:8000/docs opens on the phone'], draft: true },
-      { id: 'wifi', title: 'Wi-Fi and server address on the camera', goal: 'The camera says Wi-Fi up.', actions: ['Type the hotspot’s password once, on Test and calibrate. Only you type passwords.'], claude: ['Sends the hotspot’s name and the server’s address, then watches for Wi-Fi up.'], tool: BENCH, expect: { kind: 'serial', lines: ['E wifi up ch=6 ip=192.168.x.y'], caption: 'The channel and address are the hotspot’s.' }, checks: ['Wi-Fi up'] },
+      { id: 'wifi', title: 'Wi-Fi and server address on the camera', goal: 'The camera says Wi-Fi up.', actions: ['When Claude says: below, press Connect a board and pick the camera’s port.', 'Type the hotspot’s name and password, paste the server address Claude gives you, press Save and connect. Only you type the password.', 'At Wi-Fi up, press Disconnect, so Claude can use the board again.'], claude: ['Gives you the server’s address to paste.', 'Then reads the camera and checks it says Wi-Fi up.'], tool: BENCH, expect: { kind: 'serial', lines: ['E wifi up ch=6 ip=192.168.x.y'], caption: 'The channel and address are the hotspot’s.' }, checks: ['Wi-Fi up'] },
       { id: 'test-photo', title: 'A test photo', goal: 'A meal in the backend.', actions: ['Point the camera at something.'], claude: ['Asks the camera for a test photo with 150 g and checks the meal arrived in the server.'], tool: BENCH, expect: { kind: 'serial', lines: ['E photo bytes=… ms=…', 'E upload g=150.0 status=201 outcome=saved'] }, checks: ['outcome=saved'] },
     ],
   },
@@ -352,7 +352,7 @@ export const MILESTONES: Milestone[] = [
     goal: 'Six white LEDs light the plate when the camera shoots.',
     when: '25 Oct',
     parts: ['esp32-cam', 'esp32-cam-mb', 'led-white', 'transistor', 'resistor', 'breadboard'],
-    doneWhen: '“Light on” on the bench page lights all six LEDs.',
+    doneWhen: '“light on”, sent from the laptop, lights all six LEDs.',
     steps: [
       { id: 'off-the-base', title: 'The camera onto the breadboard', goal: 'Reach IO13, keep USB through the base.', draft: true },
       { id: 'light-wires', title: 'The light’s transistor and LEDs', goal: 'IO13 switches six LEDs.', wires: { node: 'b', ids: ['b-light-base', 'b-light-pulldown', 'b-light-emitter', 'b-light-leds', 'b-light-collector'] }, draft: true },
@@ -414,7 +414,7 @@ export const MILESTONES: Milestone[] = [
     steps: [
       { id: 'portal', title: 'The camera’s setup Wi-Fi', goal: 'Balance-Setup on your phone.', draft: true },
       { id: 'pair', title: 'The pairing code', goal: 'Balance connectée.', draft: true },
-      { id: 'real-meal', title: 'A real meal in the app', goal: 'Weighed, photographed, named.', draft: true },
+      { id: 'real-meal', title: 'A meal from the scale in the app', goal: 'Pretend-weighed, photographed, named.', draft: true },
     ],
   },
   {
@@ -428,7 +428,7 @@ export const MILESTONES: Milestone[] = [
     steps: [
       { id: 'card', title: 'The microSD card', goal: 'Photos kept when Wi-Fi is down.', draft: true },
       { id: 'power', title: 'Power without the laptop', goal: 'A 5 V 2 A charger and the 1000 µF capacitors.', wires: { node: 'b', ids: ['b-5v', 'b-gnd', 'b-bulk', 'b-split'] }, draft: true },
-      { id: 'rig', title: 'The rig', goal: 'The plate, the arm, the camera above.', draft: true },
+      { id: 'rig', title: 'The rig', goal: 'The plate, the arm, the camera above; the cell goes in at milestone 9.', draft: true },
     ],
   },
   {

@@ -495,3 +495,12 @@ to more buttons, if any, in the last milestone with the HX711)
 - Not updated: `/prototype`, `/rig`, `/project/architecture` still show TARE and PHOTO as
   two buttons. **Not run on the board yet.**
 - Checked: tsc, build, the step page and M9 in the browser.
+
+**Same day: audit of /admin/build end to end** (asked: push, and check every page with
+subagents). Three forks: M0–M4 text, M5–M9 and the plan, and a browser crawl of 62 URLs.
+Fixed: a click with nothing on the scale shows NOTHING ON IT (`too-light`), not NO CAMERA;
+M2's Wi-Fi step (the owner types name and password on the bench page, Claude gives the
+server address); stale "tomorrow"/"24 October" notes for the HX711 and microSD; M7's
+meal is pretend-weighed; `board.py counts` no longer waits for `stable=1`, which the
+firmware never prints before calibration; the button's role in `bom.ts`. Crawl: all 200,
+no console errors, no sideways scroll at 1280 and 375 px.

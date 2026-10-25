@@ -102,7 +102,7 @@ export const DAYS: Day[] = [
       { id: 't-flash', title: 'Plug the NodeMCU back in: Claude flashes “The scale”, the real image', status: 'todo' },
       { id: 't-sign', title: 'Press the cell when Claude says (swap white and green if told); mount it', status: 'todo' },
       { id: 't-cal', title: 'Put on 3 to 5 known weights, one at a time, when Claude asks', status: 'todo' },
-      { id: 't-meals', title: 'Three real meals: plate, TARE, food, PHOTO', doneWhen: 'They appear in the app', status: 'todo' },
+      { id: 't-meals', title: 'Three real meals: plate, hold the button 5 s, food, click', doneWhen: 'They appear in the app', status: 'todo' },
     ],
     claude: [
       { id: 't-c-flash', title: 'Flash the real scale and check the counts', status: 'todo' },
