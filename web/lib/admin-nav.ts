@@ -12,6 +12,7 @@ export const ADMIN_NAV: NavGroup[] = [
     items: [
       { label: 'The plan', href: '/admin/plan', icon: 'list' },
       { label: 'Build map', href: '/admin/build', icon: 'route' },
+      { label: 'Every step, animated', href: '/admin/build/scenes', icon: 'play' },
       { label: 'Our parts', href: '/admin/parts', icon: 'clipboard' },
     ],
   },

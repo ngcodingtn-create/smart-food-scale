@@ -21,6 +21,10 @@ says so where it matters. **Rewrite this file when you stop**; history belongs i
 - **The owner's working model**: they plug in, wire, press, look, turn on the hotspot,
   type the Wi-Fi password once and click Allow on the firewall prompt. Claude does the
   rest: port, flashing, boot lines, commands, the tests, calibration from their weights.
+- **Every step opens with an animation** (asked 25 Oct): a 2.5D scene in SVG, played on a timeline
+  with its captions in time, You/Claude marked, play, pause, scrub, replay; still on the last frame
+  for reduced motion. 48 steps, 22 scene kinds; all on `/admin/build/scenes`. The drawings are
+  illustrations, not measurements: sizes are chosen to read, the accuracy chart says so on it.
 - **One button** (Node A 0.3.0, asked 25 Oct): D5 click = PHOTO, hold 5 s = TARE with a
   countdown (`HOLD: TARE IN n s`); D3 (FLASH, or an optional second button) is PHOTO only.
   Whether to wire a second button is decided in M9 (`photo-button`), with the HX711. The

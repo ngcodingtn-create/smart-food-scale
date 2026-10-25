@@ -504,3 +504,18 @@ server address); stale "tomorrow"/"24 October" notes for the HX711 and microSD; 
 meal is pretend-weighed; `board.py counts` no longer waits for `stable=1`, which the
 firmware never prints before calibration; the button's role in `bom.ts`. Crawl: all 200,
 no console errors, no sideways scroll at 1280 and 375 px.
+
+**Same day: every step animated** (asked: each step, start to finish, explained with a 3D or
+2.5D SVG animation)
+
+- `web/components/admin/build/scenes/`: an isometric kit (projection, blocks, cylinders, drawing
+  on faces, timing helpers), the parts in 2.5D (laptop, NodeMCU, ESP32-CAM and base, breadboard,
+  display, button, buzzer, transistor, LEDs, load cell, HX711, rig, plate, phone, charger, card),
+  22 scene kinds with variants, and a player: requestAnimationFrame timeline, captions that
+  light up in time and say who acts, play/pause, a scrubber, replay, a following camera on the
+  wiring and the button, paused offscreen, still for reduced motion.
+- Every one of the 48 steps has a scene (`scenes/index.ts`; a missing one fails the build); it
+  opens each step page, drafts included. `/admin/build/scenes` shows them all, in the sidebar
+  as "Every step, animated".
+- Checked: tsc, build; each scene frame by frame in the browser (seeking, since the hidden pane
+  throttles animation); a step at 375 px with no sideways scroll.

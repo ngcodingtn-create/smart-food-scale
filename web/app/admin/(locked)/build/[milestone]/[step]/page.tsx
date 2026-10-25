@@ -10,6 +10,8 @@ import { StepStepper } from '@/components/admin/build/Stepper';
 import { StepKeys } from '@/components/admin/build/StepKeys';
 import { StepTool } from '@/components/admin/build/StepTool';
 import { StepWiring } from '@/components/admin/build/StepWiring';
+import { sceneFor } from '@/components/admin/build/scenes';
+import { StepScene } from '@/components/admin/build/scenes/StepScene';
 import { MILESTONES, milestoneById } from '@/components/admin/roadmap';
 import '@/components/admin/build/build.css';
 
@@ -55,6 +57,8 @@ export default async function StepPage({ params }: { params: Params }) {
       </header>
 
       <StepStepper milestoneId={milestone.id} currentStepId={step.id} />
+
+      <StepScene scene={sceneFor(milestone.id, step.id)} />
 
       {step.draft ? (
         <p className="step-draft-note">

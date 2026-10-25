@@ -1,0 +1,138 @@
+/* A step's animation: the stage, its controls, and the captions in time. */
+.step-scene {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0.9rem;
+  border: 1px solid var(--rule);
+  border-radius: 0.9rem;
+  background: var(--paper-raised);
+}
+.step-scene-stage {
+  border-radius: 0.6rem;
+  background:
+    radial-gradient(120% 90% at 50% 20%, color-mix(in oklch, var(--paper-raised) 70%, var(--accent) 6%), transparent 70%),
+    var(--paper-sunken);
+  overflow: hidden;
+}
+.step-scene-stage svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 26rem;
+  font-family: var(--font-sans, system-ui, sans-serif);
+}
+.step-scene-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.step-scene-play,
+.step-scene-replay {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  height: 2rem;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: var(--paper);
+  color: var(--ink);
+  cursor: pointer;
+}
+.step-scene-play {
+  width: 2rem;
+}
+.step-scene-play svg {
+  width: 0.85rem;
+  height: 0.85rem;
+  fill: currentColor;
+}
+.step-scene-replay {
+  padding: 0 0.8rem;
+  font-size: 0.85rem;
+}
+.step-scene-play:hover,
+.step-scene-replay:hover {
+  border-color: var(--accent);
+}
+.step-scene-scrub {
+  flex: 1;
+  min-width: 0;
+  accent-color: var(--accent);
+}
+.step-scene-beats {
+  display: grid;
+  gap: 0.3rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: beat;
+}
+.step-scene-beats li {
+  counter-increment: beat;
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.35rem 0.6rem;
+  border-radius: 0.5rem;
+  color: var(--ink);
+  font-size: 0.92rem;
+  line-height: 1.4;
+  cursor: pointer;
+  transition: background-color 0.2s, opacity 0.2s;
+}
+.step-scene-beats li::before {
+  content: counter(beat);
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: 1.3rem;
+  height: 1.3rem;
+  border-radius: 50%;
+  background: var(--paper-sunken);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+}
+.step-scene-beats li[data-state='next'] {
+  opacity: 0.5;
+}
+.step-scene-beats li[data-state='now'] {
+  background: color-mix(in oklch, var(--accent) 14%, transparent);
+}
+.step-scene-beats li[data-state='now']::before {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.step-scene-beats li[data-state='past']::before {
+  content: '✓';
+  background: var(--tip-wash);
+  color: var(--tip-ink);
+}
+.step-scene-who {
+  flex: none;
+  padding: 0.05rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  background: color-mix(in oklch, var(--accent) 18%, transparent);
+  color: var(--accent-ink);
+}
+.step-scene-who[data-who='claude'] {
+  background: var(--tip-wash);
+  color: var(--tip-ink);
+}
+
+/* The gallery of every step's animation. */
+.scene-gallery-milestone {
+  display: grid;
+  gap: 0.8rem;
+}
+.scene-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 26rem), 1fr));
+  gap: 1rem;
+}
+.scene-gallery h3 {
+  margin: 0 0 0.4rem;
+  font-size: 1rem;
+}
