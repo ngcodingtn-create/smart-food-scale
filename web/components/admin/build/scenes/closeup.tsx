@@ -18,20 +18,26 @@ import type { Beat, Box, SceneDef } from './types';
 const MONO = 'var(--font-mono, ui-monospace, monospace)';
 type Pt = [number, number];
 
-// --- the NodeMCU, from above, USB at the bottom ---------------------------------
+// --- the NodeMCU ----------------------------------------------------------------------
+// The owner keeps it upside down, pins up, so jumpers plug straight on, with the USB
+// pointing away and the breadboard on its right. Seen from the back like that, each row
+// keeps its side but runs the other way: the D row is next to the breadboard, with D0 at
+// the far end. The front view, USB at the bottom, is kept for the plug-in step.
 
 const MCU = { x: 30, y: 14, w: 160, h: 412 };
 const PIN_TOP = 52;
 const PIN_STEP = 25;
 const COL_X = { left: 46, right: 174 };
 const NODE_A = NODES.find((node) => node.id === 'a')!;
-const LEFT = NODE_A.board.left;
-const RIGHT = NODE_A.board.right;
+const FRONT_LEFT = NODE_A.board.left;
+const FRONT_RIGHT = NODE_A.board.right;
+const LEFT = [...FRONT_LEFT].reverse();
+const RIGHT = [...FRONT_RIGHT].reverse();
 
 function mcuPin(name: string, prefer?: 'left' | 'right'): { at: Pt; side: 'left' | 'right'; index: number } {
   const order: ('left' | 'right')[] = prefer === 'left' ? ['left', 'right'] : ['right', 'left'];
-  // The pins named in wiring.ts: 3V and G are the pair between D4 and D5 on the right; VIN is on the left.
-  const wanted: Record<string, { side: 'left' | 'right'; index: number }> = { '3V': { side: 'right', index: 5 }, G: { side: 'right', index: 6 }, VIN: { side: 'left', index: 14 } };
+  // The pins named in wiring.ts: 3V and G are the pair between D4 and D5 in the D row; VIN is the outer row's pin by the USB.
+  const wanted: Record<string, { side: 'left' | 'right'; index: number }> = { '3V': { side: 'right', index: 9 }, G: { side: 'right', index: 8 }, VIN: { side: 'left', index: 0 } };
   const fixed = wanted[name];
   if (fixed) return { at: [COL_X[fixed.side], PIN_TOP + fixed.index * PIN_STEP], ...fixed };
   for (const side of order) {
@@ -41,13 +47,48 @@ function mcuPin(name: string, prefer?: 'left' | 'right'): { at: Pt; side: 'left'
   throw new Error(`No NodeMCU pin ${name}`);
 }
 
-/** "between D4 and G": the neighbours printed beside a pin, to find it by. */
+const ORDINAL = ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th', '10th', '11th', '12th', '13th', '14th', '15th'];
+
+/** How to find a pin on the upside-down board, whose names are underneath: count from the far end. */
 function between(side: 'left' | 'right', index: number) {
-  const col = side === 'left' ? LEFT : RIGHT;
-  const above = col[index - 1];
-  const below = col[index + 1];
-  if (above && below) return `${side} side, between ${above} and ${below}`;
-  return `${side} side, ${above ? `the last, below ${above}` : `the first, above ${below}`}`;
+  const row = side === 'right' ? 'row next to the breadboard' : 'outer row';
+  return `${row}, ${ORDINAL[14 - index]} pin from the far end${index === 0 ? ', by the USB' : ''}`;
+}
+
+/** The owner's way: upside down, pins up, USB away. The names are not printed on this side: they are drawn here to help. */
+export function NodeMCUBack() {
+  return (
+    <g>
+      <rect x={MCU.x + 6} y={MCU.y + 8} width={MCU.w} height={MCU.h} rx={6} fill="#000" opacity={0.25} />
+      <rect x={MCU.x} y={MCU.y} width={MCU.w} height={MCU.h} rx={6} fill="#111214" stroke="#26282c" />
+      <rect x={93} y={MCU.y - 6} width={34} height={14} rx={2} fill="url(#cu-can)" stroke="#8d949a" />
+      <text x={110} y={200} textAnchor="middle" fontSize={11} fill="#e7e9ec" fontFamily={MONO} transform="rotate(-90 110 200)">
+        NodeMcu V3
+      </text>
+      <text x={110} y={300} textAnchor="middle" fontSize={6.5} fill="#9aa0a6" fontFamily={MONO} transform="rotate(-90 110 300)">
+        back side · pins up
+      </text>
+      <text x={110} y={MCU.y + MCU.h - 10} textAnchor="middle" fontSize={7} fill="#9aa0a6" fontFamily={MONO}>
+        far end
+      </text>
+      {(['left', 'right'] as const).map((side) => (
+        <g key={side}>
+          <rect x={COL_X[side] - 8} y={PIN_TOP - 12} width={16} height={14 * PIN_STEP + 24} rx={2} fill="#26282c" />
+          {(side === 'left' ? LEFT : RIGHT).map((name, i) => {
+            const y = PIN_TOP + i * PIN_STEP;
+            return (
+              <g key={`${side}-${i}`}>
+                <rect x={COL_X[side] - 4} y={y - 4} width={8} height={8} rx={1} fill="url(#cu-gold)" />
+                <text x={side === 'left' ? COL_X.left + 12 : COL_X.right - 12} y={y + 3.5} textAnchor={side === 'left' ? 'start' : 'end'} fontSize={9.5} fill="#aeb4ba" fontFamily={MONO}>
+                  {name}
+                </text>
+              </g>
+            );
+          })}
+        </g>
+      ))}
+    </g>
+  );
 }
 
 export function NodeMCUTop({ led }: { led: boolean }) {
@@ -97,7 +138,7 @@ export function NodeMCUTop({ led }: { led: boolean }) {
       {(['left', 'right'] as const).map((side) => (
         <g key={side}>
           <rect x={COL_X[side] - 8} y={PIN_TOP - 12} width={16} height={14 * PIN_STEP + 24} rx={2} fill="#0a0a0a" />
-          {(side === 'left' ? LEFT : RIGHT).map((name, i) => {
+          {(side === 'left' ? FRONT_LEFT : FRONT_RIGHT).map((name, i) => {
             const y = PIN_TOP + i * PIN_STEP;
             return (
               <g key={`${side}-${i}`}>
@@ -594,8 +635,8 @@ const SETUP_A: Setup = {
       return { at: pin.at, title: `NodeMCU ${name}`, detail: between(pin.side, pin.index), female: true };
     },
   },
-  drawBoard: (led) => <NodeMCUTop led={led} />,
-  usb: [110, 432],
+  drawBoard: () => <NodeMCUBack />,
+  usb: [110, 4],
 };
 
 const SETUP_B: Setup = {
@@ -715,6 +756,7 @@ export function closeupScene(variant: string): SceneDef {
   const newParts = partsOf(current).filter((p) => !oldParts.includes(p));
   const placeT = newParts.length ? 2.8 : 0;
   const powerStep = current.some((w) => w.id === 'x-supply-5v');
+  const usbAway = setup.usb[1] < 100 ? -1 : 1;
 
   const boardPart = setup.board?.part;
   const orient = (w: Wire): [End, End] => (w.to.part === boardPart || w.to.part === 'supply' ? [w.to, w.from] : [w.from, w.to]);
@@ -855,9 +897,10 @@ export function closeupScene(variant: string): SceneDef {
               </text>
             </g>
           ) : (
-            <g transform={`translate(0 ${(1 - usb) * 60})`} opacity={0.35 + usb * 0.65}>
-              <rect x={setup.usb[0] - 12} y={setup.usb[1] - 8} width={24} height={14} rx={2} fill="#2a2d31" />
-              <rect x={setup.usb[0] - 6} y={setup.usb[1] + 4} width={12} height={60} fill="#1f2124" />
+            // The cable leaves away from the board: down for the camera's base, up for the upside-down NodeMCU.
+            <g transform={`translate(0 ${(1 - usb) * 60 * usbAway})`} opacity={0.35 + usb * 0.65}>
+              <rect x={setup.usb[0] - 12} y={setup.usb[1] - 7} width={24} height={14} rx={2} fill="#2a2d31" />
+              <rect x={setup.usb[0] - 6} y={usbAway > 0 ? setup.usb[1] + 4 : setup.usb[1] - 64} width={12} height={60} fill="#1f2124" />
             </g>
           )}
           {past.map((p) => (
@@ -891,8 +934,8 @@ export function closeupScene(variant: string): SceneDef {
               </text>
             </g>
           ) : null}
-          {t < INTRO ? <Tag at={[setup.usb[0], setup.usb[1] - 50]} text={powerStep ? 'base off the laptop' : 'USB out'} tone="you" size={9} /> : null}
-          {t > end + 0.6 ? <Tag at={powerStep ? [215, 428] : [setup.usb[0], setup.usb[1] - 50]} text={powerStep ? 'charger in' : 'USB in · tell Claude'} tone="you" size={9} /> : null}
+          {t < INTRO ? <Tag at={[setup.usb[0], setup.usb[1] - 50 * usbAway]} text={powerStep ? 'base off the laptop' : 'USB out'} tone="you" size={9} /> : null}
+          {t > end + 0.6 ? <Tag at={powerStep ? [215, 428] : [setup.usb[0], setup.usb[1] - 50 * usbAway]} text={powerStep ? 'charger in' : 'USB in · tell Claude'} tone="you" size={9} /> : null}
           {t > end + 1.2 && !showSupply ? (
             <text x={290} y={442} textAnchor="middle" fontSize={7} fill="var(--ink, #222)" opacity={0.75} paintOrder="stroke" stroke="var(--paper, #fff)" strokeWidth={2}>
               Rows here are an example: any free row works, as long as each wire meets its part in the same row of five.

@@ -105,6 +105,8 @@ answers. The channel is saved on the board. The display's top line shows it:
 | `info` | Prints the settings |
 | `find` | Searches for Node B again |
 | `i2c` | Checks the display's wires from the laptop: answers `E i2c …` |
+| `button` | Answers `E button main=<0\|1> flash=<0\|1>`: 1 while that button is held |
+| `beep` | One short beep, to hear the buzzer without zeroing the scale; answers `E beep` |
 | `sim <grams>` | The `-sim` builds only: sets the pretend weight. It lands like a plate: overshoots about 16 %, within a gram in about 1.3 s |
 | `sim sign <1\|-1>` | The `-sim` builds only: `-1` plays a cell with white and green swapped, so the counts fall as weight goes on |
 

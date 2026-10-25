@@ -558,6 +558,13 @@ void command(String text) {
   else if (text == "capture") capture();
   else if (text == "find") findCamera();
   else if (text == "i2c") checkDisplayWires();
+  // `button`: is the button pressed right now? 1 = pressed (the leg on D5 joined to ground). FLASH is D3.
+  else if (text == "button") Serial.printf("E button main=%d flash=%d\n", digitalRead(PIN_BUTTON_TARE) == LOW, digitalRead(PIN_BUTTON_CAPTURE) == LOW);
+  // `beep`: one short beep, to hear the buzzer without zeroing the scale.
+  else if (text == "beep") {
+    beepOk();
+    Serial.println("E beep");
+  }
   else if (text == "info") {
     Serial.printf("E info node=a fw=%s calibrated=%d cpg=%.6f tared=%d offset=%ld camera_ch=%u%s\n", SFS_FIRMWARE_VERSION,
                   calibrated(), countsPerGram, tared, tareOffset, cameraChannel,
@@ -601,7 +608,7 @@ void command(String text) {
   }
 #endif
   else if (text.length()) {
-    Serial.println("E help tare | capture | find | info | i2c | cal <counts per gram> | cal clear | sim <grams> | sim sign <1|-1>");
+    Serial.println("E help tare | capture | find | info | i2c | button | beep | cal <counts per gram> | cal clear | sim <grams> | sim sign <1|-1>");
   }
 }
 
