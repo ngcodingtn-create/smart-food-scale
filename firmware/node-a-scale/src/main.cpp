@@ -585,7 +585,11 @@ void setup() {
 #endif
 
   Wire.begin(PIN_OLED_SDA, PIN_OLED_SCL);
-  hasDisplay = oled.begin(SSD1306_SWITCHCAPVCC, config::kOledAddress);
+  // oled.begin() succeeds with nothing wired (it only sets up memory): ask the
+  // display to answer on the bus first, so a missing or miswired one is reported.
+  Wire.beginTransmission(config::kOledAddress);
+  const bool displayAnswers = Wire.endTransmission() == 0;
+  hasDisplay = displayAnswers && oled.begin(SSD1306_SWITCHCAPVCC, config::kOledAddress);
   if (!hasDisplay) Serial.println("E error no-display");
 
 #ifndef SIMULATE_SCALE
