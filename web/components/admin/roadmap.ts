@@ -245,7 +245,7 @@ export const MILESTONES: Milestone[] = [
         parts: ['devkit'],
         actions: ['Nothing, unless Claude asks: then hold FLASH, press and let go of RST, let go of FLASH.'],
         claude: ['Flashes the pretend scale over USB (board.py flash node-a-nodemcu-sim).', 'Restarts the board and reads its boot line.'],
-        expect: { kind: 'serial', lines: ['E boot node=a fw=0.3.2 calibrated=1 cpg=100.000000 simulated=1'], caption: 'The boot line Claude reads back.' },
+        expect: { kind: 'serial', lines: ['E boot node=a fw=0.3.3 calibrated=1 cpg=100.000000 simulated=1'], caption: 'The boot line Claude reads back.' },
         checks: ['Claude read the boot line'],
         trouble: [{ symptom: 'Flashing cannot connect', fix: 'Claude asks you to hold FLASH and tap RST, then tries again.' }],
         tool: SIM,

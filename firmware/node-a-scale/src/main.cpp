@@ -500,6 +500,54 @@ void capture() {
   }
 }
 
+// --- the display's wires, checked from the laptop ---------------------------------
+
+// Pulls a line low, lets go, and reads it a moment later. The display module's own
+// pull-up resistors, to its VCC, bring the line straight back high; a wire that
+// reaches no powered display leaves it low. So a 1 means: this pin's wire reaches the
+// display, and the display has power.
+bool pulledUp(uint8_t pin) {
+  pinMode(pin, OUTPUT);
+  digitalWrite(pin, LOW);
+  delayMicroseconds(50);
+  pinMode(pin, INPUT);
+  delayMicroseconds(20);
+  return digitalRead(pin) == HIGH;
+}
+
+// Every address that answers, with the two lines as given: "3c", "3c,3d" or "".
+String scanBus(uint8_t sda, uint8_t scl) {
+#if defined(ESP32)
+  Wire.end();
+#endif
+  Wire.begin(sda, scl);
+  String found;
+  for (uint8_t address = 0x08; address < 0x78; address++) {
+    Wire.beginTransmission(address);
+    if (Wire.endTransmission() == 0) {
+      if (found.length()) found += ',';
+      found += String(address, HEX);
+    }
+  }
+  return found;
+}
+
+// `i2c`: are the display's two signal wires there, and does anything answer, either
+// way round? Tells a missing wire or missing power from swapped SDA and SCL.
+void checkDisplayWires() {
+  const bool sdaUp = pulledUp(PIN_OLED_SDA);
+  const bool sclUp = pulledUp(PIN_OLED_SCL);
+  const String straight = scanBus(PIN_OLED_SDA, PIN_OLED_SCL);
+  const String swapped = scanBus(PIN_OLED_SCL, PIN_OLED_SDA);
+  scanBus(PIN_OLED_SDA, PIN_OLED_SCL);  // back to the real wiring
+  Serial.printf("E i2c sda_pullup=%d scl_pullup=%d found=%s swapped_found=%s\n", sdaUp, sclUp,
+                straight.length() ? straight.c_str() : "none", swapped.length() ? swapped.c_str() : "none");
+  if (!hasDisplay && straight.indexOf(String(config::kOledAddress, HEX)) >= 0) {
+    hasDisplay = oled.begin(SSD1306_SWITCHCAPVCC, config::kOledAddress);
+    if (hasDisplay) Serial.println("E display found");
+  }
+}
+
 // --- the serial console ------------------------------------------------------
 
 String line;
@@ -509,6 +557,7 @@ void command(String text) {
   if (text == "tare") tare();
   else if (text == "capture") capture();
   else if (text == "find") findCamera();
+  else if (text == "i2c") checkDisplayWires();
   else if (text == "info") {
     Serial.printf("E info node=a fw=%s calibrated=%d cpg=%.6f tared=%d offset=%ld camera_ch=%u%s\n", SFS_FIRMWARE_VERSION,
                   calibrated(), countsPerGram, tared, tareOffset, cameraChannel,
@@ -552,7 +601,7 @@ void command(String text) {
   }
 #endif
   else if (text.length()) {
-    Serial.println("E help tare | capture | find | info | cal <counts per gram> | cal clear | sim <grams> | sim sign <1|-1>");
+    Serial.println("E help tare | capture | find | info | i2c | cal <counts per gram> | cal clear | sim <grams> | sim sign <1|-1>");
   }
 }
 

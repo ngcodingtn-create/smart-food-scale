@@ -260,8 +260,8 @@ export function plugScene(): SceneDef {
 }
 
 const FLASH = {
-  pretend: { env: 'node-a-nodemcu-sim', boot: 'E boot node=a fw=0.3.2 simulated=1', what: 'the pretend scale' },
-  real: { env: 'node-a-nodemcu', boot: 'E boot node=a fw=0.3.2 calibrated=0', what: 'the real scale' },
+  pretend: { env: 'node-a-nodemcu-sim', boot: 'E boot node=a fw=0.3.3 simulated=1', what: 'the pretend scale' },
+  real: { env: 'node-a-nodemcu', boot: 'E boot node=a fw=0.3.3 calibrated=0', what: 'the real scale' },
   camera: { env: 'node-b-camera', boot: 'E boot node=b camera=1', what: 'the camera' },
 } as const;
 
