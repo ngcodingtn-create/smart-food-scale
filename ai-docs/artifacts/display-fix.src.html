@@ -52,6 +52,21 @@
   h2 { font: 560 22px/1.2 var(--display); margin: 0; text-wrap: balance; }
   p { margin: 0; }
 
+  .status { display: grid; gap: 12px; }
+  .lede { color: var(--ink-soft); max-width: 62ch; }
+  .chips { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
+  .state { border-radius: 12px; padding: 12px 14px; display: grid; gap: 2px; }
+  .state b { font: 600 18px/1.2 var(--body); }
+  .state span { font-size: 14px; }
+  .state.ok { background: var(--measure-soft); color: var(--measure-ink); }
+  .state.bad { background: var(--danger-wash); color: var(--danger-ink); outline: 1.5px solid var(--danger-ink); }
+  .state.ok b::before { content: "✓ "; }
+  .state.bad b::before { content: "✗ "; }
+  .fixed { color: var(--ink-soft); max-width: 62ch; }
+  .fixed b { color: var(--ink); }
+  .mark { justify-self: start; }
+  .mark[aria-pressed="true"] { background: var(--measure-soft); border-color: var(--measure); color: var(--measure-ink); }
+  .pill.checked::after { content: " ✓"; }
   .verdict { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 18px; align-items: start; }
   @media (max-width: 680px) { .verdict { grid-template-columns: 1fr; } }
   .verdict figure { margin: 0; display: grid; gap: 6px; }
@@ -105,24 +120,22 @@
 <div class="page">
   <header>
     <span class="eyebrow">Bench Photos · answer · step 1.4, the display</span>
-    <h1>Why the display stays dark</h1>
+    <h1>One wire left: SCL</h1>
   </header>
 
-  <section class="verdict" aria-label="What Claude found">
-    <figure>
-      <img src="__PHOTO__" alt="Your photo: the display beside the breadboard, its four pins VCC, GND, SCL, SDA with nothing plugged on them.">
-      <figcaption>Your photo, cropped. The four pins at the display’s edge are bare.</figcaption>
-    </figure>
-    <div class="found">
-      <p class="big">Nothing is plugged onto the display’s four pins, so the board cannot see it.</p>
-      <p>Claude restarted the board from the laptop. It says:</p>
-      <code class="serial">E error no-display</code>
-      <p class="flip"><b>Also: your NodeMCU is upside down</b>, pins pointing up. That is fine for plugging jumpers on, but its names are now underneath and its two rows of pins <b>swap sides</b>. The bench below and the map at the end show it the way you see it.</p>
+  <section class="status" aria-label="What the board says">
+    <p class="lede">Claude asked the board to test its own display wires, three times, from the laptop. Same answer each time:</p>
+    <div class="chips">
+      <div class="state ok"><b>Power</b><span>reaches the display</span></div>
+      <div class="state ok"><b>SDA</b><span>D2’s wire reaches it</span></div>
+      <div class="state bad"><b>SCL</b><span>D1’s wire does not</span></div>
     </div>
+    <code class="serial">E i2c sda_pullup=1 scl_pullup=0 found=none</code>
+    <p class="fixed">Already fixed: the display is in the breadboard, and 3V and G reach the rails. Leave the USB in: <b>the screen lights up by itself the moment SCL is right</b>. While it is powered, move only the yellow D1 wire.</p>
   </section>
 
   <section class="bench" aria-labelledby="bench-title">
-    <h2 id="bench-title">The fix, on your bench</h2>
+    <h2 id="bench-title">Five checks for the SCL wire, on your bench</h2>
     <div class="stage">
       <svg id="scene" viewBox="0 0 160 100" role="img" aria-label="Your bench in 2.5D: the NodeMCU upside down beside the breadboard, and the display."></svg>
     </div>
@@ -150,12 +163,12 @@
         <div class="pins" id="row-out"></div>
       </div>
     </div>
-    <div class="legend"><span class="l-disp">Display wires (now)</span><span class="l-rail">Rail wires (step 1.3)</span></div>
+    <div class="legend"><span class="l-disp">Display signal wires: D1 (SCL), D2 (SDA)</span><span class="l-rail">Power wires: G, 3V, VIN</span></div>
   </section>
 
   <section class="done">
-    <b>When the four wires are in</b>
-    <p>Plug the USB back in and look at the display: <b>CAMERA ?</b>, <b>0.0 g</b>, <b>READY</b>. Then tell Claude in the chat “display done”. Claude restarts the board and checks that <code>E error no-display</code> has gone.</p>
+    <b>When the screen lights up</b>
+    <p>It shows <b>CAMERA ?</b>, <b>0.0 g</b>, <b>READY</b>. Tell Claude “display done”: Claude checks that the board found it. Still dark after all five? Send a photo looking straight down on the display’s four rows.</p>
   </section>
 </div>
 
@@ -201,23 +214,22 @@
   const PIN_TOP = MCU.z + 1.6 + 2.5 + 6;
   const pin = (row, i) => [pinX(i), row === 'in' ? ROW_IN : ROW_OUT, PIN_TOP];
 
-  const WIRE = { red: ['#d0453c', '#8d2a24'], black: ['#2b2b2b', '#0f0f0f'], green: ['#3f9b5a', '#22603a'], blue: ['#3b6fd0', '#23447f'], purple: ['#8a5cc8', '#553683'], yellow: ['#e2b93b', '#94761f'] };
+  const WIRE = { teal: ['#1fa99a', '#12695f'], grey: ['#8d949a', '#565c61'], red: ['#d0453c', '#8d2a24'], black: ['#2b2b2b', '#0f0f0f'], green: ['#3f9b5a', '#22603a'], blue: ['#3b6fd0', '#23447f'], purple: ['#8a5cc8', '#553683'], yellow: ['#e2b93b', '#94761f'] };
 
-  // The wires made on the rails step, as they should be (the owner's colours).
+  // The owner's power wires: G and 3V from the outer row (pins 10 and 11), VIN from its last pin.
   const RAILS = [
-    { from: pin('in', 5), to: hole('Lp', 18), colour: 'purple', label: '3V → left + rail' },
-    { from: pin('in', 6), to: hole('Lm', 19), colour: 'yellow', label: 'G → left − rail' },
+    { from: pin('out', 9), to: hole('Lm', 22), colour: 'grey', label: 'G → left − rail' },
+    { from: pin('out', 10), to: hole('Lp', 21), colour: 'teal', label: '3V → left + rail' },
     { from: pin('out', 14), to: hole('Rp', 27), colour: 'purple', label: 'VIN → right + rail' },
   ];
-  // This step's four wires. Display pins in column e, rows 2 to 5; the wires leave from column a.
+  // The display is turned round: from the far end its pins are SDA, SCL, GND, VCC, in rows 2 to 5.
+  const ROW = { SDA: 2, SCL: 3, GND: 4, VCC: 5 };
   const POWER = [
-    { from: hole('a', 2), to: hole('Lp', 2), colour: 'red', label: 'VCC row → + rail', male: true },
-    { from: hole('a', 3), to: hole('Lm', 3), colour: 'black', label: 'GND row → − rail', male: true },
+    { from: hole('a', ROW.VCC), to: hole('Lp', ROW.VCC), colour: 'green', label: 'VCC row → + rail', male: true },
+    { from: hole('a', ROW.GND), to: hole('Lm', ROW.GND), colour: 'grey', label: 'GND row → − rail', male: true },
   ];
-  const SIGNAL = [
-    { from: pin('in', 1), to: hole('a', 4), colour: 'green', label: 'D1 → SCL row' },
-    { from: pin('in', 2), to: hole('a', 5), colour: 'blue', label: 'D2 → SDA row' },
-  ];
+  const SDA_WIRE = { from: pin('in', 2), to: hole('a', ROW.SDA), colour: 'yellow' };
+  const SCL_WIRE = (row) => ({ from: pin('in', 1), to: hole('a', row), colour: 'yellow' });
 
   // --- static layers -----------------------------------------------------------------
   function desk() {
@@ -289,14 +301,14 @@
     return s;
   }
   function display(x0, z0, onDesk) {
-    // 27 × 27 mm module, its four header pins along one edge: VCC, GND, SCL, SDA.
+    // 27 × 27 mm module, its four header pins along one edge; the owner's is turned round: SDA, SCL, GND, VCC.
     let s = '';
     const y1 = COL.e + 2.4;
     const yy = onDesk ? 0 : 0;
     const top = z0 + 1.6;
     s += box(x0, y1 - 27 + yy, z0, 27, 27, 1.6, '#1f4fa0', '#163a78', '#1a4590');
     s += poly([[x0 + 2, y1 - 25.5, top], [x0 + 25, y1 - 25.5, top], [x0 + 25, y1 - 6, top], [x0 + 2, y1 - 6, top]], '#06080b');
-    const names = ['VCC', 'GND', 'SCL', 'SDA'];
+    const names = ['SDA', 'SCL', 'GND', 'VCC'];
     for (let k = 0; k < 4; k++) {
       const px = rowX(2 + k) - (rowX(2) - (x0 + 8.65));
       s += box(px - 0.32, y1 - 2.4, top, 0.64, 0.64, onDesk ? 6 : 0.01, '#e8d28a', '#a88a3a', '#c7a955');
@@ -311,51 +323,56 @@
   const displayX = rowX(2) - 8.65;
   const STEPS = [
     {
-      title: 'What your photo shows',
+      title: 'What the board says',
       who: 'claude',
-      text: ['The display lies beside the breadboard. No wire is on its four pins, so the board cannot see it: it says <code>E error no-display</code>.'],
-      focus: [[-46, 8, 0], [165, 55, 0], [84, 97, 0]],
+      text: ['Power reaches the display, and so does the SDA wire from D2. The SCL wire from D1 does not. The fault is in that one wire: one of the five checks below.'],
+      focus: [[-2, 8, 0], [165, 55, 0], [84, 97, 0]],
       T: 1.6,
     },
     {
-      title: 'USB out',
+      title: 'Is D1’s wire in the SCL row?',
       who: 'you',
-      text: ['Pull the USB cable out of the NodeMCU. Nothing is wired with the power on.'],
-      focus: [[60, 70, 0], [110, 90, 0]],
-      T: 1.4,
+      text: ['Most likely. Your display’s pins, from the far end: <b>SDA, SCL, GND, VCC</b>. SCL is the <b>2nd</b> row.', 'The D1 yellow’s pin must be in that same row, columns a to e. One row off, often into GND next door, is the usual fault.'],
+      focus: [[0, 30, 0], [22, 56, 0]],
+      T: 3,
+      check: true,
     },
     {
-      title: 'The display into the breadboard',
+      title: 'Is the SCL pin in its hole?',
       who: 'you',
-      text: ['Push its four pins into <b>column e, rows 2 to 5</b>, one pin per row: VCC in row 2, GND 3, SCL 4, SDA 5.', 'Its screen lies over the middle of the board. Press gently until the pins are in.'],
-      focus: [[-2, 8, 0], [30, 50, 0]],
-      T: 1.8,
+      text: ['Look along the display’s edge: all four pins go down into holes.', 'A bent pin can rest on the plastic beside its hole, and from above it looks plugged in.'],
+      focus: [[0, 26, 0], [20, 40, 0]],
+      T: 2,
+      check: true,
     },
     {
-      title: 'Power: two short wires',
+      title: 'Is the socket fully on D1?',
       who: 'you',
-      text: ['From <b>row 2, column a</b> (the VCC row) to the <b>left + rail</b>, the red line.', 'From <b>row 3, column a</b> (the GND row) to the <b>left − rail</b>, the blue line.', 'Male–male jumpers: both ends go into the breadboard.'],
-      focus: [[0, 30, 0], [22, 58, 0]],
+      text: ['On the row next to the breadboard, the <b>2nd pin from the far end</b>. On the front it is labelled D1.', 'Push the black socket all the way down the pin.'],
+      focus: [[28, 60, 0], [50, 80, 0]],
+      T: 2,
+      check: true,
+    },
+    {
+      title: 'Is the pin end pushed all the way in?',
+      who: 'you',
+      text: ['In the SCL row: the black plastic should touch the breadboard.'],
+      focus: [[0, 34, 0], [16, 52, 0]],
+      T: 2,
+      check: true,
+    },
+    {
+      title: 'Swap the jumper',
+      who: 'you',
+      text: ['A jumper can break inside its plastic. Take a fresh female–male one: female on D1, pin into the SCL row.'],
+      focus: [[0, 30, 0], [50, 80, 0]],
       T: 2.6,
+      check: true,
     },
     {
-      title: 'Signal: two wires to the NodeMCU',
-      who: 'you',
-      text: ['On the pin row <b>next to the breadboard</b>, count from the far end: the <b>2nd pin is D1</b>, the <b>3rd is D2</b>.', 'D1 → <b>row 4, column a</b> (the SCL row). D2 → <b>row 5, column a</b> (the SDA row).', 'Female–male jumpers: the female end goes on the NodeMCU pin.'],
-      focus: [[0, 40, 0], [50, 75, 0]],
-      T: 2.8,
-    },
-    {
-      title: 'Check the three rail wires',
-      who: 'you',
-      text: ['Row next to the breadboard: the <b>6th pin is 3V</b> → left + rail, the <b>7th is G</b> → left − rail.', 'Outer row: <b>VIN is the last pin, closest to the USB</b> → right + rail. If your 5 V wire is anywhere else, move it there.'],
-      focus: [[30, 8, 0], [85, 95, 0]],
-      T: 1.8,
-    },
-    {
-      title: 'USB in, and look',
+      title: 'The screen lights up by itself',
       who: 'claude',
-      text: ['Plug the USB back in. The display should show <b>CAMERA ?</b>, <b>0.0 g</b>, <b>READY</b>.', 'Tell Claude “display done”. Claude restarts the board and checks that <code>E error no-display</code> has gone.'],
+      text: ['No need to unplug: the board switches the display on the moment SCL answers.', 'It shows <b>CAMERA ?</b>, <b>0.0 g</b>, <b>READY</b>. Tell Claude “display done”.'],
       focus: [[-4, 6, 0], [100, 95, 0]],
       T: 2.2,
     },
@@ -379,7 +396,7 @@
     const fs = cam[2] / labelScale();
     const [ax, ay] = P(...at);
     const tx = ax + dx * fs, ty = ay + dy * fs;
-    const colour = tone === 'you' ? '#b4532a' : tone === 'claude' ? '#1d6b5c' : '#2b2420';
+    const colour = tone === 'you' ? '#b4532a' : tone === 'claude' ? '#1d6b5c' : tone === 'bad' ? '#a0332a' : '#2b2420';
     return `<circle cx="${f(ax)}" cy="${f(ay)}" r="${f(fs * 0.22)}" fill="${colour}"/>` +
       `<line x1="${f(ax)}" y1="${f(ay)}" x2="${f(tx)}" y2="${f(ty + fs * 0.3)}" stroke="${colour}" stroke-width="${f(fs * 0.08)}"/>` +
       `<text x="${f(tx)}" y="${f(ty)}" text-anchor="middle" font-family="Instrument Sans, system-ui, sans-serif" font-weight="600" font-size="${f(fs)}" fill="${colour}" paint-order="stroke" stroke="#fffaf2" stroke-width="${f(fs * 0.32)}" stroke-linejoin="round">${text}</text>`;
@@ -406,63 +423,61 @@
 
   function frame(step, t, cam) {
     let u = '', o = '', l = '';
-    // The display: on the desk at first, then into column e.
-    if (step === 0) {
-      u += display(displayX - 44, 0.01, true);
-    } else if (step >= 2) {
-      const q = step === 2 ? seg(t, 0.1, 0.9) : 1;
-      const z = TOP + 2.5 + (1 - q) * 30;
-      u += `<g opacity="${f(0.3 + q * 0.7)}">${display(displayX, z, false)}</g>`;
-    } else {
-      u += display(displayX - 44, 0.01, true);
+    u += display(displayX, TOP + 2.5, false);
+    for (const w of RAILS) o += `<g opacity="${step === 0 ? 1 : 0.5}">${jumper(w, 1)}</g>`;
+    POWER.forEach((w) => { u += `<g opacity="${step === 0 ? 1 : 0.6}">${jumper(w, 1)}</g>`; });
+    o += `<g opacity="${step === 0 || step >= 6 ? 1 : 0.55}">${jumper(SDA_WIRE, 1)}</g>`;
+
+    // The SCL wire: where it may be (the GND row), then where it must be.
+    let sclRow = ROW.SCL, sclLift = 0, sclProg = 1, pinLift = 0;
+    if (step === 1) sclRow = ROW.GND + (ROW.SCL - ROW.GND) * seg(t, 0.45, 0.75);
+    if (step === 4) sclLift = 5 * (1 - seg(t, 0.25, 0.7));
+    if (step === 3) pinLift = 6 * (1 - seg(t, 0.25, 0.7));
+    if (step === 5) sclProg = t < 0.45 ? 1 - seg(t, 0.05, 0.4) : seg(t, 0.5, 0.95);
+    const scl = SCL_WIRE(ROW.SCL);
+    const sclTo = [rowX(sclRow), COL.a, TOP];
+    if (sclProg > 0) {
+      o += housing(scl.from, pinLift, true);
+      o += wirePath([scl.from[0], scl.from[1], MCU.z + 9 + pinLift], [sclTo[0], sclTo[1], TOP + sclLift], 'yellow', sclProg);
+      if (sclProg >= 1) o += housing(sclTo, sclLift);
     }
-    // Wires: the rails, made on step 1.3; then this step's.
-    for (const w of RAILS) o += `<g opacity="${step === 5 ? 1 : 0.55}">${jumper(w, 1)}</g>`;
-    if (step >= 3) POWER.forEach((w, k) => { u += jumper(w, step === 3 ? seg(t, 0.15 + k * 0.4, 0.55 + k * 0.4) : 1, step === 3 ? 1 - seg(t, 0.05 + k * 0.4, 0.2 + k * 0.4) : 0); });
-    if (step >= 4) SIGNAL.forEach((w, k) => { o += jumper(w, step === 4 ? seg(t, 0.15 + k * 0.4, 0.55 + k * 0.4) : 1, step === 4 ? 1 - seg(t, 0.05 + k * 0.4, 0.2 + k * 0.4) : 0); });
-    // The USB cable: in, out, in.
-    const usbOut = step === 0 ? 0 : step === 1 ? seg(t, 0.2, 0.9) : step === 6 ? 1 - seg(t, 0.05, 0.5) : 1;
-    const ux = MCU.x + MCU.L + usbOut * 14;
+    const ux = MCU.x + MCU.L;
     o += box(ux, MCU.y + 12, 1.2, 7, 7, 3.6, '#2a2d31', '#16181b', '#1f2124');
     o += box(ux + 7, MCU.y + 14.2, 2.2, 40, 2.6, 1.6, '#232528', '#111214', '#1a1b1e');
 
-    // Labels and highlights, per step.
+    // The row of five that SCL and the D1 wire must share.
+    const strip = (row, colour, alpha) => poly([[rowX(row) - 1.2, COL.e - 1.4, TOP + 0.02], [rowX(row) + 1.2, COL.e - 1.4, TOP + 0.02], [rowX(row) + 1.2, COL.a + 1.4, TOP + 0.02], [rowX(row) - 1.2, COL.a + 1.4, TOP + 0.02]], colour, `opacity="${f(alpha)}"`);
+
     if (step === 0) {
-      const dispPin = [rowX(3) - 44, COL.e, 0.5];
-      l += label(dispPin, 'VCC GND SCL SDA: nothing on them', 5, -5, 'claude', cam);
-      l += chip([30, 70, 34], 'E error no-display', 'bad', cam);
+      l += chip([rowX(ROW.SDA) - 3, COL.a - 6, 26], 'SDA ✓', 'ok', cam);
+      l += chip([rowX(ROW.SCL) + 6, COL.a + 6, 22], 'SCL ✗', 'bad', cam);
+      l += chip([pinX(10), ROW_OUT + 4, 22], 'power ✓', 'ok', cam);
+      o += ring([sclTo[0], sclTo[1], TOP + 9], 2.4, '#ff6b5e', t);
     }
-    if (step === 1) l += label([MCU.x + MCU.L + 4, MCU.y + 15, 5], 'USB out', 3, 4, 'you', cam);
+    if (step === 1) {
+      const right = t > 0.75;
+      u += strip(ROW.SCL, '#3fbf8f', 0.45) + (right ? '' : strip(ROW.GND, '#ff6b5e', 0.35));
+      ['SDA', 'SCL', 'GND', 'VCC'].forEach((name, k) => { l += label(hole('e', 2 + k), `row ${2 + k}: ${name}`, 3.4, 1.6 + k * 1.15, name === 'SCL' ? 'claude' : 'ink', cam); });
+      l += t < 0.45 ? label([rowX(ROW.GND), COL.a, TOP + 9], 'D1 here? GND row: wrong', -6, -2.5, 'bad', cam) : right ? label([rowX(ROW.SCL), COL.a, TOP + 9], 'SCL row: right', -5, -3, 'claude', cam) : '';
+    }
     if (step === 2) {
-      ['VCC row 2', 'GND row 3', 'SCL row 4', 'SDA row 5'].forEach((name, k) => { if (t > 0.85) l += label(hole('e', 2 + k), name, -2.6 + k * 0.2, 2.4 + k * 1.3, 'you', cam); });
+      const sclPin = [displayX + 8.65 + 2.54, COL.e, TOP + 2.5];
+      o += ring([sclPin[0], sclPin[1], TOP + 0.1], 1.6, '#ffb27d', t);
+      l += label([sclPin[0], sclPin[1], TOP], 'SCL pin: down in its hole', -4, 3.5, 'you', cam);
     }
-    if (step === 3) {
-      if (t > 0.5) l += label(hole('Lp', 2), '+ rail', 1.5, 3.5, 'you', cam);
-      if (t > 0.9) l += label(hole('Lm', 3), '− rail', 4, 1.8, 'you', cam);
+    if (step === 3 || step === 5) {
+      IN.forEach((name, i) => { o += planeText(pinX(i) - 0.9, ROW_IN + 3.2, MCU.z + 1.61, name, 1.25, i === 1 ? '#ffd36b' : '#b8bec4'); });
+      o += ring(pin('in', 1), 1.9, '#ffd36b', t);
+      l += label(pin('in', 1), 'D1: 2nd pin from the far end', -6, 3, 'you', cam);
     }
-    if (step === 4 || step === 5) {
-      IN.forEach((name, i) => { o += planeText(pinX(i) - 0.9, ROW_IN + 3.2, MCU.z + 1.61, name, 1.25, step === 4 && (i === 1 || i === 2) ? '#7fe0b0' : step === 5 && (i === 5 || i === 6) ? '#ffb27d' : '#b8bec4'); });
-      OUT.forEach((name, i) => { o += planeText(pinX(i) - 0.9, ROW_OUT - 2.2, MCU.z + 1.61, name, 1.25, step === 5 && i === 14 ? '#ffb27d' : '#b8bec4'); });
-    }
-    if (step === 4) {
-      o += ring(pin('in', 1), 1.9, '#7fe0b0', t) + ring(pin('in', 2), 1.9, '#7fe0b0', t);
-      l += label(pin('in', 1), 'D1: 2nd pin', -6, 2, 'you', cam);
-      l += label(pin('in', 2), 'D2: 3rd pin', 5, 3, 'you', cam);
-      if (t > 0.95) l += label(hole('a', 4), 'SCL row', -5, -3, 'you', cam) + label(hole('a', 5), 'SDA row', 2, -5.5, 'you', cam);
-    }
-    if (step === 5) {
-      o += ring(pin('in', 5), 1.9, '#ffb27d', t) + ring(pin('in', 6), 1.9, '#ffb27d', t) + ring(pin('out', 14), 1.9, '#ffb27d', t);
-      l += label(pin('in', 5), '3V: 6th pin', -2, -4.5, 'you', cam);
-      l += label(pin('in', 6), 'G: 7th pin', 3, -3.5, 'you', cam);
-      l += label(pin('out', 14), 'VIN: last pin, by the USB', 3, 3, 'you', cam);
-      l += label([MCU.x + 2, MCU.y + 15, 4], 'far end', -2.5, 2.5, 'ink', cam);
-    }
-    if (step === 6 && t > 0.55) {
+    if (step === 4) l += label([rowX(ROW.SCL), COL.a, TOP + 9], 'plastic touches the board', -6, -3, 'you', cam);
+    if (step === 5) l += label([rowX(ROW.SCL), COL.a, TOP + 9], t < 0.45 ? 'old jumper out' : 'a fresh female–male jumper', -6, -3, 'you', cam);
+    if (step === 6 && t > 0.35) {
       const sc = [displayX + 13, COL.e - 14, TOP + 4.2];
-      u += poly([[displayX + 2, COL.e - 23, TOP + 4.11], [displayX + 25, COL.e - 23, TOP + 4.11], [displayX + 25, COL.e - 3.6, TOP + 4.11], [displayX + 2, COL.e - 3.6, TOP + 4.11]], '#123a5c', `opacity="${f(seg(t, 0.55, 0.8))}"`);
+      u += poly([[displayX + 2, COL.e - 23, TOP + 4.11], [displayX + 25, COL.e - 23, TOP + 4.11], [displayX + 25, COL.e - 3.6, TOP + 4.11], [displayX + 2, COL.e - 3.6, TOP + 4.11]], '#123a5c', `opacity="${f(seg(t, 0.35, 0.6))}"`);
       u += planeText(displayX + 4, COL.e - 18, TOP + 4.12, 'CAMERA ?', 2, '#9fd8ff') + planeText(displayX + 4, COL.e - 11.5, TOP + 4.12, '0.0 g', 4, '#9fd8ff') + planeText(displayX + 4, COL.e - 6.5, TOP + 4.12, 'READY', 2, '#9fd8ff');
       l += chip([sc[0] - 4, sc[1] - 6, 22], 'CAMERA ?  0.0 g  READY', 'ok', cam);
-      if (t > 0.85) l += chip([60, 70, 30], 'tell Claude: “display done”', 'you', cam);
+      if (t > 0.7) l += chip([60, 70, 30], 'E display found', 'ok', cam);
     }
     under.innerHTML = u;
     over.innerHTML = o;
@@ -473,14 +488,17 @@
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   let step = 0, start = performance.now(), cam = fit(STEPS[0].focus), camFrom = cam, camStart = start;
   const seen = new Set([0]);
+  // Which checks the owner has done, kept in this browser only.
+  const checked = new Set((() => { try { return JSON.parse(localStorage.getItem('display-fix-checked') || '[]'); } catch { return []; } })());
+  const saveChecked = () => { try { localStorage.setItem('display-fix-checked', JSON.stringify([...checked])); } catch {} };
   const pills = document.getElementById('pills'), caption = document.getElementById('caption');
   STEPS.forEach((s, i) => {
     const b = document.createElement('button');
     b.className = 'pill';
     b.type = 'button';
-    b.textContent = i === 0 ? 'Found' : String(i);
+    b.textContent = i === 0 ? 'Board' : i === STEPS.length - 1 ? 'Lit' : 'Check ' + i;
     b.title = s.title;
-    b.setAttribute('aria-label', `${i === 0 ? 'What your photo shows' : 'Step ' + i}: ${s.title}`);
+    b.setAttribute('aria-label', s.title);
     b.addEventListener('click', () => go(i));
     pills.append(b);
   });
@@ -491,14 +509,17 @@
     camFrom = cam;
     camStart = start = performance.now();
     const s = STEPS[step];
-    caption.innerHTML = `<h3>${step === 0 ? '' : step + '. '}${s.title}</h3>` +
+    caption.innerHTML = `<h3>${s.check ? 'Check ' + step + '. ' : ''}${s.title}</h3>` +
       `<div class="doer"><span class="who ${s.who}">${s.who === 'you' ? 'You do' : 'Claude'}</span>` +
-      (s.text.length > 1 ? `<ol>${s.text.map((x) => `<li>${x}</li>`).join('')}</ol>` : `<p>${s.text[0]}</p>`) + `</div>`;
+      (s.text.length > 1 ? `<ol>${s.text.map((x) => `<li>${x}</li>`).join('')}</ol>` : `<p>${s.text[0]}</p>`) + `</div>` +
+      (s.check ? `<button class="btn mark" type="button" aria-pressed="${checked.has(step)}">${checked.has(step) ? 'Checked ✓' : 'I checked this'}</button>` : '');
+    caption.querySelector('.mark')?.addEventListener('click', () => { checked.has(step) ? checked.delete(step) : checked.add(step); saveChecked(); go(step); });
+    [...pills.children].forEach((b, k) => b.classList.toggle('checked', checked.has(k)));
     [...pills.children].forEach((b, k) => { b.toggleAttribute('aria-current', k === step); if (k === step) b.setAttribute('aria-current', 'step'); b.classList.toggle('seen', seen.has(k) && k !== step); });
     document.getElementById('prev').disabled = step === 0;
     const next = document.getElementById('next');
     next.disabled = step === STEPS.length - 1;
-    next.textContent = step === 0 ? 'Show me the fix →' : step === STEPS.length - 1 ? 'That’s all' : 'Next step →';
+    next.textContent = step === 0 ? 'Start the checks →' : step === STEPS.length - 1 ? 'That’s all' : 'Next check →';
     if (reduce) draw(performance.now() + 1e6);
   }
   function draw(now) {
@@ -526,8 +547,8 @@
       return s;
     }));
   };
-  fill('row-in', IN, { 1: 'disp', 2: 'disp', 5: 'rail', 6: 'rail' });
-  fill('row-out', OUT, { 14: 'rail' });
+  fill('row-in', IN, { 1: 'disp', 2: 'disp' });
+  fill('row-out', OUT, { 9: 'rail', 10: 'rail', 14: 'rail' });
 
   go(0);
   // Drawn once now, so the bench shows even where animation frames are paused (a background tab, a preview).
