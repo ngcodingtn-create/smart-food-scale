@@ -405,28 +405,31 @@ const camPin = (name: string, nth = 0): { pin: Pt; jumper: Pt } => {
   return found.side === 'left' ? { pin: at('b', found.i), jumper: at('a', found.i) } : { pin: at('i', found.i), jumper: at('j', found.i) };
 };
 
-const LED_ROW = (n: number) => 10 + n * 2;
+/** The LEDs sit below the camera's body, which covers rows 1 to 14. */
+const LED_ROW = (n: number) => 14 + n * 2;
+/** The side rails have a gap every sixth row: a wire meant for one goes one row down. */
+const railRow = (row: number) => (row % 6 === 5 ? row + 1 : row);
 
 const PLACES_B: Record<string, Place> = {
   cam: {
     pins: Object.fromEntries([...CAM_LEFT, ...CAM_RIGHT].map((name) => [name, camPin(name).pin])),
     jumper: Object.fromEntries([...CAM_LEFT, ...CAM_RIGHT].map((name) => [name, camPin(name).jumper])),
     leg: { '5V': at('L+', 0), GND: at('L-', 0) },
-    say: 'The camera into the breadboard, lens at the bottom: its left pins in column b, its right pins in column i, rows 1 to 8.',
+    say: 'The camera into the breadboard, the microSD end at the top: its left pins in column b, its right pins in column i, rows 1 to 8. Its body covers the rows down to 14: nothing goes under it.',
     draw: () => <CameraTop />,
   },
   q2: {
-    pins: { emitter: at('c', 10), base: at('c', 11), collector: at('c', 12) },
-    jumper: { emitter: at('a', 10), base: at('a', 11), collector: at('d', 12) },
-    leg: { base: at('d', 11) },
+    pins: { emitter: at('c', 18), base: at('c', 19), collector: at('c', 20) },
+    jumper: { emitter: at('a', 18), base: at('a', 19), collector: at('d', 20) },
+    leg: { base: at('d', 19) },
     seriesCol: 'b',
-    say: 'The second transistor in column c, rows 11 to 13: flat face to the left, E, B, C from the top.',
-    draw: () => <TransistorTop col="c" row={10} />,
+    say: 'The second transistor below the camera, in column c, rows 19 to 21: flat face to the left, E, B, C from the top.',
+    draw: () => <TransistorTop col="c" row={18} />,
   },
   leds: {
     pins: { 'long legs': at('g', LED_ROW(0)), 'short legs': at('g', LED_ROW(0) + 1) },
     jumper: { 'long legs': at('j', LED_ROW(0)), 'short legs': at('j', LED_ROW(0) + 1) },
-    say: 'Six white LEDs down column g, each across two rows: long leg on top, short leg below. Rows 11 to 22.',
+    say: 'Six white LEDs down column g, below the camera, each across two rows: long leg on top, short leg below. Rows 15 to 26.',
     draw: () => (
       <g>
         {Array.from({ length: 6 }, (_, n) => (
@@ -448,26 +451,40 @@ const PLACES_B: Record<string, Place> = {
   },
 };
 
+/**
+ * The ESP32-CAM from above, as on the owner's board: 27 × 40.5 mm, so it covers the
+ * breadboard down to row 14. The microSD slot is at the top edge with the lens folded
+ * over it, then the ribbon, the camera connector, the white LED, and "ESP32-CAM".
+ */
+export const CAM_BOX = { x: COLS.b - 13, y: rowY(0) - 24, w: COLS.i - COLS.b + 26, h: 220 };
+
 export function CameraTop() {
-  const x0 = COLS.b - 13;
-  const x1 = COLS.i + 13;
+  const { x, y, w, h } = CAM_BOX;
+  const label = { fontSize: 7, fill: '#f2f5f7', fontFamily: MONO, paintOrder: 'stroke', stroke: '#1d2732', strokeWidth: 2.6, strokeLinejoin: 'round' } as const;
   return (
     <g>
-      <rect x={x0 + 5} y={ROW_TOP - 12 + 6} width={x1 - x0} height={7 * ROW_STEP + 26} rx={4} fill="#000" opacity={0.25} />
-      <rect x={x0} y={ROW_TOP - 12} width={x1 - x0} height={7 * ROW_STEP + 26} rx={4} fill="#1d2732" stroke="#2c3a48" />
-      <rect x={350} y={ROW_TOP - 6} width={80} height={30} rx={2} fill="url(#cu-can)" />
-      <text x={390} y={ROW_TOP + 12} textAnchor="middle" fontSize={6} fill="#4a5258" fontFamily={MONO}>
-        ESP32-S
+      <rect x={x + 5} y={y + 6} width={w} height={h} rx={4} fill="#000" opacity={0.25} />
+      <rect x={x} y={y} width={w} height={h} rx={4} fill="#1d2732" stroke="#2c3a48" />
+      {/* the microSD slot, open at the top edge */}
+      <rect x={x + 32} y={y} width={86} height={76} rx={2} fill="url(#cu-can)" stroke="#8d949a" />
+      <rect x={x + 36} y={y} width={78} height={3} fill="#6f777d" />
+      {/* the lens, folded over the slot, and its ribbon */}
+      <rect x={x + 54} y={y + 80} width={30} height={34} fill="#c9873a" />
+      <rect x={x + 46} y={y + 23} width={50} height={50} rx={3} fill="#111" />
+      <circle cx={x + 71} cy={y + 48} r={17} fill="#1b1b1b" stroke="#333" />
+      <circle cx={x + 71} cy={y + 48} r={8} fill="#1f3350" />
+      <circle cx={x + 68} cy={y + 45} r={2.2} fill="#7fa6d8" />
+      {/* the camera connector, the LED, the name */}
+      <rect x={x + 27} y={y + 123} width={96} height={32} rx={2} fill="#ecebe6" />
+      <rect x={x + 32} y={y + 128} width={86} height={8} fill="#3a3a3a" />
+      <rect x={x + 129} y={y + 149} width={17} height={17} rx={1.5} fill="#fff6d8" stroke="#c9c2a5" />
+      <text x={x + w / 2} y={y + 210} textAnchor="middle" fontSize={11} fontWeight={700} fill="#f2f5f7" fontFamily={MONO}>
+        ESP32-CAM
       </text>
-      <rect x={372} y={rowY(4)} width={38} height={38} rx={3} fill="#111" />
-      <circle cx={391} cy={rowY(5) + 4} r={13} fill="#1b1b1b" stroke="#333" />
-      <circle cx={391} cy={rowY(5) + 4} r={7} fill="#1f3350" />
-      <circle cx={388} cy={rowY(5) + 1} r={2} fill="#7fa6d8" />
-      <rect x={422} y={rowY(6)} width={8} height={8} fill="#fff6d8" />
       {CAM_LEFT.map((name, i) => (
         <g key={`l${i}`}>
           <rect x={COLS.b - 3.5} y={rowY(i) - 3.5} width={7} height={7} rx={1} fill="url(#cu-gold)" />
-          <text x={COLS.b + 7} y={rowY(i) + 3} fontSize={7} fill="#f2f5f7" fontFamily={MONO}>
+          <text x={COLS.b + 7} y={rowY(i) + 3} {...label}>
             {name}
           </text>
         </g>
@@ -475,7 +492,7 @@ export function CameraTop() {
       {CAM_RIGHT.map((name, i) => (
         <g key={`r${i}`}>
           <rect x={COLS.i - 3.5} y={rowY(i) - 3.5} width={7} height={7} rx={1} fill="url(#cu-gold)" />
-          <text x={COLS.i - 7} y={rowY(i) + 3} textAnchor="end" fontSize={7} fill="#f2f5f7" fontFamily={MONO}>
+          <text x={COLS.i - 7} y={rowY(i) + 3} textAnchor="end" {...label}>
             {name}
           </text>
         </g>
@@ -644,7 +661,9 @@ function resolve(setup: Setup, end: End, other: End): End3 {
   if (rail) {
     let row = rowOf(near[1]);
     if (row % 6 === 5) row += 1;
-    if (end.part === 'v5R' || (other.part === 'v5R' && end.part === 'v5L')) row = 24;
+    // The bridge and the charger's leads each get rail holes of their own, clear of the light's.
+    if (end.part === 'v5R' || (other.part === 'v5R' && end.part === 'v5L')) row = 25;
+    if (other.part === 'supply') row = 21;
     const h = hole(rail.col, row);
     return { at: h, jumper: h, leg: h, title: rail.name, detail: rail.detail, glow: { kind: 'rail', rail } };
   }
@@ -671,8 +690,8 @@ function ledSubs(wire: Wire, setup: Setup): Sub[] | undefined {
   if (wire.id === 'b-light-collector') {
     const collector = setup.places.q2.jumper.collector;
     return [
-      ...Array.from({ length: 6 }, (_, n) => ({ a: hole('j', LED_ROW(n) + 1), b: hole('R-', LED_ROW(n) + 1), kind: 'jumper' as const, colour: 'blue' as Colour })),
-      { a: collector, b: hole('R-', 12), kind: 'jumper' as const, colour: 'blue' as Colour },
+      ...Array.from({ length: 6 }, (_, n) => ({ a: hole('j', LED_ROW(n) + 1), b: hole('R-', railRow(LED_ROW(n) + 1)), kind: 'jumper' as const, colour: 'blue' as Colour })),
+      { a: collector, b: hole('R-', rowOf(collector[1])), kind: 'jumper' as const, colour: 'blue' as Colour },
     ];
   }
   return undefined;
@@ -750,7 +769,7 @@ export function closeupScene(variant: string): SceneDef {
     return { mid: [COLS[col], p.b.jumper[1] - 3 * ROW_STEP], to: [COLS[col], p.b.jumper[1]] };
   };
 
-  const drawWire = (p: Planned, land: number, run: number, seat: number, key: string) => {
+  const drawWire = (p: Planned, land: number, run: number, seat: number, key: string, past = false) => {
     if (p.subs) {
       return (
         <g key={key}>
@@ -765,7 +784,7 @@ export function closeupScene(variant: string): SceneDef {
               <Jumper key={n} a={s.a} b={s.b} colour={s.colour} land={1} run={q} seat={q >= 1 ? 1 : 0} female={false} />
             );
           })}
-          {p.wire.id === 'b-light-collector' && run > 0.5 ? <Label at={hole('R-', 22)} text="this − line: the LEDs’ common, not ground" dx={-60} dy={30} size={8} /> : null}
+          {p.wire.id === 'b-light-collector' && run > 0.5 && !past ? <Label at={hole('R-', 22)} text="this − line: the LEDs’ common, not ground" dx={-60} dy={30} size={8} /> : null}
         </g>
       );
     }
@@ -843,19 +862,27 @@ export function closeupScene(variant: string): SceneDef {
           )}
           {past.map((p) => (
             <g key={p.wire.id} opacity={0.75}>
-              {drawWire(p, 1, 1, 1, p.wire.id)}
+              {drawWire(p, 1, 1, 1, p.wire.id, true)}
             </g>
           ))}
           {plan.map((p) => drawWire(p, ke(t, p.start + 0.6, 0.9), ke(t, p.start + 1.6, 1.4), ke(t, p.start + 3, 0.4), p.wire.id))}
-          {pinNow && pinNow.a.glow?.kind === 'pin' ? (
-            <g>
-              <circle cx={pinNow.a.at[0]} cy={pinNow.a.at[1]} r={9 + Math.sin(t * 8) * 2} fill="none" stroke="#e08a4f" strokeWidth={2.4} />
-              <Label at={[pinNow.a.at[0], pinNow.a.at[1] - 10]} text={pinNow.a.title} dy={-22} dx={pinNow.a.at[0] < 110 ? -10 : 10} tone="accent" size={11} />
-              <text x={pinNow.a.at[0] + (pinNow.a.at[0] < 110 ? -10 : 10)} y={pinNow.a.at[1] - 46} textAnchor="middle" fontSize={7.5} fill="var(--ink, #222)" paintOrder="stroke" stroke="var(--paper, #fff)" strokeWidth={2.4}>
-                {pinNow.a.detail}
-              </text>
-            </g>
-          ) : null}
+          {pinNow && pinNow.a.glow?.kind === 'pin'
+            ? (() => {
+                // Centred over the pin, but never past the left edge of the frame: the board's left pins are near it.
+                const [px, py] = pinNow.a.at;
+                const half = Math.max(pinNow.a.title.length * 3.2, pinNow.a.detail.length * 2.1) + 4;
+                const lx = Math.max(px + (px < 110 ? -10 : 10), FULL[0] + half);
+                return (
+                  <g>
+                    <circle cx={px} cy={py} r={9 + Math.sin(t * 8) * 2} fill="none" stroke="#e08a4f" strokeWidth={2.4} />
+                    <Label at={[px, py - 10]} text={pinNow.a.title} dy={-22} dx={lx - px} tone="accent" size={11} />
+                    <text x={lx} y={py - 46} textAnchor="middle" fontSize={7.5} fill="var(--ink, #222)" paintOrder="stroke" stroke="var(--paper, #fff)" strokeWidth={2.4}>
+                      {pinNow.a.detail}
+                    </text>
+                  </g>
+                );
+              })()
+            : null}
           {glowing && !glowing.subs ? (
             <g opacity={o}>
               <Label at={glowing.b.jumper} text={glowing.b.title} dx={edge(glowing.b.jumper[0])} dy={-26} tone="accent" size={10.5} />
@@ -865,8 +892,8 @@ export function closeupScene(variant: string): SceneDef {
             </g>
           ) : null}
           {t < INTRO ? <Tag at={[setup.usb[0], setup.usb[1] - 50]} text={powerStep ? 'base off the laptop' : 'USB out'} tone="you" size={9} /> : null}
-          {t > end + 0.6 ? <Tag at={[setup.usb[0], setup.usb[1] - 50]} text={powerStep ? 'charger in' : 'USB in · tell Claude'} tone="you" size={9} /> : null}
-          {t > end + 1.2 ? (
+          {t > end + 0.6 ? <Tag at={powerStep ? [215, 428] : [setup.usb[0], setup.usb[1] - 50]} text={powerStep ? 'charger in' : 'USB in · tell Claude'} tone="you" size={9} /> : null}
+          {t > end + 1.2 && !showSupply ? (
             <text x={290} y={442} textAnchor="middle" fontSize={7} fill="var(--ink, #222)" opacity={0.75} paintOrder="stroke" stroke="var(--paper, #fff)" strokeWidth={2}>
               Rows here are an example: any free row works, as long as each wire meets its part in the same row of five.
             </text>

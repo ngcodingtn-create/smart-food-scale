@@ -2,7 +2,7 @@
  * Close-ups of the steps your hands do that are not wiring: the USB plug into
  * the NodeMCU, the camera onto its base, the phone's hotspot, the microSD card.
  */
-import { CameraTop, CloseupDefs, COLS, NODE_B, NodeMCUTop, ROW_STEP, ROW_TOP } from './closeup';
+import { CAM_BOX, CameraTop, CloseupDefs, COLS, NODE_B, NodeMCUTop, ROW_STEP, ROW_TOP } from './closeup';
 import { Appear, k, ke, lerp } from './iso';
 import { Label, Tag } from './parts';
 import type { SceneDef } from './types';
@@ -61,10 +61,17 @@ export function seatScene(): SceneDef {
   const right = NODE_B.board.right;
   const x0 = COLS.b - 13;
   const x1 = COLS.i + 13;
+  // The base is wider than the camera, so its names stay readable beside it once it is seated;
+  // its micro-USB and the IO0 and RST buttons are under the camera's "ESP32-CAM" end.
+  const b0 = x0 - 36;
+  const b1 = x1 + 36;
+  const top = CAM_BOX.y - 6;
+  const bottom = CAM_BOX.y + CAM_BOX.h + 14;
+  const cx = CAM_BOX.x + CAM_BOX.w / 2;
   const rowY = (i: number) => ROW_TOP + i * ROW_STEP;
   return {
     T: 11,
-    view: '250 -40 290 230',
+    view: '250 -50 290 330',
     beats: [
       { at: 0, text: 'The base on the desk, its USB socket at the bottom. Read the names beside its sockets.', who: 'you' },
       { at: 1.8, text: 'Turn the camera so the names match: its 5V over the base’s 5V, its GND over GND.', who: 'you' },
@@ -80,12 +87,12 @@ export function seatScene(): SceneDef {
           <CloseupDefs />
           <Desk />
           {/* the base, sockets on the camera's grid */}
-          <rect x={x0 - 8 + 6} y={ROW_TOP - 24 + 8} width={x1 - x0 + 16} height={8 * ROW_STEP + 60} rx={5} fill="#000" opacity={0.25} />
-          <rect x={x0 - 8} y={ROW_TOP - 24} width={x1 - x0 + 16} height={8 * ROW_STEP + 60} rx={5} fill="#1b1d20" />
+          <rect x={b0 + 6} y={top + 8} width={b1 - b0} height={bottom - top} rx={5} fill="#000" opacity={0.25} />
+          <rect x={b0} y={top} width={b1 - b0} height={bottom - top} rx={5} fill="#1b1d20" />
           {left.map((name, i) => (
             <g key={`l${i}`}>
               <rect x={COLS.b - 5} y={rowY(i) - 5} width={10} height={10} rx={1} fill="#0a0a0a" stroke="#3a3a3a" />
-              <text x={COLS.b - 9} y={rowY(i) + 3} textAnchor="end" fontSize={7} fill="#f2f5f7" fontFamily="var(--font-mono, monospace)">
+              <text x={x0 - 4} y={rowY(i) + 3} textAnchor="end" fontSize={7} fill="#f2f5f7" fontFamily="var(--font-mono, monospace)">
                 {name}
               </text>
             </g>
@@ -93,24 +100,35 @@ export function seatScene(): SceneDef {
           {right.map((name, i) => (
             <g key={`r${i}`}>
               <rect x={COLS.i - 5} y={rowY(i) - 5} width={10} height={10} rx={1} fill="#0a0a0a" stroke="#3a3a3a" />
-              <text x={COLS.i + 9} y={rowY(i) + 3} fontSize={7} fill="#f2f5f7" fontFamily="var(--font-mono, monospace)">
+              <text x={x1 + 4} y={rowY(i) + 3} fontSize={7} fill="#f2f5f7" fontFamily="var(--font-mono, monospace)">
                 {name}
               </text>
             </g>
           ))}
-          <rect x={373} y={ROW_TOP + 8 * ROW_STEP + 14} width={36} height={14} rx={2} fill="url(#cu-can)" />
-          {/* the camera, coming down */}
-          {show > 0 ? (
-            <g opacity={show} transform={`translate(${lift * 0.15} ${-lift})`}>
-              <rect x={x0 + lift * 0.1} y={ROW_TOP - 12 + lift * 0.12} width={x1 - x0} height={7 * ROW_STEP + 26} rx={4} fill="#000" opacity={0.25} transform={`translate(${6 + lift * 0.1} ${8 + lift * 0.15})`} />
-              <CameraTop />
+          <rect x={cx - 18} y={bottom - 16} width={36} height={14} rx={2} fill="url(#cu-can)" />
+          {[
+            { x: b0 + 22, name: 'IO0' },
+            { x: b1 - 22, name: 'RST' },
+          ].map((b) => (
+            <g key={b.name}>
+              <rect x={b.x - 8} y={bottom - 16} width={16} height={12} rx={1.5} fill="#c9ced2" />
+              <circle cx={b.x} cy={bottom - 10} r={3.5} fill="#2b2d30" />
             </g>
+          ))}
+          {/* the camera, coming down; its shadow stays on the base and fades while it is high */}
+          {show > 0 ? (
+            <>
+              <rect x={CAM_BOX.x + 5 + lift * 0.25} y={CAM_BOX.y + 6 + lift * 0.1} width={CAM_BOX.w} height={CAM_BOX.h} rx={4} fill="#000" opacity={show * 0.25 * (1 - lift / 300)} />
+              <g opacity={show} transform={`translate(${lift * 0.15} ${-lift})`}>
+                <CameraTop />
+              </g>
+            </>
           ) : null}
           <Appear t={t} at={1.8} out={4}>
-            <Label at={[COLS.b - 20, rowY(0)]} text="5V on 5V" dx={-40} dy={-14} tone="accent" size={8} />
+            <Label at={[COLS.b - 6, rowY(0)]} text="5V on 5V" dx={-46} dy={-20} tone="accent" size={8} />
           </Appear>
           <Appear t={t} at={8}>
-            <Tag at={[391, ROW_TOP + 8 * ROW_STEP + 46]} text="base → laptop · tell Claude" tone="you" size={8} />
+            <Tag at={[cx, bottom + 18]} text="base → laptop · tell Claude" tone="you" size={8} />
           </Appear>
         </>
       );
@@ -151,7 +169,7 @@ export function hotspotCloseScene(): SceneDef {
   );
   return {
     T: 10,
-    view: '-10 -30 420 334',
+    view: '-10 -30 420 366',
     beats: [
       { at: 0, text: 'Settings, then Personal hotspot (iPhone) or Hotspot (Android).', who: 'you' },
       { at: 1.6, text: 'Turn it on.', who: 'you' },
@@ -185,49 +203,64 @@ export function hotspotCloseScene(): SceneDef {
           Android
         </text>
         <Appear t={t} at={7.2}>
-          <Tag at={[200, 296]} text="2.4 GHz ✓" tone="ok" size={10} />
+          <Tag at={[200, 320]} text="2.4 GHz ✓" tone="ok" size={10} />
         </Appear>
       </>
     ),
   };
 }
 
-/** The microSD card into the camera's slot. */
+/** The microSD card into the camera's slot, at the board's top edge under the lens. */
 export function cardCloseScene(): SceneDef {
+  const top = CAM_BOX.y + 30;
+  const cx = CAM_BOX.x + 32 + 43;
   return {
     T: 10,
-    view: '300 -20 200 159',
+    view: '290 -95 220 205',
     beats: [
-      { at: 0, text: 'Unplug the camera first. The slot is on the camera board’s top edge.', who: 'you' },
-      { at: 1.6, text: 'Gold contacts facing the board, the card’s narrow end first.', who: 'you' },
-      { at: 3.6, text: 'Push until it clicks and stays in.', who: 'you' },
+      { at: 0, text: 'Unplug the camera first. The slot is the metal box at the board’s top edge, under the lens.', who: 'you' },
+      { at: 1.6, text: 'Gold contacts down, towards the board, and in first.', who: 'you' },
+      { at: 3.6, text: 'Push it under the metal until it clicks and stays in.', who: 'you' },
       { at: 6, text: 'Power back on: Claude reads card=1 in the camera’s first line.', who: 'claude' },
     ],
     draw: (t) => {
       const push = ke(t, 3.6, 1.4);
-      const y = lerp(-70, -6, push);
+      // The card's leading edge: above the board, then under the slot's cover with a little left showing.
+      const lead = lerp(top - 28, top + 73, push);
+      // Shown contacts up first, then turned over: label up, contacts down.
+      const turn = -Math.cos(Math.PI * ke(t, 2.4, 0.9));
       return (
         <>
           <CloseupDefs />
           <Desk />
+          <defs>
+            <clipPath id="cu-card-out">
+              <rect x={200} y={-300} width={400} height={300 + top} />
+            </clipPath>
+          </defs>
           <g transform="translate(0 30)">
             <CameraTop />
           </g>
-          <rect x={366} y={18} width={50} height={8} rx={1} fill="url(#cu-can)" />
-          <g transform={`translate(391 ${y + 30})`} opacity={k(t, 1.2, 0.4)}>
-            <path d="M-17,-24 L13,-24 L17,-20 L17,0 L-17,0 Z" fill="#26282c" />
-            {Array.from({ length: 8 }, (_, i) => (
-              <rect key={i} x={-14 + i * 3.6} y={-6} width={2.4} height={5} fill="#d9b44a" />
-            ))}
-            <text x={0} y={-12} textAnchor="middle" fontSize={5.5} fill="#ccc">
-              microSD
-            </text>
+          <g clipPath="url(#cu-card-out)" opacity={k(t, 1.2, 0.4)}>
+            <g transform={`translate(${cx} ${lead}) scale(${turn} 1)`}>
+              <path d="M-30,-81 L18,-81 L30,-69 L30,-44 L26,-40 L30,-36 L30,0 L-30,0 Z" fill={turn > 0 ? '#26282c' : '#30333a'} stroke="#111" />
+              {turn > 0 ? (
+                <text x={0} y={-44} textAnchor="middle" fontSize={11} fill="#ccc">
+                  microSD
+                </text>
+              ) : (
+                Array.from({ length: 8 }, (_, i) => <rect key={i} x={-26 + i * 6.8} y={-14} width={4.6} height={11} rx={1} fill="#d9b44a" />)
+              )}
+            </g>
           </g>
+          <Appear t={t} at={1.6} out={3.4}>
+            <Label at={[cx, top - 40]} text="contacts: down, in first" dx={-10} dy={-62} tone="accent" size={8} />
+          </Appear>
           <Appear t={t} at={4.8}>
-            <Label at={[391, 40]} text="click" dx={50} dy={-8} tone="tip" size={9} />
+            <Label at={[cx + 30, top - 4]} text="click" dx={44} dy={-14} tone="tip" size={9} />
           </Appear>
           <Appear t={t} at={6}>
-            <Tag at={[400, 125]} text="E boot … card=1" tone="claude" size={8} />
+            <Tag at={[cx, -60]} text="E boot … card=1" tone="claude" size={9} />
           </Appear>
         </>
       );
