@@ -33,8 +33,12 @@
     "m0-know-the-parts/breadboard": [
       0,
       1
+    ],
+    "m1-scale-brain/display": [
+      0,
+      1
     ]
   },
-  "updated": "2026-10-25T22:02:00.038Z",
+  "updated": "2026-10-25T23:39:39.193Z",
   "sfs-wired-v1": []
 }

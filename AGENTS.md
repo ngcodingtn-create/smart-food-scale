@@ -7,6 +7,9 @@ state, what is next, and what is known to be wrong. Then
 
 The rules that matter most here:
 
+- **Explain every hands-on step in 3D**, as the owner asked: an interactive scene of their
+  real bench, one action at a time, pins counted from the far end, the board's own check at
+  the end. The standard and the model to copy: [`ai-docs/EXPLAINING.md`](ai-docs/EXPLAINING.md).
 - **Nothing is invented.** Every nutrient value is flagged as an estimate; every
   unmeasured dimension is labelled as one; empty result tables stay empty. A number that
   looks precise and is not is the failure this project exists to prevent. Hold your own
