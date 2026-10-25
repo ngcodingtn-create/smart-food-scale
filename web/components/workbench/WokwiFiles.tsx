@@ -69,7 +69,7 @@ export function WokwiFiles() {
         </li>
         <li>Copy each file below into it.</li>
         <li>Press the green play button. The first build waits in Wokwi’s free queue for a minute or two.</li>
-        <li>Click the load cell for its weight slider. Press TARE, add weight, press PHOTO.</li>
+        <li>Click the load cell for its weight slider. Hold the D18 button 5 s to tare, add weight, click it to take the photo.</li>
       </ol>
       <ul className="wokwi-files">
         {FILES.map((file) => (

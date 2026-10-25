@@ -6,7 +6,7 @@
 #include <math.h>
 #include <stdint.h>
 
-#define SFS_FIRMWARE_VERSION "0.2.2"
+#define SFS_FIRMWARE_VERSION "0.3.0"
 
 // Counts per gram, until the scale is calibrated and the real value is saved on
 // the board. Unknown by default, on purpose: an uncalibrated scale shows raw
@@ -39,6 +39,11 @@ constexpr uint8_t kLastChannel = 13;
 // The buzzer. A passive buzzer, so the firmware chooses the pitch.
 constexpr uint16_t kBeepHz = 2700;
 constexpr uint16_t kErrorHz = 900;
+
+// The one button (D5): a click takes the photo; held this long, it tares instead.
+// Let go between the two and nothing happens, so a tare can be changed mid-hold.
+constexpr uint32_t kClickMaxMs = 800;
+constexpr uint32_t kHoldToTareMs = 5000;
 
 // The display.
 constexpr uint8_t kOledAddress = 0x3C;

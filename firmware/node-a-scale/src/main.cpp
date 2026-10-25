@@ -301,6 +301,7 @@ bool findCamera() {
 Adafruit_SSD1306 oled(128, 64, &Wire, -1);
 bool hasDisplay = false;
 const char *note = "READY";
+uint32_t holdingFor = 0;  // how long the button has been held towards a tare, for the countdown
 
 void beep(uint16_t hz, uint16_t ms) {
   tone(PIN_BUZZER, hz, ms);
@@ -343,7 +344,8 @@ void show() {
   // Bottom line: what the scale is doing.
   oled.setTextSize(1);
   oled.setCursor(0, 56);
-  oled.print(calibrated() ? note : "NOT CALIBRATED");
+  if (holdingFor) oled.printf("HOLD: TARE IN %lu s", (unsigned long)((config::kHoldToTareMs - holdingFor + 999) / 1000));
+  else oled.print(calibrated() ? note : "NOT CALIBRATED");
   oled.display();
 }
 
@@ -364,8 +366,43 @@ struct Button {
   }
 };
 
-Button tareButton{PIN_BUTTON_TARE};
-Button captureButton{PIN_BUTTON_CAPTURE};
+// The one button: a click, or a hold of kHoldToTareMs.
+struct MainButton {
+  enum Event { None, Click, Hold };
+  explicit MainButton(uint8_t pin) : pin(pin) {}
+  uint8_t pin;
+  bool down = false;
+  bool held = false;  // this press already tared
+  uint32_t changed = 0;
+  uint32_t pressedAt = 0;
+  Event poll() {
+    bool now = digitalRead(pin) == LOW;
+    if (now != down && millis() - changed > 30) {
+      down = now;
+      changed = millis();
+      if (down) {
+        held = false;
+        pressedAt = changed;
+        return None;
+      }
+      // Let go: a click if it was short; after a hold, or between the two, nothing.
+      return !held && millis() - pressedAt < config::kClickMaxMs ? Click : None;
+    }
+    if (down && now && !held && millis() - changed >= config::kHoldToTareMs) {
+      held = true;
+      return Hold;
+    }
+    return None;
+  }
+  // How long it has been held past a click, while a tare is still to come.
+  uint32_t holding() const {
+    uint32_t ms = millis() - changed;
+    return down && !held && ms >= config::kClickMaxMs ? ms : 0;
+  }
+};
+
+MainButton mainButton{PIN_BUTTON_TARE};
+Button captureButton{PIN_BUTTON_CAPTURE};  // the board's FLASH button, or a second button: PHOTO only
 
 // --- what the buttons do -----------------------------------------------------
 
@@ -596,7 +633,12 @@ void loop() {
     Serial.printf("R raw=%ld net=%ld g=%.1f stable=%d\n", raw, raw - tareOffset, grams, stable);
   }
 
-  if (tareButton.pressed()) tare();
+  switch (mainButton.poll()) {
+    case MainButton::Click: capture(); break;
+    case MainButton::Hold: tare(); break;
+    default: break;
+  }
+  holdingFor = mainButton.holding();
   if (captureButton.pressed()) capture();
   readConsole();
 

@@ -47,7 +47,7 @@ export const DAYS: Day[] = [
     summary: 'Everything except the real weight. The scale runs the pretend-scale image; the laptop is the server.',
     you: [
       { id: 'y-port', title: 'Plug in the NodeMCU and say “plugged in”', doneWhen: 'Claude finds its CH340 port and flashes it', status: 'todo' },
-      { id: 'y-wire-a', title: 'Wire the display, tare button and buzzer', doneWhen: 'Ticks on the step pages; Claude says it still boots', href: '/admin/build/m1-scale-brain', status: 'todo' },
+      { id: 'y-wire-a', title: 'Wire the display, the button and the buzzer', doneWhen: 'Ticks on the step pages; Claude says it still boots', href: '/admin/build/m1-scale-brain', status: 'todo' },
       { id: 'y-try-a', title: 'Watch and listen while Claude runs the pretend meal', doneWhen: 'The display shows 150 g and the buzzer beeps', status: 'todo' },
       { id: 'y-hotspot', title: 'Phone hotspot on 2.4 GHz, laptop joins', doneWhen: 'Laptop online through the phone', status: 'todo' },
       { id: 'y-backend', title: 'Click Allow when Windows asks about Python and the network', doneWhen: 'Claude reaches the server from the hotspot address', status: 'todo' },
@@ -66,6 +66,7 @@ export const DAYS: Day[] = [
       { id: 'c-server-lan', title: 'Start the server where the camera can reach it, and check it', status: 'todo' },
       { id: 'c-tests', title: 'Run the tests on the boards: pretend meal, test photo, the whole-meal test', status: 'todo' },
       { id: 'c-rehearse', title: 'Rehearse the real weight on the pretend one: the sign check and a calibration', status: 'todo' },
+      { id: 'c-one-button', title: 'One button: click for PHOTO, hold 5 s for TARE, with a countdown', status: 'done' },
       { id: 'c-sim-real', title: 'A pretend weight that lands like a real one: wobble, settle, a backwards cell', status: 'done' },
       { id: 'c-server', title: 'Server v2: accounts, pairing, the “to name” inbox, photos, Postgres', status: 'todo' },
       { id: 'c-fake', title: 'The fake scale: sends meals as if it were your paired scale', status: 'todo' },
@@ -78,10 +79,9 @@ export const DAYS: Day[] = [
     id: 'tomorrow',
     date: '26 Oct',
     title: 'Tomorrow',
-    summary: 'The second button and the microSD card go in; the scale joins your account and meals reach the app, still on the pretend weight. The HX711 stays in its bag: it is the last thing.',
+    summary: 'The microSD card goes in; the scale joins your account and meals reach the app, still on the pretend weight and the one button. The HX711 and the second button stay in the bag: they are the last thing.',
     you: [
       { id: 't-lab', title: 'At the lab: solder the HX711’s pins, check the transistor and buzzer, ask for calibration weights', status: 'todo' },
-      { id: 't-button', title: 'Wire the second button on D3', href: '/admin/build/m8-finish', status: 'todo' },
       { id: 't-sd', title: 'microSD: FAT32, into the camera', doneWhen: 'Claude tests it with the hotspot off, then on', status: 'todo' },
       { id: 't-pair', title: 'From the app: the scale’s Wi-Fi and pairing code', status: 'todo' },
       { id: 't-pretend-meals', title: 'Three pretend meals from the scale', doneWhen: 'They appear in the app', status: 'todo' },
@@ -98,6 +98,7 @@ export const DAYS: Day[] = [
     summary: 'Everything else works first. Then the HX711 and the load cell replace the pretend weight, and real meals go from the plate to the app.',
     you: [
       { id: 't-wire', title: 'Wire the HX711 (8 wires)', href: '/admin/build/m9-real-weight', status: 'todo' },
+      { id: 't-button', title: 'One button or two: keep the hold-to-tare, or wire PHOTO its own button on D3', href: '/admin/build/m9-real-weight/photo-button', status: 'todo' },
       { id: 't-flash', title: 'Plug the NodeMCU back in: Claude flashes “The scale”, the real image', status: 'todo' },
       { id: 't-sign', title: 'Press the cell when Claude says (swap white and green if told); mount it', status: 'todo' },
       { id: 't-cal', title: 'Put on 3 to 5 known weights, one at a time, when Claude asks', status: 'todo' },

@@ -21,7 +21,7 @@
 #include <math.h>
 #include <stdint.h>
 
-#define SFS_FIRMWARE_VERSION "0.2.1"
+#define SFS_FIRMWARE_VERSION "0.3.0"
 
 // Counts per gram, until the scale is calibrated and the real value is saved on
 // the board. Unknown by default, on purpose: an uncalibrated scale shows raw
@@ -55,6 +55,11 @@ constexpr uint8_t kLastChannel = 13;
 constexpr uint16_t kBeepHz = 2700;
 constexpr uint16_t kErrorHz = 900;
 
+// The one button (D5): a click takes the photo; held this long, it tares instead.
+// Let go between the two and nothing happens, so a tare can be changed mid-hold.
+constexpr uint32_t kClickMaxMs = 800;
+constexpr uint32_t kHoldToTareMs = 5000;
+
 // The display.
 constexpr uint8_t kOledAddress = 0x3C;
 
@@ -67,6 +72,11 @@ constexpr uint8_t kOledAddress = 0x3C;
 namespace config {
 constexpr float kSimCountsPerGram = 100.0f;  // made up, and only used by the simulation
 constexpr long kSimZeroCounts = 84000;       // likewise
+// How a weight lands, per reading (10 a second): pulled towards the new weight,
+// slowed by the damping. These two overshoot about 15 % and settle within a gram
+// in about 1.5 s. Chosen to look like a plate set down, not measured on our arm.
+constexpr float kSimSpring = 0.5f;
+constexpr float kSimDamping = 0.6f;
 }  // namespace config
 #endif
 
@@ -83,23 +93,23 @@ constexpr long kSimZeroCounts = 84000;       // likewise
 #if defined(ESP8266)
 
 // NodeMCU, ESP8266: the board on the bench.
-static const uint8_t PIN_BUTTON_CAPTURE =  0;  // D3: Capture button leg
+static const uint8_t PIN_BUTTON_CAPTURE =  0;  // D3: Second button (optional) leg
 static const uint8_t PIN_OLED_SDA       =  4;  // D2: OLED SDA
 static const uint8_t PIN_OLED_SCL       =  5;  // D1: OLED SCL
 static const uint8_t PIN_HX711_DT       = 12;  // D6: HX711 DT
 static const uint8_t PIN_HX711_SCK      = 13;  // D7: HX711 SCK
-static const uint8_t PIN_BUTTON_TARE    = 14;  // D5: Tare button leg
+static const uint8_t PIN_BUTTON_TARE    = 14;  // D5: The button leg
 static const uint8_t PIN_BUZZER         = 15;  // D8: Transistor base, through 1 kΩ
 
 #else
 
 // ESP32 DevKit V1: the Wokwi simulation, and the board on the original request.
-static const uint8_t PIN_BUTTON_CAPTURE = 19;  // D19: Capture button leg
+static const uint8_t PIN_BUTTON_CAPTURE = 19;  // D19: Second button (optional) leg
 static const uint8_t PIN_OLED_SDA       = 21;  // D21: OLED SDA
 static const uint8_t PIN_OLED_SCL       = 22;  // D22: OLED SCL
 static const uint8_t PIN_HX711_DT       = 16;  // RX2: HX711 DT
 static const uint8_t PIN_HX711_SCK      = 17;  // TX2: HX711 SCK
-static const uint8_t PIN_BUTTON_TARE    = 18;  // D18: Tare button leg
+static const uint8_t PIN_BUTTON_TARE    = 18;  // D18: The button leg
 static const uint8_t PIN_BUZZER         = 23;  // D23: Transistor base, through 1 kΩ
 
 #endif
@@ -213,7 +223,10 @@ static_assert(sizeof(Frame) == 13, "Frame layout changed: rebuild both nodes");
 #ifndef SIMULATE_SCALE
 HX711 cell;
 #else
-float simGrams = 0;  // set from the console with `sim <grams>`
+float simGrams = 0;   // where the weight is going: `sim <grams>`
+float simNow = 0;     // where it is, while it lands
+float simSpeed = 0;
+int simSign = 1;      // -1 plays a cell with its white and green swapped: `sim sign -1`
 #endif
 
 // The last readings, newest last. Raw counts straight from the converter.
@@ -314,7 +327,10 @@ bool readCell() {
   static uint32_t last = 0;
   if (millis() - last < 100) return false;  // the real converter's 10 per second
   last = millis();
-  raw = config::kSimZeroCounts + lroundf(simGrams * config::kSimCountsPerGram) + random(-3, 4);
+  // A weight does not arrive at once: it overshoots and wobbles, then settles.
+  simSpeed += (simGrams - simNow) * config::kSimSpring - simSpeed * config::kSimDamping;
+  simNow += simSpeed;
+  raw = config::kSimZeroCounts + simSign * lroundf(simNow * config::kSimCountsPerGram) + random(-3, 4);
   overloaded = false;
 #endif
   if (historyCount == kHistory) {
@@ -461,6 +477,7 @@ bool findCamera() {
 Adafruit_SSD1306 oled(128, 64, &Wire, -1);
 bool hasDisplay = false;
 const char *note = "READY";
+uint32_t holdingFor = 0;  // how long the button has been held towards a tare, for the countdown
 
 void beep(uint16_t hz, uint16_t ms) {
   tone(PIN_BUZZER, hz, ms);
@@ -503,7 +520,8 @@ void show() {
   // Bottom line: what the scale is doing.
   oled.setTextSize(1);
   oled.setCursor(0, 56);
-  oled.print(calibrated() ? note : "NOT CALIBRATED");
+  if (holdingFor) oled.printf("HOLD: TARE IN %lu s", (unsigned long)((config::kHoldToTareMs - holdingFor + 999) / 1000));
+  else oled.print(calibrated() ? note : "NOT CALIBRATED");
   oled.display();
 }
 
@@ -524,8 +542,43 @@ struct Button {
   }
 };
 
-Button tareButton{PIN_BUTTON_TARE};
-Button captureButton{PIN_BUTTON_CAPTURE};
+// The one button: a click, or a hold of kHoldToTareMs.
+struct MainButton {
+  enum Event { None, Click, Hold };
+  explicit MainButton(uint8_t pin) : pin(pin) {}
+  uint8_t pin;
+  bool down = false;
+  bool held = false;  // this press already tared
+  uint32_t changed = 0;
+  uint32_t pressedAt = 0;
+  Event poll() {
+    bool now = digitalRead(pin) == LOW;
+    if (now != down && millis() - changed > 30) {
+      down = now;
+      changed = millis();
+      if (down) {
+        held = false;
+        pressedAt = changed;
+        return None;
+      }
+      // Let go: a click if it was short; after a hold, or between the two, nothing.
+      return !held && millis() - pressedAt < config::kClickMaxMs ? Click : None;
+    }
+    if (down && now && !held && millis() - changed >= config::kHoldToTareMs) {
+      held = true;
+      return Hold;
+    }
+    return None;
+  }
+  // How long it has been held past a click, while a tare is still to come.
+  uint32_t holding() const {
+    uint32_t ms = millis() - changed;
+    return down && !held && ms >= config::kClickMaxMs ? ms : 0;
+  }
+};
+
+MainButton mainButton{PIN_BUTTON_TARE};
+Button captureButton{PIN_BUTTON_CAPTURE};  // the board's FLASH button, or a second button: PHOTO only
 
 // --- what the buttons do -----------------------------------------------------
 
@@ -633,27 +686,40 @@ void command(String text) {
 #endif
     );
   } else if (text == "cal clear") {
+#ifdef SIMULATE_SCALE
+    countsPerGram = NAN;  // uncalibrated until `cal`, as a fresh real scale would be
+#else
     saveCountsPerGram(NAN);
     countsPerGram = SFS_COUNTS_PER_GRAM;
+#endif
     Serial.println("E cal cleared");
   } else if (text.startsWith("cal ")) {
     float value = text.substring(4).toFloat();
     if (value > 0) {
       countsPerGram = value;
+#ifdef SIMULATE_SCALE
+      // A rehearsal: kept until the next restart, never saved, so nothing from the
+      // pretend scale is left for the real one to read.
+      Serial.printf("E cal cpg=%.6f saved=0\n", value);
+#else
       saveCountsPerGram(value);
       Serial.printf("E cal cpg=%.6f\n", value);
+#endif
     } else {
       Serial.println("E error cal-needs-a-positive-number");
     }
   }
 #ifdef SIMULATE_SCALE
-  else if (text.startsWith("sim ")) {
+  else if (text.startsWith("sim sign ")) {
+    simSign = text.substring(9).toInt() < 0 ? -1 : 1;
+    Serial.printf("E sim sign=%d\n", simSign);
+  } else if (text.startsWith("sim ")) {
     simGrams = text.substring(4).toFloat();
     Serial.printf("E sim g=%.1f\n", simGrams);
   }
 #endif
   else if (text.length()) {
-    Serial.println("E help tare | capture | find | info | cal <counts per gram> | cal clear | sim <grams>");
+    Serial.println("E help tare | capture | find | info | cal <counts per gram> | cal clear | sim <grams> | sim sign <1|-1>");
   }
 }
 
@@ -743,7 +809,12 @@ void loop() {
     Serial.printf("R raw=%ld net=%ld g=%.1f stable=%d\n", raw, raw - tareOffset, grams, stable);
   }
 
-  if (tareButton.pressed()) tare();
+  switch (mainButton.poll()) {
+    case MainButton::Click: capture(); break;
+    case MainButton::Hold: tare(); break;
+    default: break;
+  }
+  holdingFor = mainButton.holding();
   if (captureButton.pressed()) capture();
   readConsole();
 

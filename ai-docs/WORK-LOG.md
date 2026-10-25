@@ -480,3 +480,18 @@ best way to stand in for the HX711 meanwhile, with what is in hand)
 - M4 gained a written step, "Rehearse the real weight on the pretend one".
 - Checked: `tsc`, build, firmware builds; the map, the rehearsal step and the plan in the
   browser. **The wobble and the rehearsal have not run on the board yet.**
+
+**Same day: one button** (asked: one button, hold 5 s for tare, click for photo; the change
+to more buttons, if any, in the last milestone with the HX711)
+
+- Node A 0.3.0: `MainButton` on D5. A click (under 0.8 s) is PHOTO; held 5 s it tares; let go
+  in between and nothing happens. The bottom line counts down `HOLD: TARE IN n s`. D3 stays
+  PHOTO. `kClickMaxMs`, `kHoldToTareMs` in config.h. All four Node A builds clean; images
+  republished; `pins.h` and the Wokwi files regenerated from `wiring.ts`.
+- M1's button step rewritten (hold, then click); the second button left M8 and is M9's
+  "One button or two" (draft). `plan.ts`, `wiring.ts` (part names, say/why), `kit.ts`,
+  the French missing-parts sheet (a second button is now optional), the bench page's check
+  table, the Wokwi note, the drawing's card titles, the firmware README.
+- Not updated: `/prototype`, `/rig`, `/project/architecture` still show TARE and PHOTO as
+  two buttons. **Not run on the board yet.**
+- Checked: tsc, build, the step page and M9 in the browser.

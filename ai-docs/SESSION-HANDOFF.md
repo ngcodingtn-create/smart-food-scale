@@ -21,6 +21,10 @@ says so where it matters. **Rewrite this file when you stop**; history belongs i
 - **The owner's working model**: they plug in, wire, press, look, turn on the hotspot,
   type the Wi-Fi password once and click Allow on the firewall prompt. Claude does the
   rest: port, flashing, boot lines, commands, the tests, calibration from their weights.
+- **One button** (Node A 0.3.0, asked 25 Oct): D5 click = PHOTO, hold 5 s = TARE with a
+  countdown (`HOLD: TARE IN n s`); D3 (FLASH, or an optional second button) is PHOTO only.
+  Whether to wire a second button is decided in M9 (`photo-button`), with the HX711. The
+  public prototype, rig and architecture pages still draw two buttons: not yet updated.
 - **The real weight is the last milestone** (M9), asked 25 Oct: M0–M4 on the boards today,
   then the server (M5), the app (M6), pairing (M7), the finished scale with the second
   button and microSD (M8), all on the pretend scale; the HX711 and load cell only at the end.

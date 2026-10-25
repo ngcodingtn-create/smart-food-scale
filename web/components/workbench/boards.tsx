@@ -207,12 +207,12 @@ function NodeAParts() {
         <Pad at={[A_MOD, 208]} name="SDA" />
       </Card>
 
-      <Card x={A_MOD} y={234} w={144} h={42} title="CAPTURE">
+      <Card x={A_MOD} y={234} w={144} h={42} title="2ND BUTTON">
         <circle className="ln-thin" cx="372" cy="262" r="7" />
         <Pad at={[A_MOD, 246]} name="one leg" />
         <Pad at={[A_MOD, 266]} name="opposite leg" />
       </Card>
-      <Card x={A_MOD} y={286} w={144} h={42} title="TARE">
+      <Card x={A_MOD} y={286} w={144} h={42} title="BUTTON">
         <circle className="ln-thin" cx="372" cy="314" r="7" />
         <Pad at={[A_MOD, 298]} name="one leg" />
         <Pad at={[A_MOD, 318]} name="opposite leg" />

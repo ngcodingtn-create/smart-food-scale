@@ -1,7 +1,11 @@
 # Node A, the scale
 
-An ESP8266 NodeMCU with the HX711 and the load cell, the OLED, two buttons and the
+An ESP8266 NodeMCU with the HX711 and the load cell, the OLED, one button and the
 buzzer. It weighs, and on **PHOTO** hands the grams to Node B over ESP-NOW.
+
+**One button** (D5, since 0.3.0): a click is PHOTO; held 5 s it is TARE, with a countdown
+on the display (`HOLD: TARE IN n s`). Let go between 0.8 s and 5 s and nothing happens.
+D3 (the board's FLASH button, or an optional second button) is PHOTO only.
 
 The request asked for an ESP32 DevKit; the lab handed over a NodeMCU, and the firmware
 was moved to it on 23 October 2026. It still builds for the ESP32 too, because the
@@ -92,8 +96,8 @@ answers. The channel is saved on the board. The display's top line shows it:
 
 | Command | Does |
 | --- | --- |
-| `tare` | The same as the TARE button |
-| `capture` | The same as the PHOTO button |
+| `tare` | The same as holding the button 5 s |
+| `capture` | The same as clicking it |
 | `cal <counts per gram>` | Sets the calibration and saves it on the board. The `-sim` builds keep it until the next restart only and answer `saved=0` |
 | `cal clear` | Forgets it (the `-sim` builds: uncalibrated until the next `cal` or restart) |
 | `info` | Prints the settings |

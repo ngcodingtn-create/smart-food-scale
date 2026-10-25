@@ -65,13 +65,13 @@ export const ASKS: Ask[] = [
   },
   {
     kit: 'push-button',
-    urgency: 'needed',
+    urgency: 'optional',
     name: 'Bouton poussoir',
     qty: '1 de plus',
-    role: 'La balance a deux boutons : TARE (remettre à zéro avec l’assiette vide) et PHOTO. Nous en avons reçu un seul.',
+    role: 'Un seul bouton suffit : un clic prend la photo, un appui de 5 secondes remet à zéro (TARE). Un deuxième, pour la photo seule, est un confort.',
     looks: 'Comme celui que nous avons reçu : un bouton carré à quatre pattes.',
     instead: '6 × 6 mm ou 12 × 12 mm, les deux conviennent.',
-    photo: { kind: 'own', file: 'push-button.jpg', caption: 'Celui que nous avons reçu. Il en faut un deuxième.' },
+    photo: { kind: 'own', file: 'push-button.jpg', caption: 'Celui que nous avons reçu. Un deuxième est facultatif.' },
   },
   {
     kit: 'cap-ceramic',

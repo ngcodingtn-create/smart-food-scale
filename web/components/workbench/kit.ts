@@ -96,7 +96,7 @@ export const KIT: KitItem[] = [
     qty: '2',
     status: 'check',
     photo: 'push-button.jpg',
-    why: '12 × 12 mm, larger than the 6 × 6 asked for: same four legs, same job. Only one came: the scale needs two, TARE and PHOTO; the second is coming 24 October. Until the second comes, the NodeMCU’s own FLASH button works as PHOTO.',
+    why: '12 × 12 mm, larger than the 6 × 6 asked for: same four legs, same job. One is enough: a click is PHOTO, a 5-second hold is TARE. A second, for PHOTO alone, is optional, at the very end.',
   },
   {
     id: 'buzzer',
