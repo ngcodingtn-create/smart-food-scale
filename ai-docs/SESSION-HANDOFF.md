@@ -48,6 +48,13 @@ owner's own messages are the `type:"user"` lines. Mine it with Python run as `py
   list `photos`, then `Artifact` read with `path` = the asset id, then Read the saved image.
   To answer: `ArtifactData` update with `status: "answered"` and `reply` (pin `if_version`).
   It belongs to the second account; another account must recreate it.
+- **Display Fix** (<https://claude.ai/artifact/9mw8eKFAWRwLkZuSTf4pMT>, source
+  `ai-docs/artifacts/display-fix.src.html`, the published file `display-fix.html` embeds the
+  photo): the answer to the owner's first bench photos, a 2.5D stepper of their real bench.
+  **Found from the photos:** the display's pins were bare (not connected), and the owner keeps
+  the NodeMCU **upside down, pins up** to plug F-M jumpers on. Then its rows swap sides: USB
+  toward you, the row next to the breadboard is D0…3V from the far end, the outer row A0…VIN.
+  The site's close-ups (`closeup.tsx`) draw it face up; **redraw them upside down** to match.
 
 ---
 

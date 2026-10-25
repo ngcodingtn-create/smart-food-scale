@@ -1,0 +1,539 @@
+<title>Display Fix, Step 1.4</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,560;9..144,650&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  /* Layout: one column; the verdict with your photo, then the bench in 2.5D you step through,
+     then the upside-down pin map. The site's own palette: terracotta = you, teal = Claude. */
+  :root {
+    --ink: oklch(0.2 0.012 60); --ink-soft: oklch(0.42 0.014 62); --ink-faint: oklch(0.54 0.012 65);
+    --paper: oklch(0.985 0.006 85); --raised: oklch(1 0 0); --sunken: oklch(0.964 0.008 82);
+    --rule: oklch(0.905 0.008 78); --rule-strong: oklch(0.83 0.01 75);
+    --accent: oklch(0.56 0.16 42); --accent-strong: oklch(0.5 0.16 40); --accent-soft: oklch(0.955 0.03 60); --accent-ink: oklch(0.45 0.15 40);
+    --on-accent: oklch(0.99 0.005 80);
+    --measure: oklch(0.52 0.085 188); --measure-soft: oklch(0.95 0.025 188); --measure-ink: oklch(0.4 0.075 190);
+    --danger-ink: oklch(0.44 0.17 25); --danger-wash: oklch(0.965 0.02 25);
+    --display: "Fraunces", Georgia, serif;
+    --body: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: oklch(0.94 0.008 80); --ink-soft: oklch(0.77 0.01 75); --ink-faint: oklch(0.63 0.01 75);
+      --paper: oklch(0.17 0.008 70); --raised: oklch(0.212 0.009 70); --sunken: oklch(0.145 0.008 70);
+      --rule: oklch(0.275 0.01 70); --rule-strong: oklch(0.37 0.012 70);
+      --accent: oklch(0.73 0.14 50); --accent-strong: oklch(0.79 0.13 54); --accent-soft: oklch(0.275 0.045 48); --accent-ink: oklch(0.81 0.115 58);
+      --on-accent: oklch(0.18 0.02 50);
+      --measure: oklch(0.76 0.09 182); --measure-soft: oklch(0.255 0.03 188); --measure-ink: oklch(0.83 0.08 180);
+      --danger-ink: oklch(0.83 0.1 25); --danger-wash: oklch(0.235 0.035 25);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: oklch(0.94 0.008 80); --ink-soft: oklch(0.77 0.01 75); --ink-faint: oklch(0.63 0.01 75);
+    --paper: oklch(0.17 0.008 70); --raised: oklch(0.212 0.009 70); --sunken: oklch(0.145 0.008 70);
+    --rule: oklch(0.275 0.01 70); --rule-strong: oklch(0.37 0.012 70);
+    --accent: oklch(0.73 0.14 50); --accent-strong: oklch(0.79 0.13 54); --accent-soft: oklch(0.275 0.045 48); --accent-ink: oklch(0.81 0.115 58);
+    --on-accent: oklch(0.18 0.02 50);
+    --measure: oklch(0.76 0.09 182); --measure-soft: oklch(0.255 0.03 188); --measure-ink: oklch(0.83 0.08 180);
+    --danger-ink: oklch(0.83 0.1 25); --danger-wash: oklch(0.235 0.035 25);
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--paper); color: var(--ink); font: 16px/1.5 var(--body);
+    padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 20px 48px;
+  }
+  .page { max-width: 880px; margin: 0 auto; display: grid; gap: 26px; }
+  .eyebrow { font: 500 12px/1.2 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); }
+  h1 { font: 650 clamp(28px, 6vw, 42px)/1.05 var(--display); margin: 6px 0 0; text-wrap: balance; letter-spacing: -0.01em; }
+  h2 { font: 560 22px/1.2 var(--display); margin: 0; text-wrap: balance; }
+  p { margin: 0; }
+
+  .verdict { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 18px; align-items: start; }
+  @media (max-width: 680px) { .verdict { grid-template-columns: 1fr; } }
+  .verdict figure { margin: 0; display: grid; gap: 6px; }
+  .verdict img { width: 100%; border-radius: 12px; border: 1px solid var(--rule); display: block; }
+  .verdict figcaption { font: 400 12px/1.4 var(--mono); color: var(--ink-faint); }
+  .found { display: grid; gap: 12px; }
+  .found .big { font: 560 21px/1.3 var(--display); }
+  .serial { font: 500 13px/1.3 var(--mono); background: var(--danger-wash); color: var(--danger-ink); border-radius: 8px; padding: 8px 10px; justify-self: start; }
+  .flip { border-left: 3px solid var(--accent); padding: 4px 0 4px 12px; color: var(--ink-soft); }
+  .flip b { color: var(--ink); }
+
+  .bench { display: grid; gap: 12px; }
+  .stage { position: relative; border-radius: 14px; overflow: hidden; border: 1px solid var(--rule); background: #b78d5f; }
+  .stage svg { display: block; width: 100%; height: auto; aspect-ratio: 16 / 10; max-width: 100%; }
+  .steps { display: flex; flex-wrap: wrap; gap: 6px; }
+  .pill { font: 500 13px/1 var(--mono); border-radius: 999px; padding: 8px 11px; border: 1px solid var(--rule-strong); background: var(--raised); color: var(--ink-soft); cursor: pointer; font-variant-numeric: tabular-nums; }
+  .pill[aria-current="step"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+  .pill.seen { border-color: var(--accent); color: var(--accent-ink); }
+  .caption { display: grid; gap: 8px; min-height: 120px; }
+  .caption h3 { font: 600 18px/1.3 var(--body); margin: 0; }
+  .doer { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; }
+  .who { font: 500 11px/1 var(--mono); letter-spacing: 0.06em; text-transform: uppercase; border-radius: 6px; padding: 5px 7px; margin-top: 2px; }
+  .who.you { background: var(--accent-soft); color: var(--accent-ink); }
+  .who.claude { background: var(--measure-soft); color: var(--measure-ink); }
+  .doer ol, .doer p { margin: 0; padding-left: 18px; }
+  .doer p { padding-left: 0; }
+  .doer li + li { margin-top: 3px; }
+  .nav { display: flex; gap: 10px; flex-wrap: wrap; }
+  .btn { font: 600 15px/1 var(--body); border-radius: 10px; border: 1px solid var(--rule-strong); background: var(--raised); color: var(--ink); padding: 12px 16px; cursor: pointer; min-height: 46px; }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); flex: 1 1 160px; }
+  .btn:disabled { opacity: 0.45; cursor: default; }
+  .btn:focus-visible, .pill:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+  .map { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; }
+  @media (max-width: 560px) { .map { grid-template-columns: 1fr; } }
+  .row { border: 1px solid var(--rule); border-radius: 12px; padding: 12px 14px; background: var(--raised); display: grid; gap: 8px; }
+  .row h3 { font: 600 15px/1.3 var(--body); margin: 0; }
+  .row .where { font-size: 13px; color: var(--ink-faint); }
+  .pins { display: flex; flex-wrap: wrap; gap: 5px; }
+  .pin { font: 500 12px/1 var(--mono); padding: 6px 7px; border-radius: 6px; background: var(--sunken); color: var(--ink-soft); min-width: 30px; text-align: center; }
+  .pin.disp { background: var(--measure-soft); color: var(--measure-ink); outline: 1.5px solid var(--measure); }
+  .pin.rail { background: var(--accent-soft); color: var(--accent-ink); outline: 1.5px solid var(--accent); }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px; color: var(--ink-soft); }
+  .legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+  .legend .l-disp::before { background: var(--measure); }
+  .legend .l-rail::before { background: var(--accent); }
+  .done { border: 1.5px dashed var(--rule-strong); border-radius: 14px; padding: 16px; display: grid; gap: 6px; }
+  .done b { font: 560 19px/1.3 var(--display); }
+</style>
+
+<div class="page">
+  <header>
+    <span class="eyebrow">Bench Photos · answer · step 1.4, the display</span>
+    <h1>Why the display stays dark</h1>
+  </header>
+
+  <section class="verdict" aria-label="What Claude found">
+    <figure>
+      <img src="__PHOTO__" alt="Your photo: the display beside the breadboard, its four pins VCC, GND, SCL, SDA with nothing plugged on them.">
+      <figcaption>Your photo, cropped. The four pins at the display’s edge are bare.</figcaption>
+    </figure>
+    <div class="found">
+      <p class="big">Nothing is plugged onto the display’s four pins, so the board cannot see it.</p>
+      <p>Claude restarted the board from the laptop. It says:</p>
+      <code class="serial">E error no-display</code>
+      <p class="flip"><b>Also: your NodeMCU is upside down</b>, pins pointing up. That is fine for plugging jumpers on, but its names are now underneath and its two rows of pins <b>swap sides</b>. The bench below and the map at the end show it the way you see it.</p>
+    </div>
+  </section>
+
+  <section class="bench" aria-labelledby="bench-title">
+    <h2 id="bench-title">The fix, on your bench</h2>
+    <div class="stage">
+      <svg id="scene" viewBox="0 0 160 100" role="img" aria-label="Your bench in 2.5D: the NodeMCU upside down beside the breadboard, and the display."></svg>
+    </div>
+    <div class="steps" id="pills" role="tablist" aria-label="Steps"></div>
+    <div class="caption" id="caption" aria-live="polite"></div>
+    <div class="nav">
+      <button class="btn" id="prev" type="button">← Back</button>
+      <button class="btn" id="replay" type="button">Replay</button>
+      <button class="btn primary" id="next" type="button">Next step →</button>
+    </div>
+  </section>
+
+  <section aria-labelledby="map-title" style="display:grid;gap:12px">
+    <h2 id="map-title">Your NodeMCU upside down: which pin is which</h2>
+    <p style="color:var(--ink-soft)">Hold it pins up, with the USB socket pointing at you. Count from the far end.</p>
+    <div class="map">
+      <div class="row">
+        <h3>Row next to the breadboard</h3>
+        <span class="where">From the far end, 1 to 15</span>
+        <div class="pins" id="row-in"></div>
+      </div>
+      <div class="row">
+        <h3>Outer row</h3>
+        <span class="where">From the far end, 1 to 15. VIN is the last, closest to the USB</span>
+        <div class="pins" id="row-out"></div>
+      </div>
+    </div>
+    <div class="legend"><span class="l-disp">Display wires (now)</span><span class="l-rail">Rail wires (step 1.3)</span></div>
+  </section>
+
+  <section class="done">
+    <b>When the four wires are in</b>
+    <p>Plug the USB back in and look at the display: <b>CAMERA ?</b>, <b>0.0 g</b>, <b>READY</b>. Then tell Claude in the chat “display done”. Claude restarts the board and checks that <code>E error no-display</code> has gone.</p>
+  </section>
+</div>
+
+<script>
+(() => {
+  // ---------------------------------------------------------------------------------
+  // A small isometric kit. World units are millimetres: X along the breadboard (towards
+  // you is +X), Y across it (the NodeMCU's side is +Y), Z up.
+  // ---------------------------------------------------------------------------------
+  const C = Math.cos(Math.PI / 6);
+  const P = (x, y, z) => [(x - y) * C, (x + y) * 0.5 - z];
+  const f = (n) => n.toFixed(2);
+  const pts = (list) => list.map((p) => { const [a, b] = P(...p); return f(a) + ',' + f(b); }).join(' ');
+  const poly = (list, fill, extra = '') => `<polygon points="${pts(list)}" fill="${fill}" ${extra}/>`;
+  function box(x, y, z, w, d, h, top, sx, sy, extra = '') {
+    return poly([[x, y + d, z], [x + w, y + d, z], [x + w, y + d, z + h], [x, y + d, z + h]], sy) +
+      poly([[x + w, y, z], [x + w, y + d, z], [x + w, y + d, z + h], [x + w, y, z + h]], sx) +
+      poly([[x, y, z + h], [x + w, y, z + h], [x + w, y + d, z + h], [x, y + d, z + h]], top, extra);
+  }
+  // Text lying on a horizontal plane, reading along +X.
+  const planeText = (x, y, z, text, size, fill, weight = 500) => {
+    const [e, g] = P(x, y, z);
+    return `<text transform="matrix(${f(C)},0.5,${f(-C)},0.5,${f(e)},${f(g)})" font-family="IBM Plex Mono, monospace" font-size="${size}" font-weight="${weight}" fill="${fill}">${text}</text>`;
+  };
+  const ease = (t) => (t <= 0 ? 0 : t >= 1 ? 1 : t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+  const clamp01 = (t) => Math.max(0, Math.min(1, t));
+  const seg = (t, a, b) => ease(clamp01((t - a) / (b - a)));
+
+  // ---------------------------------------------------------------------------------
+  // The bench, from the owner's parts.
+  // ---------------------------------------------------------------------------------
+  const BB = { L: 165, W: 55, H: 9 };
+  const rowX = (r) => 6 + (r - 1) * 2.54;
+  const COL = { Lp: 52, Lm: 49.5, a: 44, b: 41.46, c: 38.92, d: 36.38, e: 33.84, f: 26.2, g: 23.66, h: 21.12, i: 18.58, j: 16.04, Rm: 10.5, Rp: 8 };
+  const TOP = BB.H;
+  const hole = (col, row) => [rowX(row), COL[col], TOP];
+
+  const MCU = { x: 24, y: 64, L: 58, W: 31, z: 3.4 };
+  const IN = ['D0', 'D1', 'D2', 'D3', 'D4', '3V', 'G', 'D5', 'D6', 'D7', 'D8', 'RX', 'TX', 'G', '3V'];
+  const OUT = ['A0', 'G', 'VU', 'S3', 'S2', 'S1', 'SC', 'S0', 'SK', 'G', '3V', 'EN', 'RST', 'G', 'VIN'];
+  const pinX = (i) => MCU.x + MCU.L / 2 - 17.78 + i * 2.54;
+  const ROW_IN = MCU.y + 2.6, ROW_OUT = MCU.y + 2.6 + 22.86;
+  const PIN_TOP = MCU.z + 1.6 + 2.5 + 6;
+  const pin = (row, i) => [pinX(i), row === 'in' ? ROW_IN : ROW_OUT, PIN_TOP];
+
+  const WIRE = { red: ['#d0453c', '#8d2a24'], black: ['#2b2b2b', '#0f0f0f'], green: ['#3f9b5a', '#22603a'], blue: ['#3b6fd0', '#23447f'], purple: ['#8a5cc8', '#553683'], yellow: ['#e2b93b', '#94761f'] };
+
+  // The wires made on the rails step, as they should be (the owner's colours).
+  const RAILS = [
+    { from: pin('in', 5), to: hole('Lp', 18), colour: 'purple', label: '3V → left + rail' },
+    { from: pin('in', 6), to: hole('Lm', 19), colour: 'yellow', label: 'G → left − rail' },
+    { from: pin('out', 14), to: hole('Rp', 27), colour: 'purple', label: 'VIN → right + rail' },
+  ];
+  // This step's four wires. Display pins in column e, rows 2 to 5; the wires leave from column a.
+  const POWER = [
+    { from: hole('a', 2), to: hole('Lp', 2), colour: 'red', label: 'VCC row → + rail', male: true },
+    { from: hole('a', 3), to: hole('Lm', 3), colour: 'black', label: 'GND row → − rail', male: true },
+  ];
+  const SIGNAL = [
+    { from: pin('in', 1), to: hole('a', 4), colour: 'green', label: 'D1 → SCL row' },
+    { from: pin('in', 2), to: hole('a', 5), colour: 'blue', label: 'D2 → SDA row' },
+  ];
+
+  // --- static layers -----------------------------------------------------------------
+  function desk() {
+    return `<rect x="-400" y="-300" width="900" height="700" fill="#b78d5f"/>` +
+      Array.from({ length: 14 }, (_, k) => `<path d="M-400 ${-260 + k * 48} q 220 ${18 + (k % 3) * 6} 450 0 t 450 0" fill="none" stroke="#a87f53" stroke-width="0.6" opacity="0.5"/>`).join('');
+  }
+  function breadboard() {
+    let s = '';
+    s += poly([[3, 3, 0], [BB.L + 3, 3, 0], [BB.L + 3, BB.W + 3, 0], [3, BB.W + 3, 0]], 'rgba(40,25,10,0.25)');
+    s += box(0, 0, 0, BB.L, BB.W, BB.H, '#f3f1ea', '#d9d5c9', '#e6e2d6');
+    s += box(0, 29.5, TOP - 0.01, BB.L, 1.8, 0.01, '#e2ded2', '#e2ded2', '#e2ded2');
+    const line = (y, colour) => poly([[1.5, y - 0.25, TOP], [BB.L - 1.5, y - 0.25, TOP], [BB.L - 1.5, y + 0.25, TOP], [1.5, y + 0.25, TOP]], colour);
+    s += line(54, '#d0453c') + line(47.6, '#3b6fd0') + line(12.4, '#3b6fd0') + line(6.1, '#d0453c');
+    for (let r = 1; r <= 63; r++) {
+      for (const c of ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']) s += holeShape(rowX(r), COL[c]);
+      if (r % 6 !== 0) for (const c of ['Lp', 'Lm', 'Rm', 'Rp']) s += holeShape(rowX(r), COL[c]);
+      if (r === 1 || r % 5 === 0) s += planeText(rowX(r) - 0.9, 31.3, TOP, String(r), 1.4, '#8b877b');
+    }
+    return s;
+  }
+  const holeShape = (x, y) => poly([[x - 0.5, y - 0.5, TOP], [x + 0.5, y - 0.5, TOP], [x + 0.5, y + 0.5, TOP], [x - 0.5, y + 0.5, TOP]], '#3a372f');
+
+  function nodemcu() {
+    const { x, y, L, W, z } = MCU;
+    let s = '';
+    s += poly([[x + 3, y + 3, 0], [x + L + 3, y + 3, 0], [x + L + 3, y + W + 3, 0], [x + 3, y + W + 3, 0]], 'rgba(40,25,10,0.3)');
+    s += box(x + 4, y + 8, 0, 24, 16, z, '#9aa1a6', '#80878c', '#8b9297');
+    s += box(x, y, z, L, W, 1.6, '#1a1b1e', '#0d0e10', '#141518');
+    s += planeText(x + 18, y + 13, z + 1.61, 'NodeMcu V3', 2.6, '#e7e9ec');
+    s += planeText(x + 14, y + 18.5, z + 1.61, 'back side · pins up', 1.6, '#9aa0a6', 400);
+    for (const yy of [ROW_IN, ROW_OUT]) s += box(pinX(0) - 1.27, yy - 1.27, z + 1.6, 15 * 2.54, 2.54, 2.5, '#26282c', '#141518', '#1c1e21');
+    for (let i = 0; i < 15; i++) for (const yy of [ROW_IN, ROW_OUT]) s += box(pinX(i) - 0.32, yy - 0.32, z + 4.1, 0.64, 0.64, 6, '#e8d28a', '#a88a3a', '#c7a955');
+    return s;
+  }
+
+  // --- moving parts ------------------------------------------------------------------
+  function wirePath(A, B, colour, prog, lift) {
+    if (prog <= 0) return '';
+    const h = lift ?? 6 + Math.hypot(B[0] - A[0], B[1] - A[1]) * 0.32;
+    const a = [A[0], A[1], A[2] + 9], b = [B[0], B[1], B[2] + 9];
+    const c1 = [a[0], a[1], a[2] + h], c2 = [b[0], b[1], b[2] + h];
+    const n = 48, out = [];
+    for (let k = 0; k <= Math.round(n * prog); k++) {
+      const t = k / n, u = 1 - t;
+      const p = [0, 1, 2].map((j) => u * u * u * a[j] + 3 * u * u * t * c1[j] + 3 * u * t * t * c2[j] + t * t * t * b[j]);
+      out.push(P(...p).map(f).join(','));
+    }
+    const [main, dark] = WIRE[colour];
+    const shadow = Array.from({ length: Math.round(n * prog) + 1 }, (_, k) => {
+      const t = k / n, u = 1 - t;
+      const p = [0, 1].map((j) => u * u * u * a[j] + 3 * u * u * t * c1[j] + 3 * u * t * t * c2[j] + t * t * t * b[j]);
+      return P(p[0] + 2, p[1] + 2, 0).map(f).join(',');
+    });
+    return `<polyline points="${shadow.join(' ')}" fill="none" stroke="rgba(40,25,10,0.22)" stroke-width="1.4" stroke-linecap="round"/>` +
+      `<polyline points="${out.join(' ')}" fill="none" stroke="${dark}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>` +
+      `<polyline points="${out.join(' ')}" fill="none" stroke="${main}" stroke-width="1.05" stroke-linecap="round" stroke-linejoin="round"/>`;
+  }
+  // A jumper's housing: on a NodeMCU pin (female) or in a breadboard hole (male end).
+  const housing = (p, lift = 0, onPin = false) => {
+    const z = onPin ? MCU.z + 4.6 : TOP;
+    return box(p[0] - 1.3, p[1] - 1.3, z + lift, 2.6, 2.6, onPin ? 13.4 : 9, '#2a2c30', '#111214', '#1b1c1f');
+  };
+  function jumper(w, prog, drop = 0) {
+    if (prog <= 0) return '';
+    const fromPin = !w.male;
+    let s = housing(w.from, drop * 14, fromPin);
+    s += wirePath(fromPin ? [w.from[0], w.from[1], MCU.z + 9] : w.from, w.to, w.colour, prog);
+    if (prog >= 1) s += housing(w.to, drop * 14);
+    return s;
+  }
+  function display(x0, z0, onDesk) {
+    // 27 × 27 mm module, its four header pins along one edge: VCC, GND, SCL, SDA.
+    let s = '';
+    const y1 = COL.e + 2.4;
+    const yy = onDesk ? 0 : 0;
+    const top = z0 + 1.6;
+    s += box(x0, y1 - 27 + yy, z0, 27, 27, 1.6, '#1f4fa0', '#163a78', '#1a4590');
+    s += poly([[x0 + 2, y1 - 25.5, top], [x0 + 25, y1 - 25.5, top], [x0 + 25, y1 - 6, top], [x0 + 2, y1 - 6, top]], '#06080b');
+    const names = ['VCC', 'GND', 'SCL', 'SDA'];
+    for (let k = 0; k < 4; k++) {
+      const px = rowX(2 + k) - (rowX(2) - (x0 + 8.65));
+      s += box(px - 0.32, y1 - 2.4, top, 0.64, 0.64, onDesk ? 6 : 0.01, '#e8d28a', '#a88a3a', '#c7a955');
+      s += planeText(px - 1, y1 - 4.4, top, names[k], 1.15, '#e9eef7');
+    }
+    return s;
+  }
+
+  // ---------------------------------------------------------------------------------
+  // The steps.
+  // ---------------------------------------------------------------------------------
+  const displayX = rowX(2) - 8.65;
+  const STEPS = [
+    {
+      title: 'What your photo shows',
+      who: 'claude',
+      text: ['The display lies beside the breadboard. No wire is on its four pins, so the board cannot see it: it says <code>E error no-display</code>.'],
+      focus: [[-46, 8, 0], [165, 55, 0], [84, 97, 0]],
+      T: 1.6,
+    },
+    {
+      title: 'USB out',
+      who: 'you',
+      text: ['Pull the USB cable out of the NodeMCU. Nothing is wired with the power on.'],
+      focus: [[60, 70, 0], [110, 90, 0]],
+      T: 1.4,
+    },
+    {
+      title: 'The display into the breadboard',
+      who: 'you',
+      text: ['Push its four pins into <b>column e, rows 2 to 5</b>, one pin per row: VCC in row 2, GND 3, SCL 4, SDA 5.', 'Its screen lies over the middle of the board. Press gently until the pins are in.'],
+      focus: [[-2, 8, 0], [30, 50, 0]],
+      T: 1.8,
+    },
+    {
+      title: 'Power: two short wires',
+      who: 'you',
+      text: ['From <b>row 2, column a</b> (the VCC row) to the <b>left + rail</b>, the red line.', 'From <b>row 3, column a</b> (the GND row) to the <b>left − rail</b>, the blue line.', 'Male–male jumpers: both ends go into the breadboard.'],
+      focus: [[0, 30, 0], [22, 58, 0]],
+      T: 2.6,
+    },
+    {
+      title: 'Signal: two wires to the NodeMCU',
+      who: 'you',
+      text: ['On the pin row <b>next to the breadboard</b>, count from the far end: the <b>2nd pin is D1</b>, the <b>3rd is D2</b>.', 'D1 → <b>row 4, column a</b> (the SCL row). D2 → <b>row 5, column a</b> (the SDA row).', 'Female–male jumpers: the female end goes on the NodeMCU pin.'],
+      focus: [[0, 40, 0], [50, 75, 0]],
+      T: 2.8,
+    },
+    {
+      title: 'Check the three rail wires',
+      who: 'you',
+      text: ['Row next to the breadboard: the <b>6th pin is 3V</b> → left + rail, the <b>7th is G</b> → left − rail.', 'Outer row: <b>VIN is the last pin, closest to the USB</b> → right + rail. If your 5 V wire is anywhere else, move it there.'],
+      focus: [[30, 8, 0], [85, 95, 0]],
+      T: 1.8,
+    },
+    {
+      title: 'USB in, and look',
+      who: 'claude',
+      text: ['Plug the USB back in. The display should show <b>CAMERA ?</b>, <b>0.0 g</b>, <b>READY</b>.', 'Tell Claude “display done”. Claude restarts the board and checks that <code>E error no-display</code> has gone.'],
+      focus: [[-4, 6, 0], [100, 95, 0]],
+      T: 2.2,
+    },
+  ];
+
+  // --- the camera ------------------------------------------------------------------------
+  const ASPECT = 16 / 10;
+  function fit(points) {
+    const s = points.flatMap((p) => [P(p[0], p[1], p[2]), P(p[0], p[1], p[2] + 22)]);
+    let x0 = Math.min(...s.map((p) => p[0])), x1 = Math.max(...s.map((p) => p[0]));
+    let y0 = Math.min(...s.map((p) => p[1])), y1 = Math.max(...s.map((p) => p[1]));
+    let w = x1 - x0 + 24, h = y1 - y0 + 24;
+    if (w / h > ASPECT) h = w / ASPECT; else w = h * ASPECT;
+    return [(x0 + x1) / 2 - w / 2, (y0 + y1) / 2 - h / 2, w, h];
+  }
+
+  // --- labels in screen space ---------------------------------------------------------
+  // About 16 px text at any zoom; a little larger relative to the scene on a phone.
+  const labelScale = () => Math.max(24, Math.min(42, (document.getElementById('scene').clientWidth || 800) / 19));
+  function label(at, text, dx, dy, tone, cam) {
+    const fs = cam[2] / labelScale();
+    const [ax, ay] = P(...at);
+    const tx = ax + dx * fs, ty = ay + dy * fs;
+    const colour = tone === 'you' ? '#b4532a' : tone === 'claude' ? '#1d6b5c' : '#2b2420';
+    return `<circle cx="${f(ax)}" cy="${f(ay)}" r="${f(fs * 0.22)}" fill="${colour}"/>` +
+      `<line x1="${f(ax)}" y1="${f(ay)}" x2="${f(tx)}" y2="${f(ty + fs * 0.3)}" stroke="${colour}" stroke-width="${f(fs * 0.08)}"/>` +
+      `<text x="${f(tx)}" y="${f(ty)}" text-anchor="middle" font-family="Instrument Sans, system-ui, sans-serif" font-weight="600" font-size="${f(fs)}" fill="${colour}" paint-order="stroke" stroke="#fffaf2" stroke-width="${f(fs * 0.32)}" stroke-linejoin="round">${text}</text>`;
+  }
+  function chip(at, text, tone, cam) {
+    const fs = cam[2] / (labelScale() * 0.95);
+    const [x, y] = P(...at);
+    const w = text.length * fs * 0.6 + fs * 1.4;
+    const fill = tone === 'bad' ? '#fbe4e1' : tone === 'ok' ? '#dff1e7' : '#fbe7d6';
+    const ink = tone === 'bad' ? '#a0332a' : tone === 'ok' ? '#1d6b42' : '#9a4f1e';
+    return `<g><rect x="${f(x - w / 2)}" y="${f(y - fs * 1.1)}" width="${f(w)}" height="${f(fs * 1.6)}" rx="${f(fs * 0.8)}" fill="${fill}" stroke="${ink}" stroke-width="${f(fs * 0.06)}"/>` +
+      `<text x="${f(x)}" y="${f(y)}" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-weight="500" font-size="${f(fs * 0.85)}" fill="${ink}">${text}</text></g>`;
+  }
+  const ring = (at, r, colour, t) => {
+    const k = 1 + Math.sin(t * 7) * 0.12;
+    const list = Array.from({ length: 24 }, (_, i) => { const a = (i / 24) * Math.PI * 2; return [at[0] + Math.cos(a) * r * k, at[1] + Math.sin(a) * r * k, at[2]]; });
+    return `<polygon points="${pts(list)}" fill="none" stroke="${colour}" stroke-width="0.55"/>`;
+  };
+
+  // --- drawing one frame ---------------------------------------------------------------
+  const svg = document.getElementById('scene');
+  svg.innerHTML = `<g id="l-desk">${desk()}</g><g id="l-bb">${breadboard()}</g><g id="l-under"></g><g id="l-mcu">${nodemcu()}</g><g id="l-over"></g><g id="l-labels"></g>`;
+  const under = svg.querySelector('#l-under'), over = svg.querySelector('#l-over'), labels = svg.querySelector('#l-labels');
+
+  function frame(step, t, cam) {
+    let u = '', o = '', l = '';
+    // The display: on the desk at first, then into column e.
+    if (step === 0) {
+      u += display(displayX - 44, 0.01, true);
+    } else if (step >= 2) {
+      const q = step === 2 ? seg(t, 0.1, 0.9) : 1;
+      const z = TOP + 2.5 + (1 - q) * 30;
+      u += `<g opacity="${f(0.3 + q * 0.7)}">${display(displayX, z, false)}</g>`;
+    } else {
+      u += display(displayX - 44, 0.01, true);
+    }
+    // Wires: the rails, made on step 1.3; then this step's.
+    for (const w of RAILS) o += `<g opacity="${step === 5 ? 1 : 0.55}">${jumper(w, 1)}</g>`;
+    if (step >= 3) POWER.forEach((w, k) => { u += jumper(w, step === 3 ? seg(t, 0.15 + k * 0.4, 0.55 + k * 0.4) : 1, step === 3 ? 1 - seg(t, 0.05 + k * 0.4, 0.2 + k * 0.4) : 0); });
+    if (step >= 4) SIGNAL.forEach((w, k) => { o += jumper(w, step === 4 ? seg(t, 0.15 + k * 0.4, 0.55 + k * 0.4) : 1, step === 4 ? 1 - seg(t, 0.05 + k * 0.4, 0.2 + k * 0.4) : 0); });
+    // The USB cable: in, out, in.
+    const usbOut = step === 0 ? 0 : step === 1 ? seg(t, 0.2, 0.9) : step === 6 ? 1 - seg(t, 0.05, 0.5) : 1;
+    const ux = MCU.x + MCU.L + usbOut * 14;
+    o += box(ux, MCU.y + 12, 1.2, 7, 7, 3.6, '#2a2d31', '#16181b', '#1f2124');
+    o += box(ux + 7, MCU.y + 14.2, 2.2, 40, 2.6, 1.6, '#232528', '#111214', '#1a1b1e');
+
+    // Labels and highlights, per step.
+    if (step === 0) {
+      const dispPin = [rowX(3) - 44, COL.e, 0.5];
+      l += label(dispPin, 'VCC GND SCL SDA: nothing on them', 5, -5, 'claude', cam);
+      l += chip([30, 70, 34], 'E error no-display', 'bad', cam);
+    }
+    if (step === 1) l += label([MCU.x + MCU.L + 4, MCU.y + 15, 5], 'USB out', 3, 4, 'you', cam);
+    if (step === 2) {
+      ['VCC row 2', 'GND row 3', 'SCL row 4', 'SDA row 5'].forEach((name, k) => { if (t > 0.85) l += label(hole('e', 2 + k), name, -2.6 + k * 0.2, 2.4 + k * 1.3, 'you', cam); });
+    }
+    if (step === 3) {
+      if (t > 0.5) l += label(hole('Lp', 2), '+ rail', 1.5, 3.5, 'you', cam);
+      if (t > 0.9) l += label(hole('Lm', 3), '− rail', 4, 1.8, 'you', cam);
+    }
+    if (step === 4 || step === 5) {
+      IN.forEach((name, i) => { o += planeText(pinX(i) - 0.9, ROW_IN + 3.2, MCU.z + 1.61, name, 1.25, step === 4 && (i === 1 || i === 2) ? '#7fe0b0' : step === 5 && (i === 5 || i === 6) ? '#ffb27d' : '#b8bec4'); });
+      OUT.forEach((name, i) => { o += planeText(pinX(i) - 0.9, ROW_OUT - 2.2, MCU.z + 1.61, name, 1.25, step === 5 && i === 14 ? '#ffb27d' : '#b8bec4'); });
+    }
+    if (step === 4) {
+      o += ring(pin('in', 1), 1.9, '#7fe0b0', t) + ring(pin('in', 2), 1.9, '#7fe0b0', t);
+      l += label(pin('in', 1), 'D1: 2nd pin', -6, 2, 'you', cam);
+      l += label(pin('in', 2), 'D2: 3rd pin', 5, 3, 'you', cam);
+      if (t > 0.95) l += label(hole('a', 4), 'SCL row', -5, -3, 'you', cam) + label(hole('a', 5), 'SDA row', 2, -5.5, 'you', cam);
+    }
+    if (step === 5) {
+      o += ring(pin('in', 5), 1.9, '#ffb27d', t) + ring(pin('in', 6), 1.9, '#ffb27d', t) + ring(pin('out', 14), 1.9, '#ffb27d', t);
+      l += label(pin('in', 5), '3V: 6th pin', -2, -4.5, 'you', cam);
+      l += label(pin('in', 6), 'G: 7th pin', 3, -3.5, 'you', cam);
+      l += label(pin('out', 14), 'VIN: last pin, by the USB', 3, 3, 'you', cam);
+      l += label([MCU.x + 2, MCU.y + 15, 4], 'far end', -2.5, 2.5, 'ink', cam);
+    }
+    if (step === 6 && t > 0.55) {
+      const sc = [displayX + 13, COL.e - 14, TOP + 4.2];
+      u += poly([[displayX + 2, COL.e - 23, TOP + 4.11], [displayX + 25, COL.e - 23, TOP + 4.11], [displayX + 25, COL.e - 3.6, TOP + 4.11], [displayX + 2, COL.e - 3.6, TOP + 4.11]], '#123a5c', `opacity="${f(seg(t, 0.55, 0.8))}"`);
+      u += planeText(displayX + 4, COL.e - 18, TOP + 4.12, 'CAMERA ?', 2, '#9fd8ff') + planeText(displayX + 4, COL.e - 11.5, TOP + 4.12, '0.0 g', 4, '#9fd8ff') + planeText(displayX + 4, COL.e - 6.5, TOP + 4.12, 'READY', 2, '#9fd8ff');
+      l += chip([sc[0] - 4, sc[1] - 6, 22], 'CAMERA ?  0.0 g  READY', 'ok', cam);
+      if (t > 0.85) l += chip([60, 70, 30], 'tell Claude: “display done”', 'you', cam);
+    }
+    under.innerHTML = u;
+    over.innerHTML = o;
+    labels.innerHTML = l;
+  }
+
+  // --- the player ----------------------------------------------------------------------
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let step = 0, start = performance.now(), cam = fit(STEPS[0].focus), camFrom = cam, camStart = start;
+  const seen = new Set([0]);
+  const pills = document.getElementById('pills'), caption = document.getElementById('caption');
+  STEPS.forEach((s, i) => {
+    const b = document.createElement('button');
+    b.className = 'pill';
+    b.type = 'button';
+    b.textContent = i === 0 ? 'Found' : String(i);
+    b.title = s.title;
+    b.setAttribute('aria-label', `${i === 0 ? 'What your photo shows' : 'Step ' + i}: ${s.title}`);
+    b.addEventListener('click', () => go(i));
+    pills.append(b);
+  });
+
+  function go(i) {
+    step = Math.max(0, Math.min(STEPS.length - 1, i));
+    seen.add(step);
+    camFrom = cam;
+    camStart = start = performance.now();
+    const s = STEPS[step];
+    caption.innerHTML = `<h3>${step === 0 ? '' : step + '. '}${s.title}</h3>` +
+      `<div class="doer"><span class="who ${s.who}">${s.who === 'you' ? 'You do' : 'Claude'}</span>` +
+      (s.text.length > 1 ? `<ol>${s.text.map((x) => `<li>${x}</li>`).join('')}</ol>` : `<p>${s.text[0]}</p>`) + `</div>`;
+    [...pills.children].forEach((b, k) => { b.toggleAttribute('aria-current', k === step); if (k === step) b.setAttribute('aria-current', 'step'); b.classList.toggle('seen', seen.has(k) && k !== step); });
+    document.getElementById('prev').disabled = step === 0;
+    const next = document.getElementById('next');
+    next.disabled = step === STEPS.length - 1;
+    next.textContent = step === 0 ? 'Show me the fix →' : step === STEPS.length - 1 ? 'That’s all' : 'Next step →';
+    if (reduce) draw(performance.now() + 1e6);
+  }
+  function draw(now) {
+    const s = STEPS[step];
+    const t = reduce ? 1 : Math.min(1, (now - start) / 1000 / s.T);
+    const target = fit(s.focus);
+    const k = reduce ? 1 : ease(clamp01((now - camStart) / 800));
+    cam = camFrom.map((v, j) => v + (target[j] - v) * k);
+    svg.setAttribute('viewBox', cam.map(f).join(' '));
+    frame(step, t, cam);
+  }
+  function loop(now) { draw(now); requestAnimationFrame(loop); }
+
+  document.getElementById('prev').addEventListener('click', () => go(step - 1));
+  document.getElementById('next').addEventListener('click', () => go(step + 1));
+  document.getElementById('replay').addEventListener('click', () => { start = performance.now(); camFrom = cam; camStart = start; if (reduce) draw(performance.now()); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'ArrowRight') go(step + 1); if (e.key === 'ArrowLeft') go(step - 1); });
+
+  // --- the pin map -----------------------------------------------------------------------
+  const fill = (id, names, mark) => {
+    document.getElementById(id).append(...names.map((name, i) => {
+      const s = document.createElement('span');
+      s.className = 'pin ' + (mark[i] ?? '');
+      s.textContent = `${i + 1} ${name}`;
+      return s;
+    }));
+  };
+  fill('row-in', IN, { 1: 'disp', 2: 'disp', 5: 'rail', 6: 'rail' });
+  fill('row-out', OUT, { 14: 'rail' });
+
+  go(0);
+  // Drawn once now, so the bench shows even where animation frames are paused (a background tab, a preview).
+  draw(performance.now() + (reduce ? 1e6 : 0));
+  if (!reduce) requestAnimationFrame(loop);
+  // For checking a frame by hand: displayFix.show(step, 0..1).
+  window.displayFix = { show: (i, t = 1) => { go(i); start = performance.now() - t * STEPS[step].T * 1000; camStart = start - 1e6; draw(performance.now()); } };
+})();
+</script>
