@@ -534,3 +534,25 @@ no console errors, no sideways scroll at 1280 and 375 px.
   a cp1252 console.
 - On the board, 0.3.1: `E boot node=a fw=0.3.1 calibrated=1 cpg=100.000000 simulated=1`,
   `E tare offset=84001`, `E link none`; `sim 150` read 150.0 g, steady. Steps 1.1 and 1.2 done.
+
+**Same day: close-ups for every hands-on step, and the hand-off** (the owner was lost on the
+rails step: "I want it in depth and close up for each step… showing all like it's real", then
+"make it perfect for all the steps end to end", then asked for a hand-off to another account)
+
+- `web/components/admin/build/scenes/closeup.tsx`: the wiring close-up, from `wiring.ts`. Node A:
+  the NodeMCU from above with its printed pin names, the breadboard beside it, each wire made
+  one at a time (pin found by its neighbours, F-M socket landing, wire, pin into the hole, the
+  joined rail or row of five glowing). Node B: the ESP32-CAM on the breadboard (columns b and
+  i), its empty MB base beside it, bench-only wires (`BENCH_B`) and a charger (`SUPPLY_B`); the
+  light with its six LEDs, 100 Ω each, the right − rail as their common line. Positions are
+  examples and say so. Earlier steps' wires stay drawn.
+- `scenes/hands.tsx`: the micro-USB plug, the camera onto its base, the phone's hotspot, the
+  microSD.
+- `scenes/index.ts`: `closeupFor()` (wiring steps, M3 off-the-base, M8 power) and `HANDS`.
+  The step page shows the close-up under the overview scene.
+- Checked in the browser, frame by frame: rails (all three wires, rail glow, final view),
+  display, buzzer, camera off the base, the light, the USB plug. **Not yet checked**: camera
+  onto its base (may be offset), hotspot, microSD, M8 power, the M9 wiring steps. tsc and the
+  build pass.
+- `ai-docs/SESSION-HANDOFF.md` rewritten in full for the next account;
+  `ai-docs/NEXT-SESSION-PROMPT.md` holds the prompt to start it.

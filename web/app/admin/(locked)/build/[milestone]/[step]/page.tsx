@@ -10,7 +10,7 @@ import { StepStepper } from '@/components/admin/build/Stepper';
 import { StepKeys } from '@/components/admin/build/StepKeys';
 import { StepTool } from '@/components/admin/build/StepTool';
 import { StepWiring } from '@/components/admin/build/StepWiring';
-import { sceneFor } from '@/components/admin/build/scenes';
+import { closeupFor, sceneFor } from '@/components/admin/build/scenes';
 import { StepScene } from '@/components/admin/build/scenes/StepScene';
 import { MILESTONES, milestoneById } from '@/components/admin/roadmap';
 import '@/components/admin/build/build.css';
@@ -39,6 +39,7 @@ export default async function StepPage({ params }: { params: Params }) {
   const previousHref = previous ? `/admin/build/${milestone.id}/${previous.id}` : `/admin/build/${milestone.id}`;
   const nextHref = next ? `/admin/build/${milestone.id}/${next.id}` : nextMilestone ? `/admin/build/${nextMilestone.id}` : '/admin/build';
   const hasVisual = Boolean(step.photo || step.wires);
+  const closeup = closeupFor(MILESTONES, milestone.id, step.id);
   const previousLabel = previous ? previous.title : `Milestone ${milestone.number}`;
   const nextLabel = next ? next.title : nextMilestone ? `${nextMilestone.number}. ${nextMilestone.title}` : 'The build map';
 
@@ -59,6 +60,12 @@ export default async function StepPage({ params }: { params: Params }) {
       <StepStepper milestoneId={milestone.id} currentStepId={step.id} />
 
       <StepScene scene={sceneFor(milestone.id, step.id)} />
+      {closeup ? (
+        <section className="step-closeup">
+          <h2>{closeup.kind === 'closeup' ? 'Close up, one wire at a time' : 'Close up, with your hands'}</h2>
+          <StepScene scene={closeup} />
+        </section>
+      ) : null}
 
       {step.draft ? (
         <p className="step-draft-note">

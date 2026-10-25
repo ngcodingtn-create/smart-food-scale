@@ -163,3 +163,4 @@ map, which is drawn twice (760 wide and 360 tall) from the same tables.
 | The plan's tasks | `web/components/admin/plan.ts` (the source), drawn by `PlanBoard.tsx` |
 | Password check | `web/lib/admin-auth.ts`, `web/proxy.ts`; password in `SFS_ADMIN_PASSWORD` |
 | Step animations | `web/components/admin/build/scenes/`: `iso.tsx` (projection, blocks, timing), `parts.tsx` (the parts in 2.5D), `bench-scenes.tsx` and `world-scenes.tsx` (the scenes), `index.ts` (which scene each step plays: a step without one fails the build), `StepScene.tsx` (the player). All of them on `/admin/build/scenes` |
+| Close-ups | `web/components/admin/build/scenes/closeup.tsx` (wiring, one wire at a time, from `wiring.ts`; part positions in `PLACES_A`/`PLACES_B`; bench-only wires `BENCH_B`, `SUPPLY_B`), `hands.tsx` (USB plug, camera onto its base, hotspot, microSD); which step gets which: `closeupFor()` and `HANDS` in `scenes/index.ts` |

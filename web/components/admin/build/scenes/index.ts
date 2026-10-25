@@ -1,4 +1,6 @@
 import { flashScene, holdScene, hotspotScene, layoutScene, meetScene, moveScene, photoScene, plugScene, portalScene, pretendMealScene, radioScene, serverScene, wifiScene, wireScene } from './bench-scenes';
+import { BENCH_B_IDS, SUPPLY_B_IDS, closeupScene } from './closeup';
+import { cardCloseScene, hotspotCloseScene, seatScene, usbScene } from './hands';
 import type { SceneDef } from './types';
 import { appScene, cardScene, cloudScene, graphScene, mealScene, powerScene, rigScene, solderScene } from './world-scenes';
 
@@ -27,6 +29,11 @@ const KINDS = {
   power: () => powerScene(),
   rig: (v?: string) => rigScene(v ?? 'build'),
   solder: () => solderScene(),
+  closeup: (v?: string) => closeupScene(v ?? ''),
+  'usb-close': () => usbScene(),
+  'seat-close': () => seatScene(),
+  'hotspot-close': () => hotspotCloseScene(),
+  'card-close': () => cardCloseScene(),
 } satisfies Record<string, (variant?: string) => SceneDef>;
 
 export function buildScene({ kind, variant }: SceneRef): SceneDef {
@@ -89,4 +96,35 @@ export function sceneFor(milestoneId: string, stepId: string): SceneRef {
   const ref = STEP_SCENES[`${milestoneId}/${stepId}`];
   if (!ref) throw new Error(`No scene for ${milestoneId}/${stepId}: add one to components/admin/build/scenes/index.ts.`);
   return ref;
+}
+
+/** Close-ups of the steps your hands do that are not wiring. */
+const HANDS: Record<string, SceneRef> = {
+  'm1-scale-brain/port': { kind: 'usb-close' },
+  'm2-camera/flash-camera': { kind: 'seat-close' },
+  'm2-camera/hotspot': { kind: 'hotspot-close' },
+  'm8-finish/card': { kind: 'card-close' },
+};
+
+/** The close-up of a wiring step: this step's wires, and the ones made before it on the same board. */
+export function closeupFor(milestones: { id: string; steps: { id: string; wires?: { node: 'a' | 'b'; ids: string[] } }[] }[], milestoneId: string, stepId: string): SceneRef | null {
+  const earlier: Record<'a' | 'b', string[]> = { a: [], b: [] };
+  const idsOf = (m: string, step: { id: string; wires?: { node: 'a' | 'b'; ids: string[] } }): { node: 'a' | 'b'; ids: string[] } | null => {
+    if (m === 'm3-light' && step.id === 'off-the-base') return { node: 'b', ids: BENCH_B_IDS };
+    if (m === 'm8-finish' && step.id === 'power' && step.wires) return { node: 'b', ids: [...SUPPLY_B_IDS, ...step.wires.ids] };
+    return step.wires ?? null;
+  };
+  for (const milestone of milestones) {
+    for (const step of milestone.steps) {
+      const ids = idsOf(milestone.id, step);
+      if (milestone.id === milestoneId && step.id === stepId) {
+        if (!ids) return HANDS[`${milestoneId}/${stepId}`] ?? null;
+        // Once the charger powers the camera, the base's bench wires are gone.
+        const before = earlier[ids.node].filter((id) => !(ids.ids.includes('x-supply-5v') && id.startsWith('x-base')));
+        return { kind: 'closeup', variant: `${ids.node}:${ids.ids.join(',')}|${before.join(',')}` };
+      }
+      if (ids) earlier[ids.node].push(...ids.ids);
+    }
+  }
+  return null;
 }

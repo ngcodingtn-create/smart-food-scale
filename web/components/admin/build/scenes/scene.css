@@ -136,3 +136,12 @@
   margin: 0 0 0.4rem;
   font-size: 1rem;
 }
+
+/* The close-up of a wiring step. */
+.step-closeup {
+  display: grid;
+  gap: 0.5rem;
+}
+.step-closeup h2 {
+  margin: 0;
+}
