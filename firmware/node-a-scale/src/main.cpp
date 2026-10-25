@@ -515,12 +515,26 @@ bool pulledUp(uint8_t pin) {
   return digitalRead(pin) == HIGH;
 }
 
-// Every address that answers, with the two lines as given: "3c", "3c,3d" or "".
-String scanBus(uint8_t sda, uint8_t scl) {
+// With the chip's own weak pull-up on, a line that still reads low is joined to ground:
+// a wire in the GND row, or touching the − rail. A loose wire reads high.
+bool tiedLow(uint8_t pin) {
+  pinMode(pin, INPUT_PULLUP);
+  delayMicroseconds(50);
+  const bool low = digitalRead(pin) == LOW;
+  pinMode(pin, INPUT);
+  return low;
+}
+
+void startBus(uint8_t sda, uint8_t scl) {
 #if defined(ESP32)
   Wire.end();
 #endif
   Wire.begin(sda, scl);
+}
+
+// Every address that answers, with the two lines as given: "3c", "3c,3d" or "".
+String scanBus(uint8_t sda, uint8_t scl) {
+  startBus(sda, scl);
   String found;
   for (uint8_t address = 0x08; address < 0x78; address++) {
     Wire.beginTransmission(address);
@@ -537,10 +551,17 @@ String scanBus(uint8_t sda, uint8_t scl) {
 void checkDisplayWires() {
   const bool sdaUp = pulledUp(PIN_OLED_SDA);
   const bool sclUp = pulledUp(PIN_OLED_SCL);
-  const String straight = scanBus(PIN_OLED_SDA, PIN_OLED_SCL);
-  const String swapped = scanBus(PIN_OLED_SCL, PIN_OLED_SDA);
-  scanBus(PIN_OLED_SDA, PIN_OLED_SCL);  // back to the real wiring
-  Serial.printf("E i2c sda_pullup=%d scl_pullup=%d found=%s swapped_found=%s\n", sdaUp, sclUp,
+  const bool sdaGround = tiedLow(PIN_OLED_SDA);
+  const bool sclGround = tiedLow(PIN_OLED_SCL);
+  // Nothing can answer unless both lines reach the display, and a grounded line makes
+  // every try wait (about 25 s for a whole scan): scan only when both are there.
+  String straight, swapped;
+  if (sdaUp && sclUp && !sdaGround && !sclGround) {
+    straight = scanBus(PIN_OLED_SDA, PIN_OLED_SCL);
+    swapped = scanBus(PIN_OLED_SCL, PIN_OLED_SDA);
+  }
+  startBus(PIN_OLED_SDA, PIN_OLED_SCL);  // back to the real wiring
+  Serial.printf("E i2c sda_pullup=%d scl_pullup=%d sda_ground=%d scl_ground=%d found=%s swapped_found=%s\n", sdaUp, sclUp, sdaGround, sclGround,
                 straight.length() ? straight.c_str() : "none", swapped.length() ? swapped.c_str() : "none");
   if (!hasDisplay && straight.indexOf(String(config::kOledAddress, HEX)) >= 0) {
     hasDisplay = oled.begin(SSD1306_SWITCHCAPVCC, config::kOledAddress);

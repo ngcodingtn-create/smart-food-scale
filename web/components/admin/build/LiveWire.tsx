@@ -68,6 +68,18 @@ function readDisplay(result: Result, history: string[]): Verdict {
   ];
   const loose = flicker ? ['It comes and goes: a contact is loose. Push each plug of that wire all the way home, or swap the jumper for a fresh one.'] : [];
   if (answers) return { pass: true, lights, say: 'The display answers. Its screen is on: CAMERA ?, 0.0 g, READY.' };
+  // A signal line held low with the board's own pull-up on is joined to ground (firmware 0.3.5 and later).
+  const sdaGround = field(text, 'sda_ground') === '1';
+  const sclGround = field(text, 'scl_ground') === '1';
+  if (sclGround || sdaGround) {
+    const which = sclGround && sdaGround ? 'Both signal wires are' : sclGround ? 'The SCL wire, from D1, is' : 'The SDA wire, from D2, is';
+    return {
+      pass: false,
+      lights: lights.map((light) => ((sclGround && light.label.startsWith('SCL')) || (sdaGround && light.label.startsWith('SDA')) ? { ...light, label: `${light.label}: on ground` } : light)),
+      say: `${which} joined to ground: in the GND row, or touching the − rail.`,
+      fix: [sclGround ? 'Move D1’s pin end one row, out of the GND row and into the SCL row (the 2nd row from the far end on your display).' : 'Move D2’s pin end into the SDA row (the 1st row from the far end on your display).', 'Check the bare metal of that jumper is not touching the − rail.'],
+    };
+  }
   if (!sda && !scl)
     return { pass: false, lights, say: 'Nothing reaches the display yet: no power, or neither signal wire.', fix: [...loose, 'VCC row → the + rail, GND row → the − rail.', '3V and G from the NodeMCU into those same rails (pin ends pushed in, not lying flat).', 'All four display pins down in their holes.'] };
   if (sda && !scl)

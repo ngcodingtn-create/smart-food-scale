@@ -91,7 +91,7 @@ answers. The channel is saved on the board. The display's top line shows it:
 | `E result seq=<n> outcome=saved\|queued\|failed` | Node B's report on the upload, later |
 | `E link found ch=<n> mac=<address>`, `E link none`, `E link lost` | The search for Node B |
 | `E warn not-tared`, `E error <reason>` | Problems: `overload`, `too-light`, `not-calibrated`, `no-display` |
-| `E i2c sda_pullup=<0\|1> scl_pullup=<0\|1> found=<addresses\|none> swapped_found=<…>` | Answer to `i2c`: whether D2 and D1 each reach a powered display (its pull-ups pull them high), and what answers on the bus, as wired and with SDA and SCL swapped |
+| `E i2c sda_pullup=<0\|1> scl_pullup=<0\|1> sda_ground=<0\|1> scl_ground=<0\|1> found=<addresses\|none> swapped_found=<…>` | Answer to `i2c`: whether D2 and D1 each reach a powered display (its pull-ups pull them high), whether either is joined to ground, and what answers on the bus, as wired and with SDA and SCL swapped. The bus is scanned only when both lines reach the display, so the answer comes at once |
 | `E display found` | After `i2c`, a display that was missing at start-up now answers and is switched on |
 
 **What it accepts**
