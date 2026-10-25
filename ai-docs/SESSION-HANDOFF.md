@@ -58,6 +58,24 @@ owner's own messages are the `type:"user"` lines. Mine it with Python run as `py
 
 ---
 
+## 0c. 26 October: the display works; every step goes 3D
+
+- **Step 1.4 done**: wired straight with four female–female jumpers (display VCC → D row 6th
+  pin, GND → 7th, SCL → 2nd, SDA → 3rd, counted from the far end); the board found it
+  (`found=3c`) and the live page ticked the step. **Next for the owner: 1.5, the button.**
+- **The owner's standard from now on: explain every step in 3D** (`ai-docs/EXPLAINING.md`,
+  also the first rule in AGENTS.md and in memory `explain-in-3d`).
+- **The site's 3D bench**: `web/components/admin/build/bench3d/` (`model.ts` coordinates and
+  types, `engine.ts` three.js builder and player, `scenes.ts` one scene per step as data,
+  `Bench3D.tsx`, `Bench3DLazy.tsx` loaded with next/dynamic so three stays out of other
+  pages). A step with a scene shows it in place of the 2.5D scene and close-up; `/admin/wire`
+  shows it too. **Converted: all of milestone 1** (port, flash, rails, display as actually
+  wired, button with a ground bridge between the two − rails, buzzer with the module in
+  column j hanging over the edge, whole test). **Next to convert, in build order:**
+  milestone 2 (needs an ESP32-CAM and MB-base model), then 3, 4, 8, 9; the software
+  milestones get simpler scenes. Check each scene frame by frame with `window.bench3d.frameAt(beat, t)`
+  on the step page (resize the pane to 1280×900 first; it paints then).
+
 ## 0b. Later the same night: the display step, live
 
 - **The owner is on step 1.4, the display.** Their bench: NodeMCU **upside down, pins up, USB

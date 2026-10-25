@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { LiveWire, type LiveStep } from '@/components/admin/build/LiveWire';
+import { benchSceneFor } from '@/components/admin/build/bench3d/scenes';
 import { closeupFor, sceneFor } from '@/components/admin/build/scenes';
 import { MILESTONES, milestoneById } from '@/components/admin/roadmap';
 import '@/components/admin/build/build.css';
@@ -21,7 +22,7 @@ export default function WirePage() {
   const milestone = milestoneById(MILESTONE)!;
   const steps: LiveStep[] = CHECKS.map(({ id, check }) => {
     const step = milestone.steps.find((item) => item.id === id)!;
-    return { id, title: step.title, goal: step.goal, actions: step.actions ?? [], scene: closeupFor(MILESTONES, MILESTONE, id) ?? sceneFor(MILESTONE, id), check };
+    return { id, title: step.title, goal: step.goal, actions: step.actions ?? [], scene: closeupFor(MILESTONES, MILESTONE, id) ?? sceneFor(MILESTONE, id), bench: benchSceneFor(MILESTONE, id) ? `${MILESTONE}/${id}` : undefined, check };
   });
   return (
     <div className="admin-page">

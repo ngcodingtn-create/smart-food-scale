@@ -10,6 +10,8 @@ import { StepStepper } from '@/components/admin/build/Stepper';
 import { StepKeys } from '@/components/admin/build/StepKeys';
 import { StepTool } from '@/components/admin/build/StepTool';
 import { StepWiring } from '@/components/admin/build/StepWiring';
+import { Bench3DLazy } from '@/components/admin/build/bench3d/Bench3DLazy';
+import { benchSceneFor } from '@/components/admin/build/bench3d/scenes';
 import { closeupFor, sceneFor } from '@/components/admin/build/scenes';
 import { StepScene } from '@/components/admin/build/scenes/StepScene';
 import { MILESTONES, milestoneById } from '@/components/admin/roadmap';
@@ -40,6 +42,7 @@ export default async function StepPage({ params }: { params: Params }) {
   const nextHref = next ? `/admin/build/${milestone.id}/${next.id}` : nextMilestone ? `/admin/build/${nextMilestone.id}` : '/admin/build';
   const hasVisual = Boolean(step.photo || step.wires);
   const closeup = closeupFor(MILESTONES, milestone.id, step.id);
+  const bench = Boolean(benchSceneFor(milestone.id, step.id));
   const previousLabel = previous ? previous.title : `Milestone ${milestone.number}`;
   const nextLabel = next ? next.title : nextMilestone ? `${nextMilestone.number}. ${nextMilestone.title}` : 'The build map';
 
@@ -59,8 +62,16 @@ export default async function StepPage({ params }: { params: Params }) {
 
       <StepStepper milestoneId={milestone.id} currentStepId={step.id} />
 
-      <StepScene scene={sceneFor(milestone.id, step.id)} />
-      {closeup ? (
+      {/* A step with its 3D bench shows that, in place of the 2.5D scene and close-up (ai-docs/EXPLAINING.md). */}
+      {bench ? (
+        <section className="step-closeup">
+          <h2>Your bench in 3D, one action at a time</h2>
+          <Bench3DLazy sceneKey={`${milestone.id}/${step.id}`} />
+        </section>
+      ) : (
+        <StepScene scene={sceneFor(milestone.id, step.id)} />
+      )}
+      {closeup && !bench ? (
         <section className="step-closeup">
           <h2>{closeup.kind === 'closeup' ? 'Close up, one wire at a time' : 'Close up, with your hands'}</h2>
           <StepScene scene={closeup} />

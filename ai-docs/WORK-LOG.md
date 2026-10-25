@@ -591,3 +591,14 @@ right")
   Power, SDA, SCL, Answers and gives the matching advice.
 - Not done: the display still does not answer (GND row, a yellow in the wrong row, or a
   damaged display).
+
+**26 October: the display lights up; 3D becomes the standard** (the owner: "this approach of
+3D is the perfect one … continue always like this, change it in all steps")
+
+- Display, Four Wires (artifact, three.js): the display wired straight to the D row with four
+  female–female jumpers. The owner did it; the board found the display (`found=3c`); step 1.4
+  ticked by the live page.
+- `ai-docs/EXPLAINING.md`: the 3D standard; pointed to from AGENTS.md and memory.
+- `web/components/admin/build/bench3d/`: a 3D bench for the step pages (scenes as data,
+  three from npm, loaded only where shown). All of milestone 1 converted and checked frame by
+  frame in the browser; tsc and the build pass.

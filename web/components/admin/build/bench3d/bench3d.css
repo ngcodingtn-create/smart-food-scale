@@ -1,0 +1,59 @@
+/* The 3D bench: the stage, its pinned tags, the beat pills, the caption and the plain cards. */
+
+.bench3d { margin: 0; display: grid; gap: 12px; }
+.bench3d-stage {
+  position: relative; border-radius: 14px; overflow: hidden; border: 1px solid var(--rule);
+  background: #c9a679; aspect-ratio: 16 / 10; max-width: 100%; touch-action: none;
+}
+@media (max-width: 560px) { .bench3d-stage { aspect-ratio: 4 / 5; } }
+.bench3d-stage canvas { display: block; width: 100%; height: 100%; cursor: grab; }
+.bench3d-stage canvas:active { cursor: grabbing; }
+.bench3d-tags { position: absolute; inset: 0; pointer-events: none; }
+.bench3d-tag {
+  position: absolute; transform: translate(-50%, -100%); margin-top: -10px; white-space: nowrap;
+  font: 600 13px/1.2 var(--font-sans, system-ui); padding: 5px 9px; border-radius: 8px;
+  background: rgba(255, 250, 242, 0.95); color: #2b2420; border: 1px solid rgba(0, 0, 0, 0.12); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+.bench3d-tag small { display: block; font: 500 11px/1.3 var(--font-mono, monospace); color: #6b625a; }
+.bench3d-tag.you { background: #fbe7d6; color: #8a4518; border-color: #e7b48f; }
+.bench3d-tag.ok { background: #dff1e7; color: #1d6b42; border-color: #a8d8bb; }
+.bench3d-tag.claude { background: #dff1ee; color: #1d6b5c; border-color: #a8d8cf; }
+.bench3d-hint {
+  position: absolute; right: 10px; bottom: 10px; font: 500 12px var(--font-mono, monospace);
+  color: rgba(40, 25, 10, 0.75); background: rgba(255, 250, 242, 0.7); padding: 4px 8px; border-radius: 6px;
+}
+.bench3d-nogl { position: absolute; inset: 0; display: grid; place-items: center; padding: 20px; text-align: center; color: #2b2420; margin: 0; }
+.bench3d-loading {
+  aspect-ratio: 16 / 10; max-width: 100%; border-radius: 14px; background: #c9a679; color: #4a3520;
+  display: grid; place-items: center; font: 500 14px var(--font-mono, monospace);
+}
+
+.bench3d-beats { display: flex; flex-wrap: wrap; gap: 6px; }
+.bench3d-pill {
+  font: 500 13px/1 var(--font-mono, monospace); min-width: 34px; border-radius: 999px; padding: 8px 10px;
+  border: 1px solid var(--rule-strong); background: var(--paper-raised); color: var(--ink-soft); cursor: pointer; font-variant-numeric: tabular-nums;
+}
+.bench3d-pill[aria-selected='true'] { background: var(--accent); border-color: var(--accent); color: var(--paper); }
+
+.bench3d-caption { display: grid; gap: 8px; }
+.bench3d-caption h3 { font: 600 18px/1.3 var(--font-sans, system-ui); margin: 0; }
+.bench3d-doer { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; align-items: start; }
+.bench3d-doer ol, .bench3d-doer p { margin: 0; }
+.bench3d-doer ol { padding-left: 18px; display: grid; gap: 3px; }
+.bench3d-who { font: 500 11px/1 var(--font-mono, monospace); letter-spacing: 0.06em; text-transform: uppercase; border-radius: 6px; padding: 5px 7px; margin-top: 3px; }
+.bench3d-who.you { background: var(--accent-soft); color: var(--accent-ink); }
+.bench3d-who.claude { background: var(--measure-soft); color: var(--measure-ink); }
+.bench3d-nav { display: flex; flex-wrap: wrap; gap: 8px; }
+.bench3d-btn {
+  font: 600 15px/1 var(--font-sans, system-ui); border-radius: 10px; border: 1px solid var(--rule-strong);
+  background: var(--paper-raised); color: var(--ink); padding: 11px 15px; min-height: 44px; cursor: pointer;
+}
+.bench3d-btn.primary { background: var(--accent); border-color: var(--accent); color: var(--paper); flex: 1 1 160px; }
+.bench3d-btn:disabled { opacity: 0.45; cursor: default; }
+.bench3d-btn:focus-visible, .bench3d-pill:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+.bench3d-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 8px; }
+.bench3d-card { border: 1px solid var(--rule); border-radius: 10px; padding: 10px 12px; background: var(--paper-raised); display: grid; gap: 3px; }
+.bench3d-card b { font: 600 15px/1.25 var(--font-sans, system-ui); display: flex; align-items: center; gap: 8px; }
+.bench3d-card b i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; flex: none; border: 1px solid rgba(0, 0, 0, 0.15); }
+.bench3d-card span { color: var(--ink-soft); font-size: 14px; }

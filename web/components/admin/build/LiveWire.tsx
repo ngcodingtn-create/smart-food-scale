@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Icon } from '@/components/icons';
 import { milestoneById } from '../roadmap';
 import { stepKey, useTicks } from './progress';
+import { Bench3DLazy } from './bench3d/Bench3DLazy';
 import { StepScene } from './scenes/StepScene';
 import type { SceneRef } from './scenes';
 import './live.css';
@@ -15,7 +16,7 @@ import './live.css';
  * uses). A step the board confirms is ticked on the build map by itself.
  */
 
-export type LiveStep = { id: string; title: string; goal: string; actions: string[]; scene: SceneRef; check: Check };
+export type LiveStep = { id: string; title: string; goal: string; actions: string[]; scene: SceneRef; bench?: string; check: Check };
 type Check = 'board' | 'alive' | 'display' | 'button' | 'buzzer' | 'whole';
 type Result = { ok: boolean; lines: string[]; timedOut: boolean; error?: string };
 type Light = { label: string; state: 'ok' | 'bad' | 'wait' };
@@ -341,7 +342,7 @@ export function LiveWire({ milestoneId, steps }: { milestoneId: string; steps: L
         </header>
         <div className="livewire-grid">
           <div className="livewire-scene">
-            <StepScene key={step.id} scene={step.scene} />
+            {step.bench ? <Bench3DLazy key={step.id} sceneKey={step.bench} /> : <StepScene key={step.id} scene={step.scene} />}
           </div>
           <div className="livewire-side">
             <div className="livewire-do">
