@@ -556,3 +556,19 @@ rails step: "I want it in depth and close up for each step… showing all like i
   build pass.
 - `ai-docs/SESSION-HANDOFF.md` rewritten in full for the next account;
   `ai-docs/NEXT-SESSION-PROMPT.md` holds the prompt to start it.
+
+**Same day, night: a second account takes over** (the owner: finish the close-ups, then
+carry on the build from the rails step)
+
+- Close-ups checked frame by frame, rendered to PNG offline (jiti + react-dom/server +
+  sharp). The ESP32-CAM redrawn from the owner's photo; at its real length it covers rows
+  1-14, so the light's transistor and LEDs moved below it; LED wires no longer go into the
+  rails' gaps. Camera onto its base, microSD, hotspot, edge labels, power step fixed. tsc,
+  build, and the pages at the pane's ~390 px width: no sideways scroll.
+- The owner's ticks were only in one browser. Now mirrored to `web/data/progress.json`
+  through `/admin/api/progress`, merged on load; checked by ticking, unticking and wiping
+  the browser's storage (progress came back from the file).
+- Found on the board: `E error no-display` could never appear (`oled.begin()` succeeds with
+  nothing wired). Node A 0.3.2 probes the display on I2C first; flashed and confirmed with no
+  display: the error shows.
+- Step 1.3 rails: the owner wired 3V, G, VIN; the board boots and reads 0.0 g steady.

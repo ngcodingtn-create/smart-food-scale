@@ -15,6 +15,35 @@ owner's own messages are the `type:"user"` lines. Mine it with Python run as `py
 
 ---
 
+## 0. Latest (second account, 25 Oct, night): read this first
+
+- **Section 5.A is done** (commit `5de43de`). The close-ups were checked frame by frame by
+  rendering them to PNG sheets offline (see "Checking scenes offline" below). The ESP32-CAM
+  is redrawn from the owner's photo (27 × 40.5 mm, microSD slot at the top under the lens);
+  at that length it covers breadboard rows 1–14, so in the light's example the transistor
+  moved to rows 19–21 and the LEDs to 15–26. Fixed too: camera onto its base, microSD,
+  hotspot tag, pin labels at the frame's edge, the power step's tag.
+- **Ticks are saved to a file** (commit `801cb91`): `web/data/progress.json`, through
+  `/admin/api/progress` (`web/lib/progress-file.ts`, `web/components/admin/saved.ts`). The
+  owner asked for it after their ticks vanished. Read it to see where the owner is. On load,
+  the file and the browser are merged; a tick rewrites the whole key, so **do not edit the
+  file while the owner has a build page open** (their next tick overwrites it). Commit it
+  when you stop.
+- **Firmware 0.3.2** (commit `d72ce14`): `E error no-display` now really appears with no
+  display (the old check could never fail). Flashed to the NodeMCU, images published.
+- **Step 1.3 rails: done and checked.** The owner wired 3V, G and VIN; `listen --reset`
+  showed the boot line and steady 0.0 g. **Next: step 1.4, the display.** Before it, the
+  board says `E error no-display`; after it, that line must be gone.
+- Signing in: the owner types the admin password in the browser pane. Minting a cookie
+  from `.env.local` was refused by the safety classifier; do not try again.
+- Checking scenes offline: a script in the session scratchpad (`frames.mjs`) loaded the
+  scene modules with `jiti`, rendered frames with `react-dom/server` and rasterised them
+  with `sharp` (both in `web/node_modules`). Recreate it if needed; it is faster and more
+  reliable than seeking scenes in the hidden browser pane.
+- Not done: the HX711 is drawn as a generic module; redraw it from a photo when it arrives.
+
+---
+
 ## 1. Where things are, right now
 
 ### The physical build (the owner is mid-step)
