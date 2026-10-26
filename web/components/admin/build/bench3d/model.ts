@@ -31,17 +31,21 @@ export const rowZ = (row: number) => BB.zFront - 3.5 - (row - 1) * 2.54;
 export const isRail = (col: Col) => col.length === 2;
 
 // --- the HX711, standing on its pins in front of the outer row, like the display -----------------
-/** Its outline is SparkFun's reference board (rig/specs.ts), until the owner's photo shows theirs. */
+/**
+ * The owner's XFW-HX711, measured from their photo of 26 October against its 2.54 mm pin pitch
+ * (so about a millimetre either way): 24.6 × 16 mm, its pins soldered on, pointing down.
+ */
 export const HX711_AT = { x: -44, y: 14.5, z: 34 };
-/** The end towards the NodeMCU, and the far end; each counted from the back (-Z). */
+export const HX_BOARD = { w: 24.6, d: 16, cellPinX: -10.6, signalPinX: 10 };
+/** The end towards the NodeMCU, and the far end; each counted from the back (-Z), as printed. */
 export const HX_SIGNAL = ['GND', 'DT', 'SCK', 'VCC'];
 export const HX_CELL = ['E+', 'E−', 'A−', 'A+', 'B−', 'B+'];
 export function hxPin(name: string): V3 {
   const s = HX_SIGNAL.indexOf(name);
-  if (s >= 0) return [HX711_AT.x + 13.5, HX711_AT.y, HX711_AT.z - 3.81 + s * 2.54];
+  if (s >= 0) return [HX711_AT.x + HX_BOARD.signalPinX, HX711_AT.y, HX711_AT.z - 3.81 + s * 2.54];
   const c = HX_CELL.indexOf(name);
   if (c < 0) throw new Error(`No HX711 pin ${name}`);
-  return [HX711_AT.x - 13.5, HX711_AT.y, HX711_AT.z - 6.35 + c * 2.54];
+  return [HX711_AT.x + HX_BOARD.cellPinX, HX711_AT.y, HX711_AT.z - 6.35 + c * 2.54];
 }
 
 // --- the load cell: on a thick book, its wired end taped down, its free end out over the edge -----
@@ -54,9 +58,51 @@ export const CUP: V3 = [CELL.x, BOOK.h + CELL.size, 21];
 export const CONNECTOR = { x: -80, z: 56 };
 export const connectorPin = (k: number): V3 => [CONNECTOR.x - 3.81 + k * 2.54, 2.6, CONNECTOR.z + 4];
 
+// --- the camera: the ESP32-CAM, its MB base on the desk right of the breadboard --------------------
+/** Its pins as printed, each list from the microSD end; 27 × 40.5 mm, the first pin 4.4 mm from that end (owner's photo). */
+export const CAM_LEFT = ['5V', 'GND', 'IO12', 'IO13', 'IO15', 'IO14', 'IO2', 'IO4'];
+export const CAM_RIGHT = ['3V3', 'IO16', 'IO0', 'GND', 'VCC', 'U0R', 'U0T', 'GND'];
+export const CAM_BOARD = { w: 27, l: 40.5, firstPin: 4.4 };
+/** On the breadboard: lens up, its ESP32-CAM end towards the owner; 5V's column in b, the pins from row 36 to row 43. */
+export const CAM_FAR_ROW = 43;
+export function camHole(name: string, nth = 0): [Col, number] {
+  const spots = [
+    ...CAM_LEFT.flatMap((n, i) => (n === name ? [['b', CAM_FAR_ROW - i] as [Col, number]] : [])),
+    ...CAM_RIGHT.flatMap((n, i) => (n === name ? [['i', CAM_FAR_ROW - i] as [Col, number]] : [])),
+  ];
+  if (!spots[nth]) throw new Error(`No ESP32-CAM pin ${name}`);
+  return spots[nth];
+}
+/** The camera's middle, on the breadboard: its far pin row 4.4 mm from the microSD end. */
+export const CAM_ON_BB = { x: (COL_X.b + COL_X.i) / 2, z: rowZ(CAM_FAR_ROW) - CAM_BOARD.firstPin + CAM_BOARD.l / 2, y: BB.top + 3.2 };
+/** The MB base lies on the desk right of the breadboard, its USB socket away from the owner. */
+export const BASE_AT = { x: 118, z: -58 };
+export const BASE_SOCKET_TOP = 11.6;
+/** A base socket, named as the camera pin that goes into it. Seated, the camera's microSD end is towards the owner. */
+export function baseSocket(name: string, nth = 0): V3 {
+  const spots = [
+    ...CAM_LEFT.flatMap((n, i) => (n === name ? [[BASE_AT.x + 11.43, i] as [number, number]] : [])),
+    ...CAM_RIGHT.flatMap((n, i) => (n === name ? [[BASE_AT.x - 11.43, i] as [number, number]] : [])),
+  ];
+  if (!spots[nth]) throw new Error(`No base socket ${name}`);
+  const [x, i] = spots[nth];
+  return [x, BASE_SOCKET_TOP, BASE_AT.z + CAM_BOARD.l / 2 - CAM_BOARD.firstPin - i * 2.54];
+}
+/** The six LEDs of the light: long leg in column j of the row, short leg in the right − rail one row on (rails skip every sixth row). */
+export const LED_ROWS = [46, 49, 51, 55, 57, 61];
+
+// --- away from the bench --------------------------------------------------------------------------
+export const PHONE_AT = { x: 150, z: 62 };
+export const LAPTOP_AT = { x: 0, z: -300 };
+/** The rig, alone on the desk (rig/specs.ts): the plate's eating surface. */
+export const RIG_PLATE_TOP: V3 = [0, 73, -15];
+/** A phone charger on the desk, its USB cable cut at the far end: where its red and black leads come out. */
+export const CHARGER_AT = { x: 200, z: -10 };
+export const CHARGER_LEADS: V3 = [96, 2.5, -30];
+
 // --- what a scene is made of -----------------------------------------------------------------
 /** A wire's end: a NodeMCU pin, a breadboard hole, a pin of the display or of the HX711 (each standing on its plugs), or a point. */
-export type End = { pin: ['d' | 'outer', number] } | { hole: [Col, number] } | { dpin: number } | { hx: string } | { at: V3 };
+export type End = { pin: ['d' | 'outer', number] } | { hole: [Col, number] } | { dpin: number } | { hx: string } | { base: string; nth?: number } | { at: V3 };
 
 export type WireSpec = {
   id: string;
@@ -85,7 +131,17 @@ export type PartSpec =
   | { id: string; kind: 'tape' }
   | { id: string; kind: 'cup' }
   /** Across two holes: the 10 µF stands on its legs, its striped leg in `to`; the 100 nF is a small disc. */
-  | { id: string; kind: 'cap'; type: 'electrolytic' | 'ceramic'; from: [Col, number]; to: [Col, number] };
+  | { id: string; kind: 'cap'; type: 'electrolytic' | 'ceramic'; from: [Col, number]; to: [Col, number] }
+  | { id: string; kind: 'mb-base' }
+  | { id: string; kind: 'esp32cam'; on: 'base' | 'breadboard' }
+  | { id: string; kind: 'base-usb' }
+  | { id: string; kind: 'led'; row: number }
+  | { id: string; kind: 'sdcard' }
+  | { id: string; kind: 'phone' }
+  | { id: string; kind: 'laptop' }
+  | { id: string; kind: 'charger' }
+  /** A piece of the rig, from rig/specs.ts. */
+  | { id: string; kind: 'rig'; piece: 'base' | 'spacer' | 'cell' | 'platform' | 'plate' | 'post' | 'camera' | 'panel' };
 
 export type Tag = { at: End | V3; text: string; small?: string; tone?: 'you' | 'ok' | 'claude' };
 export type Cam = 'bench' | 'mcu' | 'mcu-near' | 'display' | 'usb' | { rows: [number, number]; side?: 'left' | 'right' } | [V3, V3];
@@ -97,6 +153,8 @@ export type Beat = {
   cam: Cam;
   /** Wires and parts that appear in this beat, one after the other. */
   add?: string[];
+  /** Wires and parts already on the bench that come off in this beat. */
+  remove?: string[];
   /** A pulsing ring round this pin or hole. */
   ring?: End;
   tags?: Tag[];
@@ -110,6 +168,13 @@ export type Beat = {
   press?: { at: End | V3; how: 'tap' | 'hold' | 'press' };
   /** A known mass goes into the cup, or comes out. */
   mass?: 'in' | 'out';
+  /** Food goes into the cup (or onto the plate), or comes off. */
+  food?: 'in' | 'out';
+  /** The light's LEDs and the camera's own LED shine during this beat. */
+  light?: boolean;
+  /** What the laptop's and the phone's screens show from this beat on. */
+  laptop?: string[];
+  phone?: string[];
   T?: number;
 };
 
@@ -124,6 +189,10 @@ export type BenchScene = {
   /** The same content as plain cards under the scene. */
   cards?: { title: string; text: string; colour?: string }[];
   usbStartsIn?: boolean;
+  /** false: no breadboard or NodeMCU, for the rig and the steps on the laptop and phone. */
+  bench?: boolean;
+  /** Where masses and food go, when not the cup on the bench (the rig's plate). */
+  loadAt?: V3;
 };
 
 /** Where the display stands once it is wired straight to the NodeMCU, screen up, on its four plugs. */
@@ -136,6 +205,7 @@ export function endPoint(end: End): V3 {
   if ('hole' in end) return [COL_X[end.hole[0]], BB.top, rowZ(end.hole[1])];
   if ('dpin' in end) return displayPin(end.dpin);
   if ('hx' in end) return hxPin(end.hx);
+  if ('base' in end) return baseSocket(end.base, end.nth);
   return end.at;
 }
 

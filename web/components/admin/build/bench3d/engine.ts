@@ -1,7 +1,9 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { DIM } from '@/components/rig/specs';
 import {
-  BB, BOOK, CELL, COL_X, CONNECTOR, CUP, DISPLAY, HX711_AT, HX_CELL, HX_SIGNAL, PCB_TOP, ROWS, ROW_X, endPoint, hxPin, isRail, pinZ, rowZ,
+  BASE_AT, BASE_SOCKET_TOP, BB, BOOK, CAM_BOARD, CAM_LEFT, CAM_ON_BB, CAM_RIGHT, CELL, COL_X, CONNECTOR, CUP, DISPLAY, HX711_AT, HX_BOARD, HX_CELL, HX_SIGNAL,
+  CHARGER_AT, CHARGER_LEADS, LAPTOP_AT, PCB_TOP, PHONE_AT, ROWS, ROW_X, endPoint, hxPin, isRail, pinZ, rowZ,
   type BenchScene, type Cam, type Col, type End, type PartSpec, type Tag, type V3, type WireSpec,
 } from './model';
 
@@ -312,19 +314,23 @@ function hxPins() {
 function hx711(bare: boolean) {
   const group = new THREE.Group();
   const { x, y, z } = HX711_AT;
-  group.add(boxMesh([30.48, 1.6, 22.86], M.green, [x, y - 1.6, z]));
-  group.add(boxMesh([7, 1.2, 5], M.black, [x + 1, y, z]));
-  const chip = textPlane('HX711', 6.4, 1.8, '#cfd3d6', 'transparent');
-  chip.position.set(x + 1, y + 1.25, z);
+  // The owner's XFW-HX711: the chip right of centre, standing along the board, a little to the back.
+  group.add(boxMesh([HX_BOARD.w, 1.6, HX_BOARD.d], M.green, [x, y - 1.6, z]));
+  group.add(boxMesh([4.1, 1.4, 10.4], M.black, [x + 2, y, z - 1.5]));
+  const chip = textPlane('HX711', 7, 2, '#cfd3d6', 'transparent', Math.PI / 2);
+  chip.position.set(x + 2, y + 1.42, z - 1.5);
   group.add(chip);
+  const maker = textPlane('XFW-HX711', 13, 2, '#f1f3f1', 'transparent');
+  maker.position.set(x + 1, y + 0.02, z + 6.6);
+  group.add(maker);
   // Each pin's name printed beside it, inboard, as on the board.
   for (const name of HX_SIGNAL) {
     const p = hxPin(name);
-    group.add(pinLabel(name, [p[0] - 5, y + 0.02, p[2]]));
+    group.add(pinLabel(name, [p[0] - 4, y + 0.02, p[2]]));
   }
   for (const name of HX_CELL) {
     const p = hxPin(name);
-    group.add(pinLabel(name, [p[0] + 4.2, y + 0.02, p[2]]));
+    group.add(pinLabel(name, [p[0] + 3.2, y + 0.02, p[2]]));
   }
   if (!bare) group.add(hxPins());
   return group;
@@ -455,6 +461,7 @@ type Built = { object: THREE.Object3D; grow?: (p: number) => void; drop?: (p: nu
 
 function housing(at: V3, kind: 'm' | 'f', end: End): THREE.Object3D {
   if ('dpin' in end || 'hx' in end) return boxMesh([2.6, 14, 2.6], M.black, [at[0], at[1] - 14.4, at[2]]);
+  if ('base' in end) return boxMesh([2.6, 9, 2.6], M.black, [at[0], at[1], at[2]]);
   if ('at' in end) return new THREE.Group(); // the blue connector covers it
   if (kind === 'f') return boxMesh([2.6, 13.4, 2.6], M.black, [at[0], PCB_TOP + 4.6, at[2]]);
   return boxMesh([2.6, 9, 2.6], M.black, [at[0], BB.top, at[2]]);
@@ -464,6 +471,7 @@ function housing(at: V3, kind: 'm' | 'f', end: End): THREE.Object3D {
 function wireExit(end: End, kind: 'm' | 'f'): V3 {
   const p = endPoint(end);
   if ('dpin' in end || 'hx' in end) return [p[0], 0.8, p[2]];
+  if ('base' in end) return [p[0], p[1] + 9, p[2]];
   if ('at' in end) return p;
   if (kind === 'f') return [p[0], PCB_TOP + 18, p[2]];
   return [p[0], BB.top + 9, p[2]];
@@ -511,7 +519,292 @@ function wire(spec: WireSpec): Built {
   };
 }
 
-function part(spec: PartSpec, displayRef: { current?: Display }): Built {
+// --- the camera's side ------------------------------------------------------------------------
+
+/** A screen whose text a beat can set: the phone's, the laptop's. */
+type Screen = { paint: (lines: string[]) => void };
+type Refs = { current?: Display; glow: THREE.MeshStandardMaterial[]; phone?: Screen; laptop?: Screen };
+
+function screenTexture(w: number, h: number, style: { paper: string; ink: string; title: string }, perLine = 19) {
+  const canvas = document.createElement('canvas');
+  canvas.width = w;
+  canvas.height = h;
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  const paint = (lines: string[]) => {
+    const g = canvas.getContext('2d')!;
+    g.fillStyle = style.paper;
+    g.fillRect(0, 0, w, h);
+    const size = Math.round(w / perLine);
+    lines.forEach((line, i) => {
+      g.fillStyle = i === 0 ? style.title : style.ink;
+      g.font = `${i === 0 ? 'bold ' : ''}${i === 0 ? size + 6 : size}px sans-serif`;
+      g.fillText(line, size * 0.8, size * 2 + i * size * 1.65, w - size * 1.6);
+    });
+    texture.needsUpdate = true;
+  };
+  paint([]);
+  return { texture, paint };
+}
+
+/**
+ * The owner's ESP32-CAM, from their photo: 27 × 40.5 mm, the microSD slot at one end with the
+ * lens folded over it, then the ribbon, the camera connector, its white LED, "ESP32-CAM".
+ * Local frame: the PCB's top at y = 0, the microSD end at -Z, 5V's column at -X.
+ */
+function esp32cam(glow: THREE.MeshStandardMaterial[]) {
+  const g = new THREE.Group();
+  const L = CAM_BOARD.l, W = CAM_BOARD.w, end = -L / 2;
+  g.add(boxMesh([W, 1.6, L], material(0x161a1f), [0, -1.6, 0]));
+  g.add(boxMesh([18, 2.2, 25], M.metal, [0, -3.8, 3]));
+  g.add(boxMesh([17, 2.2, 13.7], M.metal, [0, 0, end + 6.85]));
+  g.add(boxMesh([9, 3.6, 9], material(0x111111), [0, 2.2, end + 8.6]));
+  const barrel = new THREE.Mesh(new THREE.CylinderGeometry(3.6, 3.6, 3, 24), material(0x151515));
+  barrel.position.set(0, 7.3, end + 8.6);
+  g.add(barrel);
+  const glass = new THREE.Mesh(new THREE.CylinderGeometry(1.8, 1.8, 0.2, 20), material(0x1f3350, { metalness: 0.6, roughness: 0.2 }));
+  glass.position.set(0, 8.85, end + 8.6);
+  g.add(glass);
+  g.add(boxMesh([6, 0.3, 9], material(0xc9873a), [0, 0, end + 17.5]));
+  g.add(boxMesh([18, 1.8, 6], material(0xecebe6), [0, 0, end + 25.7]));
+  const ledMat = material(0xfff6d8, { emissive: 0xffffff, emissiveIntensity: 0 });
+  glow.push(ledMat);
+  g.add(boxMesh([3, 1, 3], ledMat, [10, 0, end + 29]));
+  const name = textPlane('ESP32-CAM', 16, 3.2, '#f2f5f7', 'transparent');
+  name.position.set(0, 0.02, end + 37.5);
+  g.add(name);
+  [...CAM_LEFT.map(() => -11.43), ...CAM_RIGHT.map(() => 11.43)].forEach((x, k) => {
+    const z = end + CAM_BOARD.firstPin + (k % 8) * 2.54;
+    g.add(boxMesh([2.54, 2.5, 2.54], M.header, [x, -1.6 - 2.5, z]));
+    g.add(boxMesh([0.64, 6, 0.64], M.gold, [x, -1.6 - 2.5 - 6, z], false));
+  });
+  return g;
+}
+
+function mbBase() {
+  const g = new THREE.Group();
+  const { x, z } = BASE_AT;
+  g.add(boxMesh([28, 1.6, 41], material(0x1b1d20), [x, 1.6, z]));
+  const first = z + CAM_BOARD.l / 2 - CAM_BOARD.firstPin;
+  for (const side of [-1, 1]) {
+    g.add(boxMesh([2.54, BASE_SOCKET_TOP - 3.2, 8 * 2.54], M.black, [x + side * 11.43, 3.2, first - 3.5 * 2.54]));
+    for (let i = 0; i < 8; i++) {
+      const hole = new THREE.Mesh(new THREE.BoxGeometry(1, 0.1, 1), M.hole);
+      hole.position.set(x + side * 11.43, BASE_SOCKET_TOP + 0.02, first - i * 2.54);
+      g.add(hole);
+    }
+  }
+  // The micro-USB socket at the far end; IO0 and RST either side of it, as on the owner's base.
+  g.add(boxMesh([8, 3, 6], M.metal, [x, 3.2, z - 17.5]));
+  for (const [dx, label] of [[9, 'IO0'], [-9, 'RST']] as const) {
+    g.add(boxMesh([4, 1.6, 3], material(0xc9ced2), [x + dx, 3.2, z - 17.5]));
+    const t = textPlane(label, 5, 2, '#e9eef7', 'transparent');
+    t.position.set(x + dx, 3.22, z - 13.5);
+    g.add(t);
+  }
+  const name = textPlane('ESP32-CAM-MB', 15, 2.4, '#cfd5d9', 'transparent');
+  name.position.set(x, 3.22, z - 6);
+  g.add(name);
+  return g;
+}
+
+function baseUsb() {
+  const g = new THREE.Group();
+  const { x, z } = BASE_AT;
+  g.add(boxMesh([10, 6, 14], M.black, [x, 0.6, z - 27.5]));
+  const length = z - 34.5 - (LAPTOP_AT.z + 115);
+  const cable = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 2.2, length, 12), M.black);
+  cable.rotation.x = Math.PI / 2;
+  cable.position.set(x, 2.4, z - 34.5 - length / 2);
+  cable.castShadow = true;
+  g.add(cable);
+  return g;
+}
+
+/** A white 5 mm LED: long leg in column i of its row, short leg bent to the right − rail one row on. */
+function led(row: number, glow: THREE.MeshStandardMaterial[]) {
+  const g = new THREE.Group();
+  const a = v(endPoint({ hole: ['i', row] })), k = v(endPoint({ hole: ['R-', row + 1] }));
+  const body = a.clone().lerp(k, 0.5).setY(BB.top + 7);
+  for (const foot of [a, k]) {
+    const curve = new THREE.CatmullRomCurve3([foot, foot.clone().setY(BB.top + 3), body.clone().setY(BB.top + 5).lerp(foot, 0.25)]);
+    g.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 16, 0.25, 6), M.leg));
+  }
+  const mat = new THREE.MeshStandardMaterial({ color: 0xf4f6f7, roughness: 0.25, transparent: true, opacity: 0.92, emissive: 0xffffff, emissiveIntensity: 0 });
+  glow.push(mat);
+  const cyl = new THREE.Mesh(new THREE.CylinderGeometry(2.5, 2.6, 5, 20), mat);
+  cyl.position.copy(body);
+  const dome = new THREE.Mesh(new THREE.SphereGeometry(2.5, 20, 10, 0, Math.PI * 2, 0, Math.PI / 2), mat);
+  dome.position.copy(body).setY(body.y + 2.5);
+  g.add(cyl, dome);
+  return g;
+}
+
+function sdcard() {
+  const g = new THREE.Group();
+  g.add(boxMesh([11, 0.8, 15], material(0x2a2f3a), [0, 0, 0]));
+  const label = textPlane('microSD', 8, 2.4, '#e9eef7', 'transparent');
+  label.position.set(0, 0.82, 2);
+  g.add(label);
+  return g;
+}
+/** The card fully in its slot: a couple of millimetres still out, at the camera's microSD end. */
+const SD_IN: V3 = [CAM_ON_BB.x, CAM_ON_BB.y + 1.6 + 0.6, CAM_ON_BB.z - CAM_BOARD.l / 2 + 7.5 - 2];
+
+function phone(refs: Refs) {
+  const g = new THREE.Group();
+  const { x, z } = PHONE_AT;
+  g.add(boxMesh([75, 8, 155], material(0x1c1d21, { roughness: 0.4 }), [x, 0, z]));
+  const screen = screenTexture(360, 744, { paper: '#f6f5f2', ink: '#2b2b2b', title: '#b4532a' }, 12);
+  const plane = new THREE.Mesh(new THREE.PlaneGeometry(68, 140), new THREE.MeshBasicMaterial({ map: screen.texture }));
+  plane.rotation.x = -Math.PI / 2;
+  plane.position.set(x, 8.05, z);
+  g.add(plane);
+  refs.phone = screen;
+  return g;
+}
+
+function laptop(refs: Refs) {
+  const g = new THREE.Group();
+  const { x, z } = LAPTOP_AT;
+  g.add(boxMesh([330, 18, 220], material(0x2b2d31), [x, 0, z]));
+  g.add(boxMesh([290, 0.6, 110], material(0x1a1b1e), [x, 18, z - 20]));
+  const hinge = new THREE.Group();
+  hinge.position.set(x, 18, z - 110);
+  hinge.rotation.x = -0.26;
+  const lid = boxMesh([330, 210, 6], material(0x2b2d31), [0, 0, -3]);
+  const screen = screenTexture(1024, 640, { paper: '#fbfaf7', ink: '#2b2b2b', title: '#b4532a' });
+  const plane = new THREE.Mesh(new THREE.PlaneGeometry(310, 194), new THREE.MeshBasicMaterial({ map: screen.texture }));
+  plane.position.set(0, 105, 0.1);
+  hinge.add(lid, plane);
+  g.add(hinge);
+  refs.laptop = screen;
+  return g;
+}
+
+/** A 5 V phone charger, its cable's far end cut: the red and black leads are wires of the scene. */
+function charger() {
+  const g = new THREE.Group();
+  g.add(boxMesh([42, 28, 46], material(0xf1f0ec, { roughness: 0.5 }), [CHARGER_AT.x, 0, CHARGER_AT.z]));
+  const curve = new THREE.CatmullRomCurve3([v([CHARGER_AT.x - 21, 6, CHARGER_AT.z]), v([150, 3, -20]), v([CHARGER_LEADS[0] + 6, 3, CHARGER_LEADS[2]]), v(CHARGER_LEADS)]);
+  const cable = new THREE.Mesh(new THREE.TubeGeometry(curve, 60, 2, 10), M.black);
+  cable.castShadow = true;
+  g.add(cable);
+  return g;
+}
+
+/** Food: a small heap, for the cup or the plate. */
+function food() {
+  const g = new THREE.Group();
+  const heap = new THREE.Mesh(new THREE.SphereGeometry(7, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2), material(0xc9893f, { roughness: 0.9 }));
+  heap.scale.set(1, 0.6, 1);
+  g.add(heap);
+  return g;
+}
+
+// --- the rig, alone on the desk: every number from rig/specs.ts -----------------------------------
+
+const SHELL = material(0xcfc8b8, { roughness: 0.8 });
+const RIG_ALU = material(0xb9bfc3, { metalness: 0.6, roughness: 0.4 });
+const RIG_BASE_TOP = 12;
+const RIG_CELL_TOP = DIM.cell.bottom + DIM.cell.height;
+
+function rig(piece: 'base' | 'spacer' | 'cell' | 'platform' | 'plate' | 'post' | 'camera' | 'panel', refs: Refs) {
+  const g = new THREE.Group();
+  const pz = DIM.plate.z;
+  switch (piece) {
+    case 'base':
+      for (const fx of [-103, 103]) for (const fz of [-96, 96]) {
+        const foot = new THREE.Mesh(new THREE.CylinderGeometry(9, 9, 6, 24), material(0x383a35));
+        foot.position.set(fx, 3, fz);
+        g.add(foot);
+      }
+      g.add(boxMesh([DIM.base.width, 6, DIM.base.depth], SHELL, [0, 6, 0]));
+      for (const s of [-1, 1]) g.add(boxMesh([5, 26, 230], SHELL, [s * 122.5, RIG_BASE_TOP, 0]));
+      g.add(boxMesh([240, 26, 5], SHELL, [0, RIG_BASE_TOP, -117.5]));
+      g.add(boxMesh([240, 26, 38], SHELL, [0, RIG_BASE_TOP, 101]));
+      break;
+    case 'spacer':
+      g.add(boxMesh([16, DIM.cell.bottom - RIG_BASE_TOP, 14], RIG_ALU, [-DIM.cell.mount, RIG_BASE_TOP, pz]));
+      {
+        const stop = new THREE.Mesh(new THREE.CylinderGeometry(2.4, 2.4, DIM.cell.bottom - 1 - RIG_BASE_TOP, 16), material(0x5c6565, { metalness: 0.7 }));
+        stop.position.set(DIM.cell.mount, (DIM.cell.bottom - 1 + RIG_BASE_TOP) / 2, pz);
+        g.add(stop);
+      }
+      break;
+    case 'cell': {
+      g.add(boxMesh([DIM.cell.length, DIM.cell.height, DIM.cell.width], ALU, [0, DIM.cell.bottom, pz]));
+      for (const sx of [-34, -22]) {
+        const bolt = new THREE.Mesh(new THREE.CylinderGeometry(2.6, 2.6, 1.6, 6), material(0x4d5554, { metalness: 0.7 }));
+        bolt.position.set(sx, RIG_CELL_TOP + 0.8, pz);
+        g.add(bolt);
+      }
+      const arrow = textPlane('↓', 8, 8, '#1d1d1d', 'transparent');
+      arrow.rotation.set(0, 0, 0);
+      arrow.position.set(6, DIM.cell.bottom + DIM.cell.height / 2, pz + DIM.cell.width / 2 + 0.06);
+      g.add(arrow);
+      break;
+    }
+    case 'platform': {
+      const riser = DIM.platform.y - DIM.platform.height / 2 - RIG_CELL_TOP;
+      g.add(boxMesh([16, riser, 12], RIG_ALU, [DIM.cell.mount, RIG_CELL_TOP, pz]));
+      const plat = new THREE.Mesh(new THREE.CylinderGeometry(DIM.platform.diameter / 2, DIM.platform.diameter / 2, DIM.platform.height, 64), RIG_ALU);
+      plat.position.set(0, DIM.platform.y, pz);
+      g.add(plat);
+      break;
+    }
+    case 'plate': {
+      const white = material(0xf2f1ea, { roughness: 0.3, side: THREE.DoubleSide });
+      const well = new THREE.Mesh(new THREE.CylinderGeometry(60, 60, DIM.plate.surface - DIM.plate.bottom, 64), white);
+      well.position.set(0, (DIM.plate.surface + DIM.plate.bottom) / 2, pz);
+      const rim = new THREE.Mesh(new THREE.CylinderGeometry(DIM.plate.diameter / 2, 60, DIM.plate.bottom + DIM.plate.height - DIM.plate.surface, 64, 1, true), white);
+      rim.position.set(0, (DIM.plate.surface + DIM.plate.bottom + DIM.plate.height) / 2, pz);
+      g.add(well, rim);
+      break;
+    }
+    case 'post':
+      g.add(boxMesh([34, 7, 34], RIG_ALU, [0, 38, -107]));
+      g.add(boxMesh([20, DIM.arm.postLength, 20], RIG_ALU, [0, 38, -107]));
+      g.add(boxMesh([20, 20, DIM.arm.reach], RIG_ALU, [0, DIM.arm.top - 20, -61]));
+      g.add(boxMesh([44, 7, 49], material(0xb4532a), [0, DIM.arm.top - 11.5, pz]));
+      break;
+    case 'camera': {
+      // Lens down, under the arm's end, inside the ring of six LEDs.
+      const cam = esp32cam(refs.glow);
+      cam.rotation.x = Math.PI;
+      cam.position.set(0, DIM.camera.y, pz);
+      g.add(cam);
+      const { count, circle, carrier, y } = DIM.light;
+      const ring = new THREE.Mesh(new THREE.RingGeometry(circle / 2 - 5, carrier / 2, 48), material(0x2b2d31, { side: THREE.DoubleSide }));
+      ring.rotation.x = Math.PI / 2;
+      ring.position.set(0, y, pz);
+      g.add(ring);
+      for (let i = 0; i < count; i++) {
+        const angle = (i / count) * Math.PI * 2;
+        const mat = new THREE.MeshStandardMaterial({ color: 0xf4f6f7, emissive: 0xffffff, emissiveIntensity: 0 });
+        refs.glow.push(mat);
+        const l = new THREE.Mesh(new THREE.CylinderGeometry(2.5, 2.5, 7, 16), mat);
+        l.position.set(Math.cos(angle) * circle / 2, y - 4, pz + Math.sin(angle) * circle / 2);
+        g.add(l);
+      }
+      break;
+    }
+    case 'panel': {
+      const d = display(true);
+      refs.current = d;
+      d.group.position.set(-33, 38 + 1.6, 101);
+      g.add(d.group);
+      g.add(boxMesh([12, 3.6, 12], M.black, [27, 38, 101]));
+      const cap = new THREE.Mesh(new THREE.CylinderGeometry(4.5, 4.5, 3, 24), material(0xb4532a));
+      cap.position.set(27, 38 + 3.6 + 1.5, 101);
+      g.add(cap);
+      break;
+    }
+  }
+  return g;
+}
+
+function part(spec: PartSpec, displayRef: Refs): Built {
   let object: THREE.Object3D;
   let tip: V3 = [0, 0, 0];
   switch (spec.kind) {
@@ -571,6 +864,54 @@ function part(spec: PartSpec, displayRef: { current?: Display }): Built {
       object = capacitor(spec.type, spec.from, spec.to);
       tip = endPoint({ hole: spec.from });
       break;
+    case 'mb-base':
+      object = mbBase();
+      tip = [BASE_AT.x, BASE_SOCKET_TOP + 4, BASE_AT.z];
+      break;
+    case 'base-usb':
+      object = baseUsb();
+      tip = [BASE_AT.x, 8, BASE_AT.z - 28];
+      break;
+    case 'esp32cam': {
+      const cam = esp32cam(displayRef.glow);
+      if (spec.on === 'breadboard') {
+        cam.position.set(CAM_ON_BB.x, CAM_ON_BB.y + 1.6, CAM_ON_BB.z);
+      } else {
+        // Seated on the base, its microSD end towards the owner.
+        cam.rotation.y = Math.PI;
+        cam.position.set(BASE_AT.x, BASE_SOCKET_TOP + 2.5 + 1.6, BASE_AT.z);
+      }
+      object = cam;
+      tip = [cam.position.x, cam.position.y + 10, cam.position.z];
+      break;
+    }
+    case 'led':
+      object = led(spec.row, displayRef.glow);
+      tip = [COL_X.j + 3, BB.top + 12, rowZ(spec.row)];
+      break;
+    case 'sdcard': {
+      const card = sdcard();
+      card.position.set(...SD_IN);
+      card.traverse((o) => ((o as THREE.Mesh).castShadow = true));
+      // It slides into the slot from beyond the far end, rather than dropping in.
+      return { object: card, tip: [SD_IN[0], SD_IN[1] + 8, SD_IN[2]], drop: (p) => { card.visible = p > 0; card.position.z = SD_IN[2] - (1 - p) * 26; } };
+    }
+    case 'phone':
+      object = phone(displayRef);
+      tip = [PHONE_AT.x, 20, PHONE_AT.z];
+      break;
+    case 'charger':
+      object = charger();
+      tip = [CHARGER_AT.x, 34, CHARGER_AT.z];
+      break;
+    case 'laptop':
+      object = laptop(displayRef);
+      tip = [LAPTOP_AT.x, 120, LAPTOP_AT.z - 110];
+      break;
+    case 'rig':
+      object = rig(spec.piece, displayRef);
+      tip = [0, 60, 0];
+      break;
   }
   object.traverse((o) => {
     if ((o as THREE.Mesh).isMesh) (o as THREE.Mesh).castShadow = true;
@@ -621,17 +962,28 @@ export function createBench(canvas: HTMLCanvasElement, tagsEl: HTMLElement, scen
   sun.shadow.mapSize.set(2048, 2048);
   Object.assign(sun.shadow.camera, { left: -150, right: 150, top: 150, bottom: -150, near: 10, far: 420 });
   scene.add(sun);
-  scene.add(desk(), breadboard(), nodemcu());
+  const bench = scene3.bench ?? true;
+  scene.add(desk());
   const usb = usbCable();
-  scene.add(usb);
+  if (bench) scene.add(breadboard(), nodemcu(), usb);
 
-  const displayRef: { current?: Display } = {};
-  for (const p of scene3.parts) scene.add(part(p, displayRef).object);
+  const displayRef: Refs = { glow: [] };
+  // What is already on the bench; a beat may take some of it off.
+  const standing = new Map<string, Built>();
+  for (const p of scene3.parts) {
+    const built = part(p, displayRef);
+    built.drop?.(1);
+    standing.set(p.id, built);
+    scene.add(built.object);
+  }
   for (const w of scene3.wires) {
     const built = wire(w);
     built.grow?.(1);
+    standing.set(w.id, built);
     scene.add(built.object);
   }
+  const removedIn = new Map<string, number>();
+  scene3.beats.forEach((beat, i) => beat.remove?.forEach((id) => removedIn.set(id, i)));
   const fresh = new Map<string, Built>();
   for (const p of scene3.newParts ?? []) {
     const built = part(p, displayRef);
@@ -655,6 +1007,21 @@ export function createBench(canvas: HTMLCanvasElement, tagsEl: HTMLElement, scen
   const weight = knownMass();
   weight.visible = false;
   scene.add(weight);
+  const meal = food();
+  meal.visible = false;
+  scene.add(meal);
+  const load = scene3.loadAt ?? CUP;
+  // The laptop's and the phone's screens: the last lines set at or before a beat.
+  const screenFor = (i: number, which: 'laptop' | 'phone') => {
+    for (let k = i; k >= 0; k--) if (scene3.beats[k][which]) return scene3.beats[k][which]!;
+    return [];
+  };
+  const paintedScreens = { laptop: '', phone: '' };
+  const foodIn = (i: number) => {
+    let on = false;
+    for (let k = 0; k < i; k++) if (scene3.beats[k].food) on = scene3.beats[k].food === 'in';
+    return on;
+  };
   // What the display shows at a beat: the last lines set at or before it.
   const linesFor = (i: number) => {
     for (let k = i; k >= 0; k--) if (scene3.beats[k].lines) return scene3.beats[k].lines!;
@@ -703,7 +1070,7 @@ export function createBench(canvas: HTMLCanvasElement, tagsEl: HTMLElement, scen
       .map(({ at, text, small, tone }) => {
         // Above the part, so the tag never hides what it names.
         const base = Array.isArray(at) ? at : endPoint(at);
-        const point: V3 = Array.isArray(at) ? base : [base[0], base[1] + ('hole' in at ? 12 : 'pin' in at ? 14 : 'hx' in at ? 8 : 0), base[2]];
+        const point: V3 = Array.isArray(at) ? base : [base[0], base[1] + ('hole' in at ? 12 : 'pin' in at ? 14 : 'hx' in at ? 8 : 'base' in at ? 14 : 0), base[2]];
         const p = v(point).project(camera);
         if (p.z > 1) return '';
         const x = (p.x * 0.5 + 0.5) * rect.width, y = (-p.y * 0.5 + 0.5) * rect.height;
@@ -741,6 +1108,14 @@ export function createBench(canvas: HTMLCanvasElement, tagsEl: HTMLElement, scen
       built.grow?.(p);
       built.drop?.(p);
     }
+    // What comes off: there before its beat, lifted away during it, gone after it.
+    for (const [id, when] of removedIn) {
+      const built = standing.get(id);
+      if (!built) continue;
+      const p = beat < when ? 1 : beat > when ? 0 : 1 - seg(t, 0.1, 0.6);
+      built.grow?.(p);
+      built.drop?.(p);
+    }
     // USB.
     const wasIn = usbState(beat);
     const nowIn = b.usb ? b.usb === 'in' : wasIn;
@@ -767,12 +1142,29 @@ export function createBench(canvas: HTMLCanvasElement, tagsEl: HTMLElement, scen
     // The known mass: lowered into the cup, or lifted out.
     const lowered = b.mass === 'in' ? seg(t, 0.2, 0.55) : b.mass === 'out' ? 1 - seg(t, 0.2, 0.55) : massIn(beat) ? 1 : 0;
     weight.visible = lowered > 0;
-    weight.position.set(CUP[0], CUP[1] + 0.6 + (1 - lowered) * 34, CUP[2]);
+    weight.position.set(load[0], load[1] + 0.6 + (1 - lowered) * 34, load[2]);
+    const served = b.food === 'in' ? seg(t, 0.2, 0.55) : b.food === 'out' ? 1 - seg(t, 0.2, 0.55) : foodIn(beat) ? 1 : 0;
+    meal.visible = served > 0;
+    meal.position.set(load[0], load[1] + 0.6 + (1 - served) * 34, load[2]);
+    // The light: on while a beat says so.
+    const shine = b.light ? seg(t, 0.3, 0.42) * (1 - seg(t, 0.85, 0.97)) : 0;
+    for (const m of displayRef.glow) m.emissiveIntensity = shine * 1.4;
+    // The laptop and the phone.
+    for (const which of ['laptop', 'phone'] as const) {
+      const screen = displayRef[which];
+      if (!screen) continue;
+      const lines = b[which] && t < 0.35 ? screenFor(beat - 1, which) : screenFor(beat, which);
+      const key = lines.join('|');
+      if (key !== paintedScreens[which]) {
+        screen.paint(lines);
+        paintedScreens[which] = key;
+      }
+    }
     // The ring.
     ring.visible = Boolean(b.ring);
     if (b.ring) {
       const p = endPoint(b.ring);
-      ring.position.set(p[0], 'pin' in b.ring ? PCB_TOP + 2.6 : 'hx' in b.ring ? HX711_AT.y + 0.6 : 'at' in b.ring ? p[1] : BB.top + 0.2, p[2]);
+      ring.position.set(p[0], 'pin' in b.ring ? PCB_TOP + 2.6 : 'hx' in b.ring ? HX711_AT.y + 0.6 : 'at' in b.ring || 'base' in b.ring ? p[1] + 0.2 : BB.top + 0.2, p[2]);
       ring.scale.setScalar(1 + Math.sin(now / 160) * 0.12);
     }
     tags(t > 0.35 || reduce ? b.tags ?? [] : []);

@@ -142,10 +142,9 @@ export function PlanView() {
       <rect className="wood" x={X(-w)} y={Y(-d)} width={DIM.base.width} height={DIM.base.depth} rx="4" />
       <rect className="body" x={X(-w + 5)} y={Y(82)} width={DIM.base.width - 10} height={38 - 5} rx="2" />
 
-      {/* front panel: the display, TARE, PHOTO */}
+      {/* front panel: the display and the one button */}
       <rect className="chip" x={X(-33 - DIM.oled.width / 2)} y={Y(101 - DIM.oled.length / 2)} width={DIM.oled.width} height={DIM.oled.length} rx="1.5" />
-      <circle className="body" cx={X(14)} cy={Y(101)} r="6" />
-      <circle className="hot" cx={X(40)} cy={Y(101)} r="6" />
+      <circle className="hot" cx={X(27)} cy={Y(101)} r="6" />
 
       {/* plate, with its well and the platform beneath */}
       <circle className="body" cx={X(0)} cy={Y(pz)} r={DIM.plate.diameter / 2} />

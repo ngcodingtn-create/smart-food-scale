@@ -292,11 +292,11 @@ function Rig(props: SceneProps) {
         <Printing text={sim?.oled ?? '143.2 g'} size={[26.6, 19]} position={[0, DIM.oled.height + .1, 0]} color="#bfe6dd" background="#102321" />
       </Moving></Part>
       <Part id="buttons" onSelect={onSelect}><Moving target={[0, e * 24, 0]} reduced={reducedMotion}>
-        {[14, 40].map((x, i) => <group key={x} position={[x, 38, 101]}>
+        <group position={[27, 38, 101]}>
           <Box size={[6, DIM.button.height, 6]} position={[0, DIM.button.height / 2, 0]} color="#787c74" selected={selected === 'buttons'} />
-          <Cylinder radius={6} height={3} position={[0, DIM.button.height + 1.5, 0]} color={i ? ACCENT : '#515b54'} />
-          <Printing text={i ? 'PHOTO' : 'TARE'} size={[14, 5]} position={[0, .75, 13]} color="#e8e9df" background={dark ? '#4d504a' : '#acaea2'} />
-        </group>)}
+          <Cylinder radius={6} height={3} position={[0, DIM.button.height + 1.5, 0]} color={ACCENT} />
+          <Printing text="CLICK · HOLD" size={[22, 5]} position={[0, .75, 13]} color="#e8e9df" background={dark ? '#4d504a' : '#acaea2'} />
+        </group>
       </Moving></Part>
       <Part id="arm" onSelect={onSelect}>
         <Box size={[34, 7, 34]} position={[0, 41.5, -107]} radius={2} color={ALUMINIUM} metal={.7} />
