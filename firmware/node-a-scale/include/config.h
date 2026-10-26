@@ -6,7 +6,7 @@
 #include <math.h>
 #include <stdint.h>
 
-#define SFS_FIRMWARE_VERSION "0.3.5"
+#define SFS_FIRMWARE_VERSION "0.3.6"
 
 // Counts per gram, until the scale is calibrated and the real value is saved on
 // the board. Unknown by default, on purpose: an uncalibrated scale shows raw

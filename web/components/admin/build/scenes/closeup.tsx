@@ -367,12 +367,6 @@ const PLACES_A: Record<string, Place> = {
     say: 'The button across the centre gap: two legs in column e, two in column f, rows 8 and 10.',
     draw: () => <ButtonTop x={391} y={rowY(8)} />,
   },
-  capture: {
-    pins: { leg: at('e', 11), 'opposite leg': at('f', 13) },
-    jumper: { leg: at('a', 11), 'opposite leg': at('j', 13) },
-    say: 'The second button across the gap, rows 12 and 14.',
-    draw: () => <ButtonTop x={391} y={rowY(12)} />,
-  },
   q1: {
     pins: { emitter: at('c', 15), base: at('c', 16), collector: at('c', 17) },
     jumper: { emitter: at('a', 15), base: at('a', 16), collector: at('d', 17) },

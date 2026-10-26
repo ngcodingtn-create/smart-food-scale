@@ -79,7 +79,7 @@ export const KIT: KitItem[] = [
     photo: 'load-cell.jpg',
     why: 'Red, black, white and green wires, already plugged into a blue 4-way connector and extended with jumper wires. No HX711 is attached: those jumpers end loose. Its capacity is not readable in the photo: send a close-up of the label or engraving on its side.',
   },
-  { id: 'hx711', line: 5, bom: 'HX711', qty: '1', status: 'check', why: 'Goes in last, in milestone 9. Needed: the board cannot read the load cell without it, and nothing else in the kit can stand in. Until then, the pretend scale runs everything else. It is not the blue part on the load cell’s wires, which is only a 4-way connector. Look in the load cell’s bag for a small green or purple board with E+, E−, A−, A+ on one side and GND, DT, SCK, VCC on the other; if it is not there, ask the lab.' },
+  { id: 'hx711', line: 5, bom: 'HX711', qty: '1', status: 'have', why: 'Here (26 October). It goes in at milestone 2, right after the scale’s brain: the board cannot read the load cell without it. It is not the blue part on the load cell’s wires, which is only a 4-way connector. A photo of it from above, labels readable, goes on Bench Photos before it is wired.' },
   {
     id: 'oled',
     line: 6,
@@ -96,7 +96,7 @@ export const KIT: KitItem[] = [
     qty: '2',
     status: 'check',
     photo: 'push-button.jpg',
-    why: '12 × 12 mm, larger than the 6 × 6 asked for: same four legs, same job. One is enough: a click is PHOTO, a 5-second hold is TARE. A second, for PHOTO alone, is optional, at the very end.',
+    why: '12 × 12 mm, larger than the 6 × 6 asked for: same four legs, same job. The scale uses one: a click is PHOTO, a 5-second hold is TARE. The other is a spare.',
   },
   {
     id: 'buzzer',

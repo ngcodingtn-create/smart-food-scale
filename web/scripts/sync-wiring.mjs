@@ -88,7 +88,6 @@ const WOKWI_PIN = {
   'oled:SDA': 'oled:SDA',
   'oled:SCL': 'oled:SCL',
   'tare:leg': 'tare:1.l',
-  'capture:leg': 'capture:1.l',
   'q1:base': 'buzzer:2',
 };
 
@@ -109,8 +108,7 @@ function wokwiDiagram(node) {
     parts: [
       { type: 'wokwi-esp32-devkit-v1', id: 'esp', top: 0, left: 0, attrs: {} },
       { type: 'board-ssd1306', id: 'oled', top: 10, left: 190, attrs: { i2cAddress: '0x3c' } },
-      { type: 'wokwi-pushbutton', id: 'tare', top: 120, left: 190, attrs: { color: 'green', label: 'TARE' } },
-      { type: 'wokwi-pushbutton', id: 'capture', top: 120, left: 290, attrs: { color: 'blue', label: 'PHOTO' } },
+      { type: 'wokwi-pushbutton', id: 'tare', top: 120, left: 190, attrs: { color: 'green', label: 'CLICK PHOTO · HOLD TARE' } },
       { type: 'wokwi-hx711', id: 'hx711', top: 210, left: 190, attrs: { type: '5kg' } },
       { type: 'wokwi-buzzer', id: 'buzzer', top: 250, left: -10, attrs: { volume: '0.1' } },
     ],
@@ -122,7 +120,6 @@ function wokwiDiagram(node) {
       ['esp:GND.1', 'hx711:GND', 'black', []],
       ['esp:GND.1', 'oled:GND', 'black', []],
       ['esp:GND.1', 'tare:2.r', 'black', []],
-      ['esp:GND.1', 'capture:2.r', 'black', []],
       ['esp:GND.1', 'buzzer:1', 'black', []],
       ...signals,
     ],

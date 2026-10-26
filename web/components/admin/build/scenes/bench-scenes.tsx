@@ -213,6 +213,23 @@ export function meetScene(variant: string): SceneDef {
           { at: [179, 81, 3], text: '1N4148 diode: band towards S', dx: 50, dy: 60 },
         ],
       );
+    case 'hx711':
+      return meet(
+        () => (
+          <>
+            <LoadCell x={205} y={15} />
+            <HX711 x={150} y={70} />
+          </>
+        ),
+        [185, 70, 6],
+        150,
+        [
+          { at: [211, 30, 13], text: 'The load cell: it bends a hair under weight', dx: 70, dy: -70 },
+          { at: [211, 92, 6], text: 'Its four wires: red, black, white, green', dx: 80, dy: 40 },
+          { at: [160, 73, 9], text: 'HX711: E+ E− A− A+ to the cell', dx: -110, dy: -50 },
+          { at: [160, 99, 9], text: 'GND DT SCK VCC to the NodeMCU', dx: -110, dy: 60 },
+        ],
+      );
     default:
       return meet(() => <Breadboard x={150} y={40} w={140} />, [220, 65, 0], 250, [
         { at: [180, 42, 7], text: '+ and − rails run the whole length', dx: -40, dy: -70 },
@@ -419,6 +436,7 @@ function wireVariant(variant: string): WireVariant {
         end: { T: 2.4, beats: [{ at: 0, text: '100 nF and 10 µF across VCC and GND, close to the HX711' }], draw: () => null },
       };
     case 'cell':
+    default:
       return {
         zoom: [-25, 40, 260, 206],
         module: () => (
@@ -433,32 +451,6 @@ function wireVariant(variant: string): WireVariant {
           { from: P(272, 100, 4), to: P(227, 149, 9), colour: COLOURS.white, say: 'White to A−', label: 'A−' },
           { from: P(273, 100, 4), to: P(231, 149, 9), colour: COLOURS.green, say: 'Green to A+', label: 'A+' },
         ],
-      };
-    case 'button2':
-    default:
-      return {
-        module: () => (
-          <>
-            <Button x={205} y={128} />
-            <Button x={240} y={128} />
-          </>
-        ),
-        wires: [
-          { from: pinL(3), to: bb(242, 130), colour: COLOURS.violet, say: 'Optional: one leg of a second button to D3', label: 'D3' },
-          { from: bb(251, 139), to: bb(260, 160), colour: COLOURS.black, say: 'The diagonal leg to the − rail', label: '−' },
-        ],
-        end: {
-          T: 2.6,
-          beats: [{ at: 0, text: 'Click it: PHOTO. The first button still tares with its hold.', who: 'you' }],
-          draw: (t, at) => (
-            <>
-              <Finger at={P(246, 134, 13)} down={ke(t, at + 0.3, 0.3) * (1 - ke(t, at + 0.8, 0.3))} show={k(t, at, 0.3)} />
-              <Appear t={t} at={at + 0.7}>
-                <Tag at={P(250, 100, 40)} text="E capture" tone="claude" size={7} />
-              </Appear>
-            </>
-          ),
-        },
       };
   }
 }

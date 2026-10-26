@@ -21,7 +21,7 @@
 #include <math.h>
 #include <stdint.h>
 
-#define SFS_FIRMWARE_VERSION "0.3.5"
+#define SFS_FIRMWARE_VERSION "0.3.6"
 
 // Counts per gram, until the scale is calibrated and the real value is saved on
 // the board. Unknown by default, on purpose: an uncalibrated scale shows raw
@@ -93,24 +93,22 @@ constexpr float kSimDamping = 0.6f;
 #if defined(ESP8266)
 
 // NodeMCU, ESP8266: the board on the bench.
-static const uint8_t PIN_BUTTON_CAPTURE =  0;  // D3: Second button (optional) leg
-static const uint8_t PIN_OLED_SDA       =  4;  // D2: OLED SDA
-static const uint8_t PIN_OLED_SCL       =  5;  // D1: OLED SCL
-static const uint8_t PIN_HX711_DT       = 12;  // D6: HX711 DT
-static const uint8_t PIN_HX711_SCK      = 13;  // D7: HX711 SCK
-static const uint8_t PIN_BUTTON_TARE    = 14;  // D5: The button leg
-static const uint8_t PIN_BUZZER         = 15;  // D8: Transistor base, through 1 kΩ
+static const uint8_t PIN_OLED_SDA    =  4;  // D2: OLED SDA
+static const uint8_t PIN_OLED_SCL    =  5;  // D1: OLED SCL
+static const uint8_t PIN_HX711_DT    = 12;  // D6: HX711 DT
+static const uint8_t PIN_HX711_SCK   = 13;  // D7: HX711 SCK
+static const uint8_t PIN_BUTTON_TARE = 14;  // D5: The button leg
+static const uint8_t PIN_BUZZER      = 15;  // D8: Transistor base, through 1 kΩ
 
 #else
 
 // ESP32 DevKit V1: the Wokwi simulation, and the board on the original request.
-static const uint8_t PIN_BUTTON_CAPTURE = 19;  // D19: Second button (optional) leg
-static const uint8_t PIN_OLED_SDA       = 21;  // D21: OLED SDA
-static const uint8_t PIN_OLED_SCL       = 22;  // D22: OLED SCL
-static const uint8_t PIN_HX711_DT       = 16;  // RX2: HX711 DT
-static const uint8_t PIN_HX711_SCK      = 17;  // TX2: HX711 SCK
-static const uint8_t PIN_BUTTON_TARE    = 18;  // D18: The button leg
-static const uint8_t PIN_BUZZER         = 23;  // D23: Transistor base, through 1 kΩ
+static const uint8_t PIN_OLED_SDA    = 21;  // D21: OLED SDA
+static const uint8_t PIN_OLED_SCL    = 22;  // D22: OLED SCL
+static const uint8_t PIN_HX711_DT    = 16;  // RX2: HX711 DT
+static const uint8_t PIN_HX711_SCK   = 17;  // TX2: HX711 SCK
+static const uint8_t PIN_BUTTON_TARE = 18;  // D18: The button leg
+static const uint8_t PIN_BUZZER      = 23;  // D23: Transistor base, through 1 kΩ
 
 #endif
 
@@ -525,23 +523,6 @@ void show() {
   oled.display();
 }
 
-struct Button {
-  explicit Button(uint8_t pin) : pin(pin) {}
-  uint8_t pin;
-  bool down = false;
-  uint32_t changed = 0;
-  // True once per press, after 30 ms of steady contact.
-  bool pressed() {
-    bool now = digitalRead(pin) == LOW;
-    if (now != down && millis() - changed > 30) {
-      down = now;
-      changed = millis();
-      return down;
-    }
-    return false;
-  }
-};
-
 // The one button: a click, or a hold of kHoldToTareMs.
 struct MainButton {
   enum Event { None, Click, Hold };
@@ -577,8 +558,7 @@ struct MainButton {
   }
 };
 
-MainButton mainButton{PIN_BUTTON_TARE};
-Button captureButton{PIN_BUTTON_CAPTURE};  // the board's FLASH button, or a second button: PHOTO only
+MainButton mainButton{PIN_BUTTON_TARE};  // the scale's only button
 
 // --- what the buttons do -----------------------------------------------------
 
@@ -755,8 +735,8 @@ void command(String text) {
   else if (text == "capture") capture();
   else if (text == "find") findCamera();
   else if (text == "i2c") checkDisplayWires();
-  // `button`: is the button pressed right now? 1 = pressed (the leg on D5 joined to ground). FLASH is D3.
-  else if (text == "button") Serial.printf("E button main=%d flash=%d\n", digitalRead(PIN_BUTTON_TARE) == LOW, digitalRead(PIN_BUTTON_CAPTURE) == LOW);
+  // `button`: is the button pressed right now? 1 = pressed (the leg on D5 joined to ground).
+  else if (text == "button") Serial.printf("E button main=%d\n", digitalRead(PIN_BUTTON_TARE) == LOW);
   // `beep`: one short beep, to hear the buzzer without zeroing the scale.
   else if (text == "beep") {
     beepOk();
@@ -827,7 +807,6 @@ void setup() {
   Serial.begin(115200);
   Serial.println();  // ends the chip's own start-up noise, so the boot line starts a line
   pinMode(PIN_BUTTON_TARE, INPUT_PULLUP);
-  pinMode(PIN_BUTTON_CAPTURE, INPUT_PULLUP);
   pinMode(PIN_BUZZER, OUTPUT);
   digitalWrite(PIN_BUZZER, LOW);
 
@@ -908,7 +887,6 @@ void loop() {
     default: break;
   }
   holdingFor = mainButton.holding();
-  if (captureButton.pressed()) capture();
   readConsole();
 
   // Node B reports how the upload went, some seconds after the capture.

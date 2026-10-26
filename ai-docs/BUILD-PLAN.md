@@ -4,10 +4,10 @@
 comes on **26 October**. Read "today" as 25 October and "tomorrow" as 26 October.
 The app, the server and the scale's Wi-Fi setup are planned in [APP-PLAN.md](APP-PLAN.md).
 
-**The real weight is now last** (asked 25 October). The HX711 sections below still hold,
-but they run after everything else: the server, the app, pairing, the microSD and the
-rig, all on the pretend scale and one button (click PHOTO, hold 5 s TARE). Whether to add
-a second button is decided in milestone 9, with the HX711. The order is milestone 9 on `/admin/build`;
+**The real weight is milestone 2** (asked 26 October, once the HX711 arrived; on 25 October
+it had been moved last). It comes right after the scale's brain and before the camera.
+**One button only** (click PHOTO, hold 5 s TARE): the optional second button is gone, and
+since firmware 0.3.6 neither D3 nor the FLASH button takes a photo. The order is on `/admin/build`;
 the stand-in is in [research/2026-10-25-simulating-the-weight.md](research/2026-10-25-simulating-the-weight.md).
 
 Written 23 October 2026. The goal: by the evening of 24 October, **one whole meal

@@ -26,17 +26,7 @@
       "left": 190,
       "attrs": {
         "color": "green",
-        "label": "TARE"
-      }
-    },
-    {
-      "type": "wokwi-pushbutton",
-      "id": "capture",
-      "top": 120,
-      "left": 290,
-      "attrs": {
-        "color": "blue",
-        "label": "PHOTO"
+        "label": "CLICK PHOTO · HOLD TARE"
       }
     },
     {
@@ -103,20 +93,8 @@
     ],
     [
       "esp:GND.1",
-      "capture:2.r",
-      "black",
-      []
-    ],
-    [
-      "esp:GND.1",
       "buzzer:1",
       "black",
-      []
-    ],
-    [
-      "esp:D19",
-      "capture:1.l",
-      "green",
       []
     ],
     [

@@ -10,23 +10,21 @@
 #if defined(ESP8266)
 
 // NodeMCU, ESP8266: the board on the bench.
-static const uint8_t PIN_BUTTON_CAPTURE =  0;  // D3: Second button (optional) leg
-static const uint8_t PIN_OLED_SDA       =  4;  // D2: OLED SDA
-static const uint8_t PIN_OLED_SCL       =  5;  // D1: OLED SCL
-static const uint8_t PIN_HX711_DT       = 12;  // D6: HX711 DT
-static const uint8_t PIN_HX711_SCK      = 13;  // D7: HX711 SCK
-static const uint8_t PIN_BUTTON_TARE    = 14;  // D5: The button leg
-static const uint8_t PIN_BUZZER         = 15;  // D8: Transistor base, through 1 kΩ
+static const uint8_t PIN_OLED_SDA    =  4;  // D2: OLED SDA
+static const uint8_t PIN_OLED_SCL    =  5;  // D1: OLED SCL
+static const uint8_t PIN_HX711_DT    = 12;  // D6: HX711 DT
+static const uint8_t PIN_HX711_SCK   = 13;  // D7: HX711 SCK
+static const uint8_t PIN_BUTTON_TARE = 14;  // D5: The button leg
+static const uint8_t PIN_BUZZER      = 15;  // D8: Transistor base, through 1 kΩ
 
 #else
 
 // ESP32 DevKit V1: the Wokwi simulation, and the board on the original request.
-static const uint8_t PIN_BUTTON_CAPTURE = 19;  // D19: Second button (optional) leg
-static const uint8_t PIN_OLED_SDA       = 21;  // D21: OLED SDA
-static const uint8_t PIN_OLED_SCL       = 22;  // D22: OLED SCL
-static const uint8_t PIN_HX711_DT       = 16;  // RX2: HX711 DT
-static const uint8_t PIN_HX711_SCK      = 17;  // TX2: HX711 SCK
-static const uint8_t PIN_BUTTON_TARE    = 18;  // D18: The button leg
-static const uint8_t PIN_BUZZER         = 23;  // D23: Transistor base, through 1 kΩ
+static const uint8_t PIN_OLED_SDA    = 21;  // D21: OLED SDA
+static const uint8_t PIN_OLED_SCL    = 22;  // D22: OLED SCL
+static const uint8_t PIN_HX711_DT    = 16;  // RX2: HX711 DT
+static const uint8_t PIN_HX711_SCK   = 17;  // TX2: HX711 SCK
+static const uint8_t PIN_BUTTON_TARE = 18;  // D18: The button leg
+static const uint8_t PIN_BUZZER      = 23;  // D23: Transistor base, through 1 kΩ
 
 #endif

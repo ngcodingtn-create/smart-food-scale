@@ -140,8 +140,6 @@ const A_WIRES: Record<string, WireArt> = {
   'a-oled-scl': bend([A_MOD, 186], [212, 186], [196, 176], aRight('D1')),
   'a-oled-sda': bend([A_MOD, 208], [212, 208], [196, 202], aRight('D2')),
   // buttons
-  'a-capture': bend([A_MOD, 246], [212, 246], [196, 228], aRight('D3')),
-  'a-capture-gnd': line([A_MOD, 266], [A_GND, 266]),
   'a-tare': bend([A_MOD, 298], [212, 298], [196, 332], aRight('D5')),
   'a-tare-gnd': line([A_MOD, 318], [A_GND, 318]),
   // buzzer
@@ -163,7 +161,7 @@ const A_WIRES: Record<string, WireArt> = {
   'a-supply-gnd': line([128, 566], [A_GND, 566]),
 };
 
-const A_USED = new Set(['right:3V', 'right:G', 'left:VU', 'right:D1', 'right:D2', 'right:D3', 'right:D5', 'right:D6', 'right:D7', 'right:D8']);
+const A_USED = new Set(['right:3V', 'right:G', 'left:VU', 'right:D1', 'right:D2', 'right:D5', 'right:D6', 'right:D7', 'right:D8']);
 
 function NodeAParts() {
   return (

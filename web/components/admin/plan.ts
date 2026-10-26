@@ -34,40 +34,75 @@ export type Day = {
   claude: Task[];
 };
 
-export const PLAN_UPDATED = '25 October 2026';
+export const PLAN_UPDATED = '26 October 2026';
 
 export const GOAL =
   'One real meal, weighed on the load cell, photographed, named by Gemini and shown in the app under your account.';
 
+const B = '/admin/build';
+
 export const DAYS: Day[] = [
   {
-    id: 'today',
-    date: '25 Oct',
-    title: 'Today',
-    summary: 'Everything except the real weight. The scale runs the pretend-scale image; the laptop is the server.',
+    id: 'scale',
+    date: 'now',
+    title: 'The scale, whole',
+    summary: 'The scale’s brain gets its beep, then the HX711 and the load cell replace the pretend weight. One button: a click is PHOTO, a 5-second hold is TARE.',
     you: [
       { id: 'y-port', title: 'Plug in the NodeMCU and say “plugged in”', doneWhen: 'Claude finds its CH340 port and flashes it', status: 'todo' },
-      { id: 'y-wire-a', title: 'Wire the display, the button and the buzzer', doneWhen: 'Ticks on the step pages; Claude says it still boots', href: '/admin/build/m1-scale-brain', status: 'todo' },
-      { id: 'y-try-a', title: 'Watch and listen while Claude runs the pretend meal', doneWhen: 'The display shows 150 g and the buzzer beeps', status: 'todo' },
-      { id: 'y-hotspot', title: 'Phone hotspot on 2.4 GHz, laptop joins', doneWhen: 'Laptop online through the phone', status: 'todo' },
-      { id: 'y-backend', title: 'Click Allow when Windows asks about Python and the network', doneWhen: 'Claude reaches the server from the hotspot address', status: 'todo' },
-      { id: 'y-cam-plug', title: 'Seat the camera on its base and plug it in', doneWhen: 'Claude flashes it and reads E boot node=b … camera=1', status: 'todo' },
-      { id: 'y-cam-wifi', title: 'Type the hotspot’s password once on the bench page', doneWhen: 'The bench page says Wi-Fi up', href: '/workbench/bench', status: 'todo' },
-      { id: 'y-light', title: 'Camera onto the breadboard, wire the light', doneWhen: '“Light on” lights all six LEDs', href: '/workbench/wire', status: 'todo' },
-      { id: 'y-rig', title: 'Measure the load cell’s screw holes; find two boards and screws', doneWhen: 'Screws in hand', status: 'todo' },
+      { id: 'y-wire-a', title: 'Wire the display, the button and the buzzer, each from its 3D step', doneWhen: 'The board finds the display, reads the button, and you hear the beep', href: `${B}/m1-scale-brain`, status: 'todo' },
+      { id: 'y-try-a', title: 'Watch and listen while Claude runs the pretend meal', doneWhen: 'The display shows 150 g and the buzzer beeps', href: `${B}/m1-scale-brain/bench`, status: 'todo' },
+      { id: 'y-hx-photo', title: 'Send photos of the HX711 and of the cell’s blue connector', doneWhen: 'Claude has read the HX711’s labels', href: `${B}/m2-real-weight/meet-hx711`, status: 'todo' },
+      { id: 't-lab', title: 'If the HX711’s pins came loose: solder them at the lab; ask for calibration masses', doneWhen: 'Pins on both ends', href: `${B}/m2-real-weight/headers`, status: 'todo' },
+      { id: 't-wire', title: 'Wire the HX711, then the load cell to it', doneWhen: 'Claude says it still boots', href: `${B}/m2-real-weight/hx711-wires`, status: 'todo' },
+      { id: 'y-mount', title: 'Hold the cell still: fixed end clamped, a light cup on the free end', href: `${B}/m2-real-weight/bench-mount`, status: 'todo' },
+      { id: 't-sign', title: 'Press the cell when Claude says (swap white and green if told)', href: `${B}/m2-real-weight/sign`, status: 'todo' },
+      { id: 't-cal', title: 'Put in 3 to 5 known masses, one at a time, when Claude asks', href: `${B}/m2-real-weight/calibrate`, status: 'todo' },
+      { id: 'y-by-hand', title: 'Hold the button 5 s, put a mass in, click', doneWhen: 'TARE OK, the right grams, then NO CAMERA', href: `${B}/m2-real-weight/by-hand`, status: 'todo' },
     ],
     claude: [
       { id: 'c-bench', title: 'Bench page: whole-meal test, pretend weight, any command', status: 'done' },
+      { id: 'c-board-tool', title: 'board.py: find, flash, read and test the boards from the laptop', status: 'done' },
+      { id: 'c-one-button', title: 'One button: click for PHOTO, hold 5 s for TARE, with a countdown', status: 'done' },
+      { id: 'c-no-second', title: 'No second button: the FLASH button and D3 no longer take photos', status: 'done' },
+      { id: 'c-sim-real', title: 'A pretend weight that lands like a real one: wobble, settle, a backwards cell', status: 'done' },
+      { id: 'c-flash-boards', title: 'Flash the pretend scale and read its boot line', status: 'done' },
+      { id: 'c-whole-a', title: 'Run the whole test on the pretend scale', status: 'todo' },
+      { id: 't-c-flash', title: 'Flash the real scale and check the counts', status: 'todo' },
+      { id: 't-c-cal', title: 'Calibrate from your masses and save it on the board', status: 'todo' },
+    ],
+  },
+  {
+    id: 'camera',
+    date: 'next',
+    title: 'The camera and the light',
+    summary: 'The camera joins the phone’s hotspot, the light goes on, and the two boards weigh and photograph a real meal together. The laptop is the server.',
+    you: [
+      { id: 'y-hotspot', title: 'Phone hotspot on 2.4 GHz, laptop joins', doneWhen: 'Laptop online through the phone', href: `${B}/m3-camera/hotspot`, status: 'todo' },
+      { id: 'y-backend', title: 'Click Allow when Windows asks about Python and the network', doneWhen: 'Claude reaches the server from the hotspot address', href: `${B}/m3-camera/backend`, status: 'todo' },
+      { id: 'y-cam-plug', title: 'Seat the camera on its base and plug it in', doneWhen: 'Claude flashes it and reads E boot node=b … camera=1', href: `${B}/m3-camera/flash-camera`, status: 'todo' },
+      { id: 'y-cam-wifi', title: 'Type the hotspot’s password once on the bench page', doneWhen: 'The bench page says Wi-Fi up', href: `${B}/m3-camera/wifi`, status: 'todo' },
+      { id: 'y-light', title: 'Camera onto the breadboard, wire the light', doneWhen: '“Light on” lights all six LEDs', href: `${B}/m4-light`, status: 'todo' },
+      { id: 'y-meal-test', title: 'A real weighing with both boards: hold to tare, food in, click', doneWhen: 'SAVED on the display', href: `${B}/m5-together`, status: 'todo' },
+    ],
+    claude: [
       { id: 'c-gemini', title: 'Gemini recogniser, tested against a fake Gemini', status: 'done' },
+      { id: 'c-flash-camera', title: 'Flash the camera and read its boot line', status: 'todo' },
+      { id: 'c-server-lan', title: 'Start the server where the camera can reach it, and check it', status: 'todo' },
+      { id: 'c-tests', title: 'Run the tests on the boards: test photo, the whole-meal test', status: 'todo' },
+    ],
+  },
+  {
+    id: 'online',
+    date: 'then',
+    title: 'Online, and in the app',
+    summary: 'The server goes online, the app runs on your phone, and the scale joins your account: its meals reach the app.',
+    you: [
+      { id: 't-pair', title: 'From the app: the scale’s Wi-Fi and pairing code', href: `${B}/m8-pairing`, status: 'todo' },
+      { id: 't-meals', title: 'Three real meals: hold the button 5 s, food in, click', doneWhen: 'They appear in the app', status: 'todo' },
+    ],
+    claude: [
       { id: 'c-admin', title: 'This builder’s area, behind a password', status: 'done' },
       { id: 'c-companion', title: 'The build companion: milestones 0–9, steps with your photos and the wiring', status: 'done' },
-      { id: 'c-board-tool', title: 'board.py: find, flash, read and test the boards from the laptop', status: 'done' },
-      { id: 'c-flash-boards', title: 'Flash the pretend scale and the camera; read their boot lines', status: 'todo' },
-      { id: 'c-server-lan', title: 'Start the server where the camera can reach it, and check it', status: 'todo' },
-      { id: 'c-tests', title: 'Run the tests on the boards: pretend meal, test photo, the whole-meal test', status: 'todo' },
-      { id: 'c-rehearse', title: 'Rehearse the real weight on the pretend one: the sign check and a calibration', status: 'todo' },
-      { id: 'c-one-button', title: 'One button: click for PHOTO, hold 5 s for TARE, with a countdown', status: 'done' },
-      { id: 'c-sim-real', title: 'A pretend weight that lands like a real one: wobble, settle, a backwards cell', status: 'done' },
       { id: 'c-server', title: 'Server v2: accounts, pairing, the “to name” inbox, photos, Postgres', status: 'todo' },
       { id: 'c-fake', title: 'The fake scale: sends meals as if it were your paired scale', status: 'todo' },
       { id: 'c-app', title: 'App v1 in Expo: all nine screens, French first', status: 'todo' },
@@ -76,38 +111,19 @@ export const DAYS: Day[] = [
     ],
   },
   {
-    id: 'tomorrow',
-    date: '26 Oct',
-    title: 'Tomorrow',
-    summary: 'The microSD card goes in; the scale joins your account and meals reach the app, still on the pretend weight and the one button. The HX711 and the second button stay in the bag: they are the last thing.',
+    id: 'last',
+    date: 'last',
+    title: 'Finished, then the demo',
+    summary: 'No laptop: its own power and the microSD card; the cell moves from the desk into the rig and is calibrated again there. Then the accuracy, measured, and the demo.',
     you: [
-      { id: 't-lab', title: 'At the lab: solder the HX711’s pins, check the transistor and buzzer, ask for calibration weights', status: 'todo' },
-      { id: 't-sd', title: 'microSD: FAT32, into the camera', doneWhen: 'Claude tests it with the hotspot off, then on', status: 'todo' },
-      { id: 't-pair', title: 'From the app: the scale’s Wi-Fi and pairing code', status: 'todo' },
-      { id: 't-pretend-meals', title: 'Three pretend meals from the scale', doneWhen: 'They appear in the app', status: 'todo' },
+      { id: 't-sd', title: 'microSD: FAT32, into the camera', doneWhen: 'Claude tests it with the hotspot off, then on', href: `${B}/m9-finish/card`, status: 'todo' },
+      { id: 'y-rig', title: 'Measure the load cell’s screw holes; find two boards and screws; build the rig', doneWhen: 'The cell in its mount, the camera above', href: `${B}/m9-finish/rig`, status: 'todo' },
+      { id: 'y-recal', title: 'The known masses once more, in the rig', href: `${B}/m9-finish/recalibrate`, status: 'todo' },
     ],
     claude: [
       { id: 't-c-logs', title: 'Read the boards, fix what breaks in the firmware', status: 'todo' },
       { id: 't-c-polish', title: 'App polish from what you see on your phone', status: 'todo' },
-    ],
-  },
-  {
-    id: 'last',
-    date: 'once everything else works',
-    title: 'Last: the real weight',
-    summary: 'Everything else works first. Then the HX711 and the load cell replace the pretend weight, and real meals go from the plate to the app.',
-    you: [
-      { id: 't-wire', title: 'Wire the HX711 (8 wires)', href: '/admin/build/m9-real-weight', status: 'todo' },
-      { id: 't-button', title: 'One button or two: keep the hold-to-tare, or wire PHOTO its own button on D3', href: '/admin/build/m9-real-weight/photo-button', status: 'todo' },
-      { id: 't-flash', title: 'Plug the NodeMCU back in: Claude flashes “The scale”, the real image', status: 'todo' },
-      { id: 't-sign', title: 'Press the cell when Claude says (swap white and green if told); mount it', status: 'todo' },
-      { id: 't-cal', title: 'Put on 3 to 5 known weights, one at a time, when Claude asks', status: 'todo' },
-      { id: 't-meals', title: 'Three real meals: plate, hold the button 5 s, food, click', doneWhen: 'They appear in the app', status: 'todo' },
-    ],
-    claude: [
-      { id: 't-c-flash', title: 'Flash the real scale and check the counts', status: 'todo' },
-      { id: 't-c-cal', title: 'Calibrate from your weights and save it on the board', status: 'todo' },
-      { id: 't-c-accuracy', title: 'Measure the accuracy and write it down', status: 'todo' },
+      { id: 't-c-accuracy', title: 'Measure the accuracy and write it on the accuracy page', status: 'todo' },
     ],
   },
 ];

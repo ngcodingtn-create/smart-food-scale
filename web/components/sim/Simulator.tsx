@@ -51,6 +51,9 @@ const SAMPLE_COUNT = 12;
 const SAMPLE_PERIOD_MS = 100;
 /** Per-sample noise, inside the 0.1–0.2 g "readable" figure the project claims. */
 const NOISE_G = 0.06;
+/** The one button, as firmware/node-a-scale/include/config.h times it. */
+const CLICK_MAX_MS = 800;
+const HOLD_TO_TARE_MS = 5000;
 
 // Colours for the mound on the plate and Node B's frame. Illustrative only.
 const DISH_COLOUR: Record<string, string> = {
@@ -531,6 +534,42 @@ export function Simulator() {
     say('Node A', `Tare. Zero set with ${round1(raw)} g on the cell.`);
   }
 
+  // The device's one button, timed as the firmware times it (config.h): let go within
+  // CLICK_MAX_MS and it is PHOTO; held HOLD_TO_TARE_MS, TARE; let go in between, nothing.
+  const [holdLeft, setHoldLeft] = useState<number | null>(null);
+  const hold = useRef<{ start: number; frame: number; tared: boolean } | null>(null);
+  const tareNow = useRef(tare);
+  tareNow.current = tare;
+  const captureNow = useRef(capture);
+  captureNow.current = capture;
+
+  function press() {
+    if (world.busy || hold.current) return;
+    const state = { start: performance.now(), frame: 0, tared: false };
+    hold.current = state;
+    const tick = () => {
+      const held = performance.now() - state.start;
+      if (held >= HOLD_TO_TARE_MS) {
+        state.tared = true;
+        setHoldLeft(null);
+        tareNow.current();
+        return;
+      }
+      setHoldLeft(held >= CLICK_MAX_MS ? Math.ceil((HOLD_TO_TARE_MS - held) / 1000) : null);
+      state.frame = requestAnimationFrame(tick);
+    };
+    state.frame = requestAnimationFrame(tick);
+  }
+
+  function release() {
+    const state = hold.current;
+    if (!state) return;
+    hold.current = null;
+    cancelAnimationFrame(state.frame);
+    setHoldLeft(null);
+    if (!state.tared && performance.now() - state.start < CLICK_MAX_MS) void captureNow.current();
+  }
+
   function setWifi(next: boolean) {
     patch({ wifi: next });
     say('You', next ? 'Wi-Fi restored.' : 'Wi-Fi switched off (a campus captive portal, or the hotspot dropped).');
@@ -554,12 +593,12 @@ export function Simulator() {
 
   const hint = {
     plate: 'Start by putting an empty plate on the scale.',
-    tare: `The display shows the plate’s own ${plateGrams} g. Press TARE to zero it.`,
+    tare: `The display shows the plate’s own ${plateGrams} g. Hold the button 5 s to zero it.`,
     food: 'Zeroed. Choose a dish and a portion, then put the food on the plate.',
     capture: overload
       ? `Plate plus food is ${round1(raw)} g, past the 3 kg cell. Take some off.`
       : tareMatches
-        ? 'Press PHOTO. Node A weighs, Node B photographs, the backend does the arithmetic.'
+        ? 'Click the button: that is PHOTO. Node A weighs, Node B photographs, the backend does the arithmetic.'
         : 'Not tared: the display includes the plate. Capture anyway to see what that does, or take the food off and tare.',
   }[next];
 
@@ -620,30 +659,36 @@ export function Simulator() {
             </figure>
           </div>
 
-          {/* The device's own front panel: one display, two buttons. */}
+          {/* The device's own front panel: one display, one button. */}
           <div className="sim-panel">
             <div className="sim-oled" role="status" aria-live="polite" aria-atomic="true">
               <span className="sim-oled-value">{reading}</span>
-              <span className="sim-oled-note">{world.note}</span>
+              <span className="sim-oled-note">{holdLeft !== null ? `HOLD: TARE IN ${holdLeft} s` : world.note}</span>
             </div>
             <button
               type="button"
-              className="sim-key"
-              data-next={next === 'tare' && !world.busy}
-              disabled={world.busy}
-              onClick={tare}
-            >
-              Tare
-            </button>
-            <button
-              type="button"
               className="sim-key sim-key-photo"
-              data-next={next === 'capture' && !world.busy && !overload}
+              data-next={(next === 'tare' || (next === 'capture' && !overload)) && !world.busy}
               disabled={world.busy}
-              onClick={() => void capture()}
+              aria-label="The button: click for PHOTO, hold 5 seconds for TARE"
+              onPointerDown={(event) => {
+                event.currentTarget.setPointerCapture(event.pointerId);
+                press();
+              }}
+              onPointerUp={release}
+              onPointerCancel={release}
+              onKeyDown={(event) => {
+                if ((event.key === ' ' || event.key === 'Enter') && !event.repeat) {
+                  event.preventDefault();
+                  press();
+                }
+              }}
+              onKeyUp={(event) => {
+                if (event.key === ' ' || event.key === 'Enter') release();
+              }}
             >
               <Icon name="camera" size={15} />
-              Photo
+              {holdLeft !== null ? `${holdLeft} s` : 'Click · hold 5 s'}
             </button>
           </div>
 

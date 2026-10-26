@@ -28,7 +28,7 @@ A plate on a load cell, a camera looking straight down. Turn it, take it apart, 
   <summary>The assembly, described</summary>
   <div className="rig-assembly" id="rig-assembly-description">
     <p>The <strong>plate</strong> sits on a round platform. The platform is screwed to a riser on the free end of a <strong>3 kg bar load cell</strong>; the cell’s other end is screwed to a spacer on the base. Nothing else touches the platform, so all of the weight passes through the cell. A stop screw under the free end stands 1 mm short of it, so a hand on the platform cannot over-bend the cell.</p>
-    <p>Inside the base, an <strong>HX711 amplifier</strong> reads the cell and hands a number to the <strong>ESP32 DevKit V1</strong>. The front edge carries the <strong>OLED display</strong> and two buttons, tare and photo. A buzzer confirms each press. Tare the empty plate, add the food, then press photo.</p>
+    <p>Inside the base, an <strong>HX711 amplifier</strong> reads the cell and hands a number to the <strong>ESP32 DevKit V1</strong>. The front edge carries the <strong>OLED display</strong> and one button: hold it 5 s to tare, click it for a photo. A buzzer confirms each. Tare the empty plate, add the food, then click.</p>
     <p>An <strong>arm</strong> stands on the base behind the plate and reaches over it. At its tip an <strong>ESP32-CAM</strong> looks straight down, 320 mm above the plate, with <strong>six white LEDs</strong> around the lens behind a diffuser. The base carries the arm; the platform never does.</p>
     <p>The DevKit sends the grams to the camera board over ESP-NOW, with no router between them. The camera board uploads the photo and the grams over Wi-Fi.</p>
   </div>

@@ -349,23 +349,6 @@ void show() {
   oled.display();
 }
 
-struct Button {
-  explicit Button(uint8_t pin) : pin(pin) {}
-  uint8_t pin;
-  bool down = false;
-  uint32_t changed = 0;
-  // True once per press, after 30 ms of steady contact.
-  bool pressed() {
-    bool now = digitalRead(pin) == LOW;
-    if (now != down && millis() - changed > 30) {
-      down = now;
-      changed = millis();
-      return down;
-    }
-    return false;
-  }
-};
-
 // The one button: a click, or a hold of kHoldToTareMs.
 struct MainButton {
   enum Event { None, Click, Hold };
@@ -401,8 +384,7 @@ struct MainButton {
   }
 };
 
-MainButton mainButton{PIN_BUTTON_TARE};
-Button captureButton{PIN_BUTTON_CAPTURE};  // the board's FLASH button, or a second button: PHOTO only
+MainButton mainButton{PIN_BUTTON_TARE};  // the scale's only button
 
 // --- what the buttons do -----------------------------------------------------
 
@@ -579,8 +561,8 @@ void command(String text) {
   else if (text == "capture") capture();
   else if (text == "find") findCamera();
   else if (text == "i2c") checkDisplayWires();
-  // `button`: is the button pressed right now? 1 = pressed (the leg on D5 joined to ground). FLASH is D3.
-  else if (text == "button") Serial.printf("E button main=%d flash=%d\n", digitalRead(PIN_BUTTON_TARE) == LOW, digitalRead(PIN_BUTTON_CAPTURE) == LOW);
+  // `button`: is the button pressed right now? 1 = pressed (the leg on D5 joined to ground).
+  else if (text == "button") Serial.printf("E button main=%d\n", digitalRead(PIN_BUTTON_TARE) == LOW);
   // `beep`: one short beep, to hear the buzzer without zeroing the scale.
   else if (text == "beep") {
     beepOk();
@@ -651,7 +633,6 @@ void setup() {
   Serial.begin(115200);
   Serial.println();  // ends the chip's own start-up noise, so the boot line starts a line
   pinMode(PIN_BUTTON_TARE, INPUT_PULLUP);
-  pinMode(PIN_BUTTON_CAPTURE, INPUT_PULLUP);
   pinMode(PIN_BUZZER, OUTPUT);
   digitalWrite(PIN_BUZZER, LOW);
 
@@ -732,7 +713,6 @@ void loop() {
     default: break;
   }
   holdingFor = mainButton.holding();
-  if (captureButton.pressed()) capture();
   readConsole();
 
   // Node B reports how the upload went, some seconds after the capture.

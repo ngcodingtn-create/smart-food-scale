@@ -160,7 +160,7 @@ installable Android build come after.
 
 ### Tomorrow, 26 October
 
-1. The HX711, the second button, the microSD card: BUILD-PLAN.md "Tomorrow".
+1. The HX711 (now milestone 2, one button only) and the microSD card: BUILD-PLAN.md.
 2. The camera on the online server: set up its Wi-Fi and pairing from the app.
 3. Real meals, weighed on the load cell, appear in the app.
 

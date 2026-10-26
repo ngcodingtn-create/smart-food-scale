@@ -5,7 +5,7 @@ buzzer. It weighs, and on **PHOTO** hands the grams to Node B over ESP-NOW.
 
 **One button** (D5, since 0.3.0): a click is PHOTO; held 5 s it is TARE, with a countdown
 on the display (`HOLD: TARE IN n s`). Let go between 0.8 s and 5 s and nothing happens.
-D3 (the board's FLASH button, or an optional second button) is PHOTO only. At power-on the scale tares itself, as a kitchen scale does (`E tare` right after `E boot`).
+It is the only button (since 0.3.6: D3 and the board's FLASH button no longer take a photo). At power-on the scale tares itself, as a kitchen scale does (`E tare` right after `E boot`).
 
 The request asked for an ESP32 DevKit; the lab handed over a NodeMCU, and the firmware
 was moved to it on 23 October 2026. It still builds for the ESP32 too, because the

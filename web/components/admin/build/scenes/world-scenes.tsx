@@ -80,7 +80,7 @@ export function mealScene(variant: string): SceneDef {
   const pretend = variant !== 'demo';
   const beats: Beat[] = [
     { at: 0, ...m.first },
-    { at: 1, text: pretend ? 'A plate goes on (the pretend weight until milestone 9)' : 'The empty plate goes on', who: pretend ? undefined : 'you' },
+    { at: 1, text: pretend ? 'A plate goes on (the pretend weight until milestone 2)' : 'The empty plate goes on', who: pretend ? undefined : 'you' },
     { at: 3.2, text: 'Hold the button 5 s: TARE OK, 0.0 g', who: 'you' },
     { at: 5.4, text: 'Serve the food: the weight settles', who: 'you' },
     { at: 7.6, text: 'Click: the light, the photo, the grams sent', who: 'you' },
@@ -792,7 +792,7 @@ export function rigScene(variant: string): SceneDef {
       { at: 0, text: 'The base: a board under everything', who: 'you' },
       { at: 1.6, text: 'The post and the arm hold the camera above the plate', who: 'you' },
       { at: 4, text: 'The camera looks straight down at the plate', who: 'you' },
-      { at: 5.6, text: 'The plate sits on top. The cell goes in at milestone 9.' },
+      { at: 5.6, text: 'The plate sits on top, on the cell moved from the desk into its mount.' },
     ],
     draw: (t) => (
       <>
