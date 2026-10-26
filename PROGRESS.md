@@ -11,10 +11,15 @@ Nothing is marked done unless it has been run. Newest work first.
 ## ▶ Continue here (26 October 2026)
 
 To pick up, tell Claude: **"continue from progress.md"**. **Milestone 1 is done.** The build
-is at **milestone 2, step 2.4** (http://localhost:3000/admin/build/m2-real-weight/bench-mount):
-your egg carton holds the cell, one screw into a cone, the power bank behind; it holds still
-(checked on the board). Last thing in 2.4: a small light cup on the label end. Then 2.7, the
-sign. 2.1, 2.2, 2.3 and 2.6 are ticked. Your cell is **20 kg**.
+is at **milestone 2, step 2.8: calibrate** (http://localhost:3000/admin/build/m2-real-weight/calibrate).
+
+- The cell reads cleanly now: the loose jumpers are reseated and taped. A press makes the
+  numbers rise and they come back (2.7 ticked).
+- Your cell is **20 kg**.
+- Calibration did not repeat on the egg carton (the same 140 g read 60 then 97 counts per
+  gram), so nothing is saved yet. **First: a hard support** under the wired end's last 2 cm only
+  (the power bank flat with heavy books on those 2 cm, or the bolted mount). Then 140 g in, out,
+  in again, until the two agree.
 
 ### The plan, in order (changed 26 October)
 

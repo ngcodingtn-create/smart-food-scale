@@ -387,6 +387,7 @@ export const MILESTONES: Milestone[] = [
           'The white patch in the middle (the sensor) and the “20Kg ↓” end out in the air, over a cup. Threaded holes up; the arrow points down.',
           'A small light cup on the free end, a little tape under it only: the masses go in it.',
           'Nothing may touch the free end: not the carton, not a wire. The finished scale bolts the cell between two plates instead (milestone 9).',
+          'Tried 26 October: the carton holds the cell still, but the same 140 g read 8 398 then 13 590 counts. Too soft to calibrate on: before step 2.8, a hard support under the wired end’s tip only (the power bank flat, heavy books on those 2 cm), or the bolted mount.',
         ],
         checks: ['The wired end screwed to a cone, and it does not move', 'The white patch and the label end in the air, touching nothing', 'The arrow points down'],
       },

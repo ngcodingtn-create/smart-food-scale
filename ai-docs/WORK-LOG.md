@@ -668,3 +668,14 @@ yes do 3-9, continue all")
   then they built their own support, an egg carton with one screw into a cone and the power
   bank behind. Step 2.4's 3D now draws that. Untouched, the reading held within ±60 counts
   for 20 s. Build passes. Not pushed.
+
+**26 October, night: loose jumpers found; calibration needs a harder support; pushed**
+
+- The owner built an egg-carton support (one screw into a cone); step 2.4's 3D draws it.
+- The reading jumped between two levels and dropped out. A wiggle test with Claude logging
+  found loose jumpers at both ends of the blue connector–HX711 run. Reseated and taped down:
+  steady, and a press rises and comes back. Step 2.7 ticked.
+- Calibration with a 140 g object weighed on a kitchen scale: two tries gave 60.0 and 97.1
+  counts/g. Not saved: the cardboard is too soft. Next: a hard support, then repeat until two
+  tries agree within 1 %.
+- Pushed to production on the owner's "push to prod".

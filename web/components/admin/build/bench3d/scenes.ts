@@ -320,7 +320,7 @@ export const BENCH_SCENES: Record<string, BenchScene> = {
     cards: [
       { title: 'Held end', text: 'On a cone of the egg carton, one screw through its inner hole into the cone.' },
       { title: 'Free end', text: 'Out in the air over a cup, the arrow pointing down, a small cup on top.' },
-      { title: 'Checked', text: 'Untouched for 20 s, the reading moved about ±60 counts; a press moves it about 125 000. It holds still.' },
+      { title: 'Checked', text: 'Untouched it holds still (about ±60 counts in 20 s). But the same 140 g read 8 398, then 13 590 counts: the cardboard is too soft to calibrate on. A hard support comes next.' },
     ],
   },
   'm2-real-weight/cell-wires': {

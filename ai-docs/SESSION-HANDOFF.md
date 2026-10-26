@@ -1,41 +1,68 @@
 # Session handoff
 
-**Written:** 25 October 2026, evening, Tunis time; **section 0d added 26 October** during the
-buzzer debugging. First written at the end of the long session that built
-`/admin` and the build companion, by an account about to hit its usage limit. **The next
-session is another Claude account on the same machine and the same folder.** Read this whole
-file before doing anything. History is in [WORK-LOG.md](WORK-LOG.md) (newest at the end); how
-to run things is in [RUNBOOK.md](RUNBOOK.md); where things are is in
-[PROJECT-MAP.md](PROJECT-MAP.md). **Rewrite this file when you stop.**
+**Written:** 26 October 2026, late night, Tunis time, at the end of a long session (pushed to
+production on the owner's "push to prod"). **The next session may be another Claude account on
+the same machine and folder.** Read this whole file before doing anything. History is in
+[WORK-LOG.md](WORK-LOG.md) (newest at the end); how to run things is in [RUNBOOK.md](RUNBOOK.md);
+where things are is in [PROJECT-MAP.md](PROJECT-MAP.md). **Rewrite this file when you stop.**
 
-The full transcript of this session is on disk:
-`C:\Users\ouede\.claude\projects\D--smart-food-scale\daa36be0-6861-4d52-b4b3-5c4f4544efc5.jsonl`
-(subagents under the folder of the same name). Read it only for a detail this file lacks; the
-owner's own messages are the `type:"user"` lines. Mine it with Python run as `python -I`, after
-`sys.stdout.reconfigure(encoding='utf-8')`.
+Transcripts on disk, under `C:\Users\ouede\.claude\projects\D--smart-food-scale\`: this
+session is `daa37932-d810-4066-b4ff-7353661fbaef.jsonl`; the one before, `daa36be0-….jsonl`.
+Read them only for a detail this file lacks; the owner's own messages are the `type:"user"`
+lines. Mine them with Python run as `python -I`, after `sys.stdout.reconfigure(encoding='utf-8')`.
 
 ---
 
-## 0h. Latest (26 Oct, late): the cell holds still on the owner's egg carton. Read this first
+## 0h. Latest (26 Oct, night): real weight works; calibration waits for a hard support. Read this first
 
-- **Step 2.4 is the owner's own support** (photos on Bench Photos, 26 Oct): an egg carton, cups
-  up; the cell's wired end on the tip of one cone, **one screw down through its inner hole into
-  the cone**; the power bank standing on edge in the back cups behind it; the white patch and
-  the "20Kg ↓" end in the air over a cup. The 3D draws exactly that (`book()` = the carton,
-  `tape()` = the screw + the power bank, `POWER_BANK` in `model.ts`); sizes judged from photos.
-- **Checked on the board**: untouched for 20 s the raw reading stayed within about ±60 counts
-  (around −51 800); a press earlier moved it about 125 000. It holds still.
-- A bolted sandwich (board, blocks, top plate) was drawn first on the owner's ask, then
-  replaced by their carton the same evening; the finished scale still bolts the cell
-  (milestone 9 rig). Commit `2595307` has the sandwich drawing if it is wanted again.
-- **The owner's cell is 20 kg** ("20Kg ↓" on the end face). Connector: red→yellow jumper (E+),
-  black→red (E−), white→brown (A−), green→green (A+). Earlier presses on the power bank gave
-  falls: **the sign is unconfirmed**; step 2.7 settles it (fall = swap A− and A+).
-- The board runs the real-scale firmware (`node-a-nodemcu`), display "raw …, NOT CALIBRATED".
-  Steps 2.1, 2.2, 2.3 and 2.6 are ticked.
-- **Not pushed**: everything after `ccb5312` is local. Push only on "push to prod".
-- Next: the small cup on the label end (2.4's last beat), 2.5 if any jumper is off, 2.7 the
-  sign ("holding" protocol), 2.8 calibration (needs known masses), 2.9 by hand.
+**Where the bench is.** Milestone 2, real weight. Ticked: 2.1, 2.2, 2.3, 2.4, 2.5, 2.7 (sign).
+Next: **2.8 calibrate**, which first needs a harder support (below). Then 2.9 by hand.
+
+**The board.** NodeMCU on COM5, real-scale firmware (`node-a-nodemcu`, fw 0.3.6). It is
+**not calibrated** (`calibrated=0`); last tare offset −56 436 (an empty cup on the cell). The
+display reads "raw …, NOT CALIBRATED".
+
+**The cell.** 20 kg ("20Kg ↓" on the end face). The blue connector on its wires: red→yellow
+jumper (E+), black→red (E−), white→brown (A−), green→teal (A+), as the owner wired it.
+
+**What was fixed tonight: bad contacts, not the cell.**
+- The reading flipped between two stable levels (about −14 700 and −52 000) and dropped out
+  ("−1", or slammed to ±8 388 607). A wiggle test, one spot at a time while Claude logged,
+  found it: the four jumpers between the blue connector and the HX711 were loose **at both
+  ends** (worst at the HX711's six-pin end).
+- The owner reseated them, taped the HX711 down and taped the wires near both ends. After
+  that: untouched about −55 000, noise about ±100; a press rises 36 000–41 000 and comes back.
+  **Sign confirmed: a press rises. No swap.** Earlier "falls" and odd rises were the bad
+  contacts; disregard them.
+
+**What failed: calibration on the egg carton.**
+- Support (photos on Bench Photos): an egg carton, cups up; the wired end on a cone's tip, one
+  screw through its inner hole into the cone; the power bank on edge behind it. Drawn in 3D as
+  step 2.4.
+- Same 140 g (weighed on the owner's kitchen scale), in a cup taped on the label end:
+  try 1, 8 398 counts (60.0 counts/g); between tries, empty came back 5 120 counts low;
+  try 2, 13 590 counts (97.1 counts/g). **Not saved.** The cardboard cone is soft, and it
+  touches close to the sensor, so the cell sits differently each time.
+- Step 2.4's page and 3D now say so.
+
+**Next, in order.**
+1. A hard support touching only the wired end's last 2 cm. Quick: the power bank flat, at
+   least 2 kg of books on those 2 cm, the label end in the air with the cup. For good: the
+   bolted mount (board, block under the wired end, a screw from below), which the owner first
+   asked for ("like in prod"). Commit `2595307` has that 3D drawing if wanted. Redraw step 2.4
+   in 3D for whichever the owner builds.
+2. Repeat test before saving: tare (`board.py send tare --expect "E tare"`), 140 g in
+   (`board.py counts --seconds 8 --grams 140`), out, tare, in again. **Keep it only if the
+   two agree within about 1 %**, then `board.py send "cal <cpg>" --expect "E cal"`.
+3. 2.9: weigh other things known from the kitchen scale.
+
+**How Claude listens while the owner acts.** A background
+`board.py listen --seconds 900 > scratchpad/x.log` holds COM5. Stop it (TaskStop) before any
+`send`/`counts`. Summarise with inline Python (median and spread per 2–3 s). Pulling the USB
+kills the listener with "Access is denied"; that is expected.
+
+**Production.** Pushed on the owner's "push to prod" (26 Oct, night), including everything
+since `ccb5312`. Push again only on "push to prod".
 
 ## 0g. Milestone 1 done; no ceramic capacitors
 

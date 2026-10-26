@@ -61,9 +61,19 @@
       0,
       1,
       2
+    ],
+    "m2-real-weight/cell-wires": [
+      0,
+      1
+    ],
+    "m2-real-weight/sign": [
+      0
+    ],
+    "m2-real-weight/flash-real": [
+      0
     ]
   },
-  "updated": "2026-10-26T18:34:51.285Z",
+  "updated": "2026-10-26T20:12:50.995Z",
   "sfs-wired-v1": [
     "a-3v3",
     "a-5v",
@@ -83,6 +93,10 @@
     "a-oled-sda",
     "a-oled-vcc",
     "a-tare",
-    "a-tare-gnd"
+    "a-tare-gnd",
+    "a-cell-red",
+    "a-cell-green",
+    "a-cell-black",
+    "a-cell-white"
   ]
 }
