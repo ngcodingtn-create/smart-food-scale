@@ -16,31 +16,26 @@ owner's own messages are the `type:"user"` lines. Mine it with Python run as `py
 
 ---
 
-## 0h. Latest (26 Oct, late): the cell gets a bolted mount. Read this first
+## 0h. Latest (26 Oct, late): the cell holds still on the owner's egg carton. Read this first
 
-- **Milestone 2 is at step 2.4, mount the cell**, now the proper bolted mount, as in the
-  finished scale (the owner: "in the test install it correctly like in prod since i want it
-  to work"). A board on four feet; a block (about 1.5 cm) under the wired end, two screws up
-  from below into that end's holes; a second block on the label end, the top plate on it, two
-  screws down through them. Sizes are a proposal, not measured. Screws: try M4, else M5,
-  never deeper into the cell than its 12.7 mm.
-- The 3D (`bench3d`): `BOOK` is now the board plus the first block, `tape()` the two lower
-  screws, `cup()` the second block, the plate and its screws; `PLATE`, `BLOCKS` in
-  `model.ts`. Board and blocks are drawn a little see-through so the screws show. Every later
-  step presses or loads **the plate**, not a cup.
-- **The owner's cell is 20 kg** ("20Kg ↓" on the end face, not the 3 kg the plan assumed).
-  Its wires leave near the wired (fixed) end. Connector: red→yellow jumper (E+),
-  black→red (E−), white→brown (A−), green→green (A+).
-- What the bench taught (26 Oct): the white patch in the middle is the sensor and must be
-  free; tape over it, or too much bar on a support, kills the reading. In the hands, and
-  with only the wired end's tip on a box, a press gave about +125 000 counts. The last
-  presses on the power bank gave falls (about −60 000): **the jumper order is unconfirmed**;
-  ask the owner to check it when the mount is built. A fall in step 2.7 means swap A− and A+.
-- The board runs the real-scale firmware (`node-a-nodemcu`); its display reads "raw …,
-  NOT CALIBRATED". Steps 2.1, 2.2, 2.3 and 2.6 are ticked.
+- **Step 2.4 is the owner's own support** (photos on Bench Photos, 26 Oct): an egg carton, cups
+  up; the cell's wired end on the tip of one cone, **one screw down through its inner hole into
+  the cone**; the power bank standing on edge in the back cups behind it; the white patch and
+  the "20Kg ↓" end in the air over a cup. The 3D draws exactly that (`book()` = the carton,
+  `tape()` = the screw + the power bank, `POWER_BANK` in `model.ts`); sizes judged from photos.
+- **Checked on the board**: untouched for 20 s the raw reading stayed within about ±60 counts
+  (around −51 800); a press earlier moved it about 125 000. It holds still.
+- A bolted sandwich (board, blocks, top plate) was drawn first on the owner's ask, then
+  replaced by their carton the same evening; the finished scale still bolts the cell
+  (milestone 9 rig). Commit `2595307` has the sandwich drawing if it is wanted again.
+- **The owner's cell is 20 kg** ("20Kg ↓" on the end face). Connector: red→yellow jumper (E+),
+  black→red (E−), white→brown (A−), green→green (A+). Earlier presses on the power bank gave
+  falls: **the sign is unconfirmed**; step 2.7 settles it (fall = swap A− and A+).
+- The board runs the real-scale firmware (`node-a-nodemcu`), display "raw …, NOT CALIBRATED".
+  Steps 2.1, 2.2, 2.3 and 2.6 are ticked.
 - **Not pushed**: everything after `ccb5312` is local. Push only on "push to prod".
-- Next: the owner builds the mount (needs wood, four screws); then 2.5 cell wires, 2.7 the
-  sign, 2.8 calibration (needs known masses), 2.9 by hand.
+- Next: the small cup on the label end (2.4's last beat), 2.5 if any jumper is off, 2.7 the
+  sign ("holding" protocol), 2.8 calibration (needs known masses), 2.9 by hand.
 
 ## 0g. Milestone 1 done; no ceramic capacitors
 

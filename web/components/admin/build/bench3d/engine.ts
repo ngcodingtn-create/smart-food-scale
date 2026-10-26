@@ -2,8 +2,8 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { DIM } from '@/components/rig/specs';
 import {
-  BASE_AT, BASE_SOCKET_TOP, BB, BLOCKS, BOOK, CAM_BOARD, CAM_LEFT, CAM_ON_BB, CAM_RIGHT, CELL, COL_X, CONNECTOR, CUP, DISPLAY, HX711_AT, HX_BOARD, HX_CELL, HX_SIGNAL,
-  CHARGER_AT, CHARGER_LEADS, LAPTOP_AT, PCB_TOP, PHONE_AT, PLATE, ROWS, ROW_X, endPoint, hxPin, isRail, pinZ, rowZ,
+  BASE_AT, BASE_SOCKET_TOP, BB, BOOK, CAM_BOARD, CAM_LEFT, CAM_ON_BB, CAM_RIGHT, CELL, COL_X, CONNECTOR, CUP, DISPLAY, HX711_AT, HX_BOARD, HX_CELL, HX_SIGNAL,
+  CHARGER_AT, CHARGER_LEADS, LAPTOP_AT, PCB_TOP, PHONE_AT, POWER_BANK, ROWS, ROW_X, endPoint, hxPin, isRail, pinZ, rowZ,
   type BenchScene, type Cam, type Col, type End, type PartSpec, type Tag, type V3, type WireSpec,
 } from './model';
 
@@ -338,18 +338,34 @@ function hx711(bare: boolean) {
 
 const ALU = material(0xc3c8cc, { metalness: 0.55, roughness: 0.45 });
 
-// Board and blocks a little see-through, so the screws inside them show.
-const WOOD = material(0xc8a46e, { roughness: 0.8, transparent: true, opacity: 0.72 });
-const BLOCK = material(0xa9865a, { roughness: 0.8, transparent: true, opacity: 0.8 });
+const CARDBOARD = material(0xd9d3c5, { roughness: 0.95, side: THREE.DoubleSide });
 
-/** The board on its four feet, and the block under the wired end. */
+/** The owner's egg carton, cups up: a cup at each grid point, a cone where four cups meet. */
 function book() {
   const group = new THREE.Group();
-  const cx = (BOOK.x0 + BOOK.x1) / 2, cz = (BOOK.z0 + BOOK.z1) / 2;
-  for (const fx of [BOOK.x0 + 10, BOOK.x1 - 10]) for (const fz of [BOOK.z0 + 10, BOOK.z1 - 10]) group.add(boxMesh([10, BOOK.feet, 10], material(0x2b2b2b), [fx, 0, fz]));
-  group.add(boxMesh([BOOK.x1 - BOOK.x0, BOOK.board, BOOK.z1 - BOOK.z0], WOOD, [cx, BOOK.feet, cz]));
-  const [z0, z1] = BLOCKS.fixed;
-  group.add(boxMesh([20, BOOK.h - BOOK.feet - BOOK.board, z1 - z0], BLOCK, [CELL.x, BOOK.feet + BOOK.board, (z0 + z1) / 2]));
+  const p = BOOK.pitch;
+  const cols = Math.round((BOOK.x1 - BOOK.x0) / p), rows = Math.round((BOOK.z1 - BOOK.z0) / p);
+  for (let i = 0; i < cols; i++) for (let j = 0; j < rows; j++) {
+    const x = BOOK.x0 + p * (i + 0.5), z = BOOK.z0 + p * (j + 0.5);
+    const cup = new THREE.Mesh(new THREE.CylinderGeometry(p / 2 - 2, p / 2 - 9, BOOK.rim - 2, 28, 1, true), CARDBOARD);
+    cup.position.set(x, 2 + (BOOK.rim - 2) / 2, z);
+    const floor = new THREE.Mesh(new THREE.CylinderGeometry(p / 2 - 9, p / 2 - 9, 2, 28), CARDBOARD);
+    floor.position.set(x, 1, z);
+    group.add(cup, floor);
+  }
+  for (let i = 1; i < cols; i++) for (let j = 1; j < rows; j++) {
+    const cone = new THREE.Mesh(new THREE.CylinderGeometry(5, 13, BOOK.h - BOOK.rim + 12, 24), CARDBOARD);
+    cone.position.set(BOOK.x0 + p * i, BOOK.rim - 12 + (BOOK.h - BOOK.rim + 12) / 2, BOOK.z0 + p * j);
+    group.add(cone);
+  }
+  // The skirt round the edge.
+  const w = BOOK.x1 - BOOK.x0, d = BOOK.z1 - BOOK.z0, cx = (BOOK.x0 + BOOK.x1) / 2, cz = (BOOK.z0 + BOOK.z1) / 2;
+  const skirt = material(0xd9d3c5, { roughness: 0.95 });
+  for (const [size, at] of [[[w, BOOK.rim, 2], [cx, 0, BOOK.z0]], [[w, BOOK.rim, 2], [cx, 0, BOOK.z1]], [[2, BOOK.rim, d], [BOOK.x0, 0, cz]], [[2, BOOK.rim, d], [BOOK.x1, 0, cz]]] as [V3, V3][]) {
+    const wall = boxMesh(size, skirt, at, false);
+    wall.receiveShadow = false;
+    group.add(wall);
+  }
   return group;
 }
 
@@ -375,10 +391,10 @@ function loadcell(onBook: boolean) {
     const o = (k - 1.5) * 0.9;
     const curve = new THREE.CatmullRomCurve3([
       v([CELL.x + o, top + 0.4, zc - 9]),
-      v([CELL.x + 8 + o, top + 1.5, zc - 7]),
-      v([BOOK.x1 + 4 + o, base * 0.6 + 2, zc - 2]),
-      v([BOOK.x1 + 12 + o, 3, zc + 20]),
-      v([CONNECTOR.x - 8 + o * 2, 2, CONNECTOR.z - 16]),
+      v([CELL.x + 6 + o, top + 2, zc - 4]),
+      v([CELL.x + 22 + o, base - 2, zc + 12]),
+      v([BOOK.x1 + 4 + o, BOOK.rim + 2, BOOK.z1 + 4]),
+      v([CONNECTOR.x - 8 + o * 2, 2, CONNECTOR.z - 14]),
       v([CONNECTOR.x - 3.81 + k * 2.54, 2.6, CONNECTOR.z - 4]),
     ]);
     group.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 80, 0.4, 6), material(COLOURS[colour])));
@@ -387,33 +403,30 @@ function loadcell(onBook: boolean) {
   return group;
 }
 
-/** The two screws holding the wired end: up through the board and the block, into its two holes. Heads under the board. */
+/** What holds the wired end: one screw down through its inner hole into the cone, and the power bank standing behind it. */
 function tape() {
   const group = new THREE.Group();
-  const steel = material(0x8d949a, { metalness: 0.7, roughness: 0.3 });
-  for (const z of [-15, -7]) {
-    const shank = new THREE.Mesh(new THREE.CylinderGeometry(1.8, 1.8, BOOK.h - BOOK.feet + 6, 12), steel);
-    shank.position.set(CELL.x, (BOOK.feet + BOOK.h + 6) / 2, z);
-    const head = new THREE.Mesh(new THREE.CylinderGeometry(3.6, 3.6, 2, 16), steel);
-    head.position.set(CELL.x, BOOK.feet - 1, z);
-    group.add(shank, head);
-  }
+  const top = BOOK.h + CELL.size;
+  const steel = material(0x9aa1a7, { metalness: 0.7, roughness: 0.3 });
+  const head = new THREE.Mesh(new THREE.CylinderGeometry(4.5, 4.5, 2.4, 20), steel);
+  head.position.set(CELL.x, top + 1.2, BOOK.coneZ);
+  const slot = boxMesh([7, 0.6, 1], material(0x3a3f44), [CELL.x, top + 2.2, BOOK.coneZ], false);
+  const shank = new THREE.Mesh(new THREE.CylinderGeometry(1.8, 1.8, 30, 12), steel);
+  shank.position.set(CELL.x, top - 15, BOOK.coneZ);
+  group.add(head, slot, shank);
+  const PB = POWER_BANK;
+  group.add(boxMesh([PB.w, PB.h, PB.d], material(0xf2f2ee, { roughness: 0.5 }), [PB.x, PB.y0, PB.z1 - PB.d / 2]));
   return group;
 }
 
-/** The block on the label end, the top plate on it, and its two screws down into the label end's holes. */
 function cup() {
   const group = new THREE.Group();
-  const top = BOOK.h + CELL.size;
-  const [z0, z1] = BLOCKS.free;
-  group.add(boxMesh([20, BLOCKS.freeH, z1 - z0], BLOCK, [CELL.x, top, (z0 + z1) / 2]));
-  group.add(boxMesh([PLATE.w, PLATE.h, PLATE.d], material(0xe9e4d6, { roughness: 0.6 }), [CELL.x, top + BLOCKS.freeH, PLATE.z]));
-  const steel = material(0x8d949a, { metalness: 0.7, roughness: 0.3 });
-  for (const z of [40, 48]) {
-    const head = new THREE.Mesh(new THREE.CylinderGeometry(3.6, 3.6, 0.6, 16), steel);
-    head.position.set(CELL.x, top + BLOCKS.freeH + PLATE.h + 0.3, z);
-    group.add(head);
-  }
+  const wall = new THREE.Mesh(new THREE.CylinderGeometry(9, 7, 10, 28, 1, true), material(0xf2f2ef, { side: THREE.DoubleSide }));
+  wall.position.set(CUP[0], CUP[1] + 5, CUP[2]);
+  group.add(wall);
+  const floor = new THREE.Mesh(new THREE.CylinderGeometry(7, 7, 0.6, 28), material(0xf2f2ef));
+  floor.position.set(CUP[0], CUP[1] + 0.3, CUP[2]);
+  group.add(floor);
   return group;
 }
 

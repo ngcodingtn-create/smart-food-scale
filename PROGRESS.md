@@ -11,12 +11,10 @@ Nothing is marked done unless it has been run. Newest work first.
 ## ▶ Continue here (26 October 2026)
 
 To pick up, tell Claude: **"continue from progress.md"**. **Milestone 1 is done.** The build
-is at **milestone 2, step 2.4: mount the cell, bolted as in the finished scale**
-(http://localhost:3000/admin/build/m2-real-weight/bench-mount): a board on feet, a block under
-the wired end screwed from below, a block and the top plate on the label end screwed from
-above. 2.1, 2.2, 2.3 and 2.6 are ticked; the board runs the real-scale firmware. Your cell is
-**20 kg**. Still to check: the jumper order on the blue connector (yellow E+, red E−, brown A−,
-green A+).
+is at **milestone 2, step 2.4** (http://localhost:3000/admin/build/m2-real-weight/bench-mount):
+your egg carton holds the cell, one screw into a cone, the power bank behind; it holds still
+(checked on the board). Last thing in 2.4: a small light cup on the label end. Then 2.7, the
+sign. 2.1, 2.2, 2.3 and 2.6 are ticked. Your cell is **20 kg**.
 
 ### The plan, in order (changed 26 October)
 

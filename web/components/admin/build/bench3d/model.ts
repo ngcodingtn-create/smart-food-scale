@@ -48,24 +48,23 @@ export function hxPin(name: string): V3 {
   return [HX711_AT.x + HX_BOARD.cellPinX, HX711_AT.y, HX711_AT.z - 6.35 + c * 2.54];
 }
 
-// --- the load cell, bolted as in the finished scale --------------------------------------------------
+// --- the load cell: on a cone of the owner's egg carton, screwed down at its wired end -------------------
 /**
- * The mount (the owner chose it, 26 October): a board on four feet; a block under the wired end,
- * screwed from below into that end's two holes; the cell; a block on the label end, screwed from
- * above through the top plate into its two holes. The blocks at opposite ends leave the middle,
- * where the sensor is, free to bend. Sizes are a proposal, not measured. `h` is where the cell's
- * underside sits: feet 6, board 12, block 15. The cell is drawn 75 × 12.7 × 12.7 mm (rig/specs.ts);
- * the owner's is labelled 20 kg, and its exact length was not measured.
+ * The support the owner made (photos, 26 October): an egg carton, cups up. The cell's wired end sits
+ * on the tip of one cone, a screw down through its inner hole into the cone; the label end is in the
+ * air over a cup. The power bank stands on edge in the back cups, behind the wired end. Sizes are
+ * judged from the photos, not measured. `h` is the cone's tip, where the cell's underside sits;
+ * `rim` the cups' top edge; `pitch` the distance between cups. The cell is drawn 75 × 12.7 × 12.7 mm
+ * (rig/specs.ts); the owner's is labelled 20 kg, and its exact length was not measured.
  */
-export const BOOK = { x0: -160, x1: -60, z0: -50, z1: 100, h: 33, feet: 6, board: 12 };
-export const CELL = { x: -110, z0: -20, z1: 55, size: 12.7 };
-/** The two blocks, along the cell: under the wired end, on top of the label end. */
-export const BLOCKS = { fixed: [-20, 2], free: [33, 55], freeH: 10 } as const;
-/** The top plate, on the free block; masses and food go in its middle. */
-export const PLATE = { w: 90, d: 110, h: 6, z: 44 };
-export const CUP: V3 = [CELL.x, BOOK.h + CELL.size + BLOCKS.freeH + PLATE.h, PLATE.z];
+export const BOOK = { x0: -220, x1: -70, z0: -55, z1: 45, h: 45, rim: 30, pitch: 50, coneZ: -5.5 };
+export const CELL = { x: -120, z0: -20, z1: 55, size: 12.7 };
+/** The power bank on its long edge, its face just behind the wired end. Judged from the photos. */
+export const POWER_BANK = { x: -110, w: 140, h: 70, d: 25, z1: -22, y0: 8 };
+/** Where a known mass sits: in a small cup taped on the free end. */
+export const CUP: V3 = [CELL.x, BOOK.h + CELL.size, 45];
 /** The blue 4-way connector on the cell's wires, lying on the desk, and its four jumpers' ends. */
-export const CONNECTOR = { x: -38, z: 74 };
+export const CONNECTOR = { x: -58, z: 64 };
 export const connectorPin = (k: number): V3 => [CONNECTOR.x - 3.81 + k * 2.54, 2.6, CONNECTOR.z + 4];
 
 // --- the camera: the ESP32-CAM, its MB base on the desk right of the breadboard --------------------

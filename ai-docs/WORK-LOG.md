@@ -664,6 +664,7 @@ yes do 3-9, continue all")
 - Finding where the cell bends took many presses, with a background listener on the board
   and a 3D page, "Where does the cell bend?" (artifact `EmrtZSE3nhbqKa6ZtqZWrg`): tape over
   the sensor kills the response; only the wired end's tip on a support works.
-- The owner asked to mount it as in production: step 2.4 is now a bolted sandwich (board,
-  block, cell, block, top plate), drawn in 3D and checked in the browser; later steps load
-  the plate. Build passes. Not pushed.
+- The owner asked to mount it as in production: a bolted sandwich was drawn (`2595307`);
+  then they built their own support, an egg carton with one screw into a cone and the power
+  bank behind. Step 2.4's 3D now draws that. Untouched, the reading held within ±60 counts
+  for 20 s. Build passes. Not pushed.
