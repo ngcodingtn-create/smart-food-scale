@@ -1,0 +1,375 @@
+<title>Find the Cell’s Position</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,650&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  /* Layout: the 3D bench first, full width; the step under it; the four wires as a table at the end.
+     The Smart Food Scale palette: terracotta for what your hands do, teal for what Claude checks. */
+  :root {
+    --ink: oklch(0.2 0.012 60); --ink-soft: oklch(0.42 0.014 62); --ink-faint: oklch(0.54 0.012 65);
+    --paper: oklch(0.985 0.006 85); --raised: oklch(1 0 0); --sunken: oklch(0.964 0.008 82);
+    --rule: oklch(0.905 0.008 78); --rule-strong: oklch(0.83 0.01 75);
+    --accent: oklch(0.56 0.16 42); --accent-soft: oklch(0.955 0.03 60); --accent-ink: oklch(0.45 0.15 40); --on-accent: oklch(0.99 0.005 80);
+    --measure: oklch(0.52 0.085 188); --measure-soft: oklch(0.95 0.025 188); --measure-ink: oklch(0.4 0.075 190);
+    --display: "Fraunces", Georgia, serif;
+    --body: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: oklch(0.94 0.008 80); --ink-soft: oklch(0.77 0.01 75); --ink-faint: oklch(0.63 0.01 75);
+      --paper: oklch(0.17 0.008 70); --raised: oklch(0.212 0.009 70); --sunken: oklch(0.145 0.008 70);
+      --rule: oklch(0.275 0.01 70); --rule-strong: oklch(0.37 0.012 70);
+      --accent: oklch(0.73 0.14 50); --accent-soft: oklch(0.275 0.045 48); --accent-ink: oklch(0.81 0.115 58); --on-accent: oklch(0.18 0.02 50);
+      --measure: oklch(0.76 0.09 182); --measure-soft: oklch(0.255 0.03 188); --measure-ink: oklch(0.83 0.08 180);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: oklch(0.94 0.008 80); --ink-soft: oklch(0.77 0.01 75); --ink-faint: oklch(0.63 0.01 75);
+    --paper: oklch(0.17 0.008 70); --raised: oklch(0.212 0.009 70); --sunken: oklch(0.145 0.008 70);
+    --rule: oklch(0.275 0.01 70); --rule-strong: oklch(0.37 0.012 70);
+    --accent: oklch(0.73 0.14 50); --accent-soft: oklch(0.275 0.045 48); --accent-ink: oklch(0.81 0.115 58); --on-accent: oklch(0.18 0.02 50);
+    --measure: oklch(0.76 0.09 182); --measure-soft: oklch(0.255 0.03 188); --measure-ink: oklch(0.83 0.08 180);
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--paper); color: var(--ink); font: 16px/1.5 var(--body);
+    padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 18px 44px;
+  }
+  .page { max-width: 980px; margin: 0 auto; display: grid; gap: 18px; }
+  .eyebrow { font: 500 12px/1.2 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); }
+  h1 { font: 650 clamp(28px, 6vw, 42px)/1.05 var(--display); margin: 6px 0 0; text-wrap: balance; letter-spacing: -0.01em; }
+  h2 { font: 650 22px/1.2 var(--display); margin: 0; }
+  p { margin: 0; }
+  .lede { color: var(--ink-soft); max-width: 64ch; margin-top: 8px; }
+
+  .stage { position: relative; border-radius: 14px; overflow: hidden; border: 1px solid var(--rule); background: #c9a679; aspect-ratio: 16 / 10; max-width: 100%; touch-action: none; }
+  @media (max-width: 560px) { .stage { aspect-ratio: 4 / 5; } }
+  .stage canvas { display: block; width: 100%; height: 100%; }
+  .tags { position: absolute; inset: 0; pointer-events: none; }
+  .tag {
+    position: absolute; transform: translate(-50%, -100%); white-space: nowrap; font: 600 13px/1.2 var(--body);
+    padding: 5px 9px; border-radius: 8px; background: rgba(255, 250, 242, 0.94); color: #2b2420; border: 1px solid rgba(0, 0, 0, 0.12);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); margin-top: -10px;
+  }
+  .tag small { display: block; font: 500 11px/1.3 var(--mono); color: #6b625a; }
+  .tag.you { background: #fbe7d6; color: #8a4518; border-color: #e7b48f; }
+  .tag.ok { background: #dff1e7; color: #1d6b42; border-color: #a8d8bb; }
+  .hint { position: absolute; right: 10px; bottom: 10px; font: 500 12px var(--mono); color: rgba(40, 25, 10, 0.75); background: rgba(255, 250, 242, 0.7); padding: 4px 8px; border-radius: 6px; }
+  .nogl { position: absolute; inset: 0; display: grid; place-items: center; padding: 20px; text-align: center; color: #2b2420; }
+
+  .steps { display: flex; flex-wrap: wrap; gap: 6px; }
+  .pill { font: 500 13px/1 var(--mono); border-radius: 999px; padding: 8px 11px; border: 1px solid var(--rule-strong); background: var(--raised); color: var(--ink-soft); cursor: pointer; }
+  .pill[aria-current="step"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+  .pill.seen { border-color: var(--accent); color: var(--accent-ink); }
+  .caption { display: grid; gap: 8px; min-height: 104px; }
+  .caption h3 { font: 600 19px/1.3 var(--body); margin: 0; }
+  .doer { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; align-items: start; }
+  .who { font: 500 11px/1 var(--mono); letter-spacing: 0.06em; text-transform: uppercase; border-radius: 6px; padding: 5px 7px; margin-top: 3px; }
+  .who.you { background: var(--accent-soft); color: var(--accent-ink); }
+  .who.claude { background: var(--measure-soft); color: var(--measure-ink); }
+  .doer ol { margin: 0; padding-left: 18px; display: grid; gap: 3px; }
+  .nav { display: flex; gap: 10px; flex-wrap: wrap; }
+  .btn { font: 600 15px/1 var(--body); border-radius: 10px; border: 1px solid var(--rule-strong); background: var(--raised); color: var(--ink); padding: 12px 16px; cursor: pointer; min-height: 46px; }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); flex: 1 1 180px; }
+  .btn:disabled { opacity: 0.45; cursor: default; }
+  .btn:focus-visible, .pill:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+  .wires { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+  .wire { border: 1px solid var(--rule); border-radius: 12px; padding: 12px 14px; background: var(--raised); display: grid; gap: 4px; }
+  .wire b { font: 600 17px/1.2 var(--body); display: flex; align-items: center; gap: 8px; }
+  .wire b i { width: 14px; height: 14px; border-radius: 4px; display: inline-block; }
+  .wire span { color: var(--ink-soft); font-size: 14px; }
+  .wire code { font: 500 13px var(--mono); }
+  .note { color: var(--ink-soft); font-size: 14px; max-width: 70ch; }
+</style>
+
+<div class="page">
+  <header>
+    <span class="eyebrow">Smart Food Scale · step 2.4, the load cell</span>
+    <h1>Where does the cell bend?</h1>
+    <p class="lede">The cell only reads when it bends: one end held still, the other end free. Four ways to try, A to D. After each, tell Claude: Claude reads the board while you press and says whether it moved. Drag to turn; scroll or pinch to zoom.</p>
+  </header>
+
+  <div class="stage" id="stage">
+    <canvas id="gl" aria-label="Your load cell and your round box in 3D, in four positions to try: in your hands, on the box with the label end out, turned end for end, and upside down"></canvas>
+    <div class="tags" id="tags"></div>
+    <span class="hint">drag to turn · scroll to zoom</span>
+  </div>
+  <div class="steps" id="pills" aria-label="Steps"></div>
+  <div class="caption" id="caption" aria-live="polite"></div>
+  <div class="nav">
+    <button class="btn" id="prev" type="button">← Back</button>
+    <button class="btn" id="replay" type="button">Replay</button>
+    <button class="btn primary" id="next" type="button">Next step →</button>
+  </div>
+
+  <section style="display:grid;gap:10px" aria-labelledby="w-title">
+    <h2 id="w-title">The four tries</h2>
+    <div class="wires">
+      <div class="wire"><b>A · In your hands</b><span>Grip the wired end; press the 20Kg ↓ end with your thumb. Proves the cell answers.</span></div>
+      <div class="wire"><b>B · Label end out</b><span>Wired end held on the box, label end 3 cm out. Press the label end.</span></div>
+      <div class="wire"><b>C · Turned round</b><span>Label end held, wired end out. Press the wired end.</span></div>
+      <div class="wire"><b>D · Upside down</b><span>As B, holes down, the arrow up.</span></div>
+    </div>
+    <p class="note">Press for about 3 seconds, let go, then tell Claude which letter you just did. The right position: the counts move a lot while you press and come straight back when you let go.</p>
+  </section>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(() => {
+  // ---------------------------------------------------------------------------------
+  // The owner's load cell and their round box, in millimetres. X: across, Y: up, Z: towards
+  // the owner. The cell is drawn 75 × 12.7 × 12.7 (its length was not measured); its label end,
+  // "20Kg ↓", at local +Z; the end its wires leave from at local -Z.
+  // ---------------------------------------------------------------------------------
+  const BOX = { x: 0, z: -40, r: 75, h: 55 };
+  const L = 75, S = 12.7;
+  const ON_BOX = { x: 0, y: BOX.h + S / 2, z: BOX.z + BOX.r - L / 2 + 35 };   // 35 mm out past the front edge
+  const IN_HAND = { x: 110, y: 70, z: 40 };
+  // Each step: where the cell is (position, turned end for end, upside down), what holds it, where the finger presses.
+  const STEPS = [
+    { title: 'Where you are', who: 'you', text: ['Pressing does nothing yet: the bar has to bend, and it only bends if one end is held still and the other is free.', 'Four ways to try, one after the other. After each, tell Claude: Claude reads the board each time.'], cam: [[150, 170, 240], [20, 30, -10]], T: 1.4, pose: 'loose' },
+    { title: 'A · In your hands', who: 'you', text: ['Pick the cell up. One hand grips the end the wires leave from, firmly.', 'With the other thumb, press the 20Kg ↓ end down, hold it 3 seconds, let go. Then tell Claude “A done”.'], cam: [[210, 130, 170], [110, 62, 40]], T: 3.6, pose: 'hand', press: 'label' },
+    { title: 'B · Label end out', who: 'you', text: ['Back on the box: the wired end on the lid, the 20Kg ↓ end out over the edge by about 3 cm. Holes up.', 'Tape and the power bank hold the wired end. Press the label end down, hold 3 s, let go. Tell Claude “B done”.'], cam: [[130, 150, 190], [0, 55, 20]], T: 3.6, pose: 'B', press: 'label' },
+    { title: 'C · Turned end for end', who: 'you', text: ['The same, but turned round: the label end held on the box, the wired end out over the edge.', 'Press the wired end down, hold 3 s, let go. Tell Claude “C done”.'], cam: [[130, 150, 190], [0, 55, 20]], T: 3.6, pose: 'C', press: 'wired' },
+    { title: 'D · Upside down', who: 'you', text: ['As B, but the bar turned over: holes down, the label’s arrow pointing up.', 'Press the label end down, hold 3 s, let go. Tell Claude “D done”.'], cam: [[130, 150, 190], [0, 55, 20]], T: 3.6, pose: 'D', press: 'label' },
+    { title: 'The one that moves most', who: 'claude', text: ['The right position is the one where the counts move a lot while you press and come straight back when you let go.', 'Claude says which. The cup then goes on the free end, and the next step is the sign.'], cam: [[150, 170, 240], [20, 30, -10]], T: 1.4, pose: 'B' },
+  ];
+
+  // --- the player's chrome, which works without WebGL ---------------------------------
+  const pills = document.getElementById('pills'), caption = document.getElementById('caption');
+  const seen = new Set([0]);
+  let step = 0, start = performance.now();
+  STEPS.forEach((s, i) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'pill'; b.textContent = i === 0 ? 'Now' : i === STEPS.length - 1 ? 'Best' : s.title[0];
+    b.setAttribute('aria-label', s.title);
+    b.addEventListener('click', () => go(i));
+    pills.append(b);
+  });
+  function go(i) {
+    const from = STEPS[step].pose;
+    step = Math.max(0, Math.min(STEPS.length - 1, i));
+    seen.add(step);
+    start = performance.now();
+    lastPose = from;
+    flyTo(STEPS[step].cam);
+    const s = STEPS[step];
+    caption.innerHTML = `<h3>${s.title}</h3><div class="doer"><span class="who ${s.who}">${s.who === 'you' ? 'You do' : 'Claude'}</span>` +
+      (s.text.length > 1 ? `<ol>${s.text.map((t) => `<li>${t}</li>`).join('')}</ol>` : `<p>${s.text[0]}</p>`) + '</div>';
+    [...pills.children].forEach((b, k) => { b.toggleAttribute('aria-current', k === step); if (k === step) b.setAttribute('aria-current', 'step'); b.classList.toggle('seen', seen.has(k) && k !== step); });
+    document.getElementById('prev').disabled = step === 0;
+    const next = document.getElementById('next');
+    next.disabled = step === STEPS.length - 1;
+    next.textContent = step === STEPS.length - 1 ? 'That’s all' : 'Next →';
+  }
+  let lastPose = 'loose';
+  document.getElementById('prev').addEventListener('click', () => go(step - 1));
+  document.getElementById('next').addEventListener('click', () => go(step + 1));
+  document.getElementById('replay').addEventListener('click', () => { start = performance.now(); flyTo(STEPS[step].cam); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'ArrowRight') go(step + 1); if (e.key === 'ArrowLeft') go(step - 1); });
+
+  let flyTo = () => {};
+  const stage = document.getElementById('stage');
+  if (!window.THREE || !(() => { try { return document.createElement('canvas').getContext('webgl'); } catch { return null; } })()) {
+    stage.insertAdjacentHTML('beforeend', '<p class="nogl">This browser cannot draw the 3D bench. The steps below still say what to do.</p>');
+    go(0);
+    return;
+  }
+
+  // --- the scene ------------------------------------------------------------------------
+  const canvas = document.getElementById('gl');
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
+  renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0xc9a679);
+  const camera = new THREE.PerspectiveCamera(38, 16 / 10, 1, 2000);
+  camera.position.set(...STEPS[0].cam[0]);
+  const controls = new THREE.OrbitControls(camera, canvas);
+  controls.target.set(...STEPS[0].cam[1]);
+  controls.enableDamping = true;
+  controls.maxPolarAngle = Math.PI * 0.47;
+  controls.minDistance = 40;
+  controls.maxDistance = 500;
+  scene.add(new THREE.HemisphereLight(0xfff6e8, 0x6b5136, 0.8));
+  const sun = new THREE.DirectionalLight(0xffffff, 0.85);
+  sun.position.set(-80, 220, 140);
+  sun.castShadow = true;
+  sun.shadow.mapSize.set(2048, 2048);
+  Object.assign(sun.shadow.camera, { left: -200, right: 200, top: 200, bottom: -200, near: 10, far: 500 });
+  scene.add(sun);
+
+  const mat = (color, extra = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.6, metalness: 0.05, ...extra });
+  function textTexture(draw, w, h) {
+    const c = document.createElement('canvas');
+    c.width = w; c.height = h;
+    draw(c.getContext('2d'), w, h);
+    const t = new THREE.CanvasTexture(c);
+    t.encoding = THREE.sRGBEncoding;
+    t.anisotropy = 4;
+    return t;
+  }
+  const mesh = (geo, m, x, y, z) => { const o = new THREE.Mesh(geo, m); o.position.set(x, y, z); o.castShadow = true; o.receiveShadow = true; return o; };
+
+  // the desk
+  const deskTex = textTexture((g, w, h) => {
+    g.fillStyle = '#c9a679'; g.fillRect(0, 0, w, h);
+    for (let i = 0; i < 70; i++) { g.strokeStyle = `rgba(120,80,40,${0.05 + ((i * 37) % 10) / 160})`; g.lineWidth = 1 + (i % 3); g.beginPath(); const y = (i * 151) % h; g.moveTo(0, y); g.bezierCurveTo(w * 0.3, y + 10, w * 0.6, y - 10, w, y + 4); g.stroke(); }
+  }, 1024, 1024);
+  const desk = new THREE.Mesh(new THREE.PlaneGeometry(1200, 1200), new THREE.MeshStandardMaterial({ map: deskTex, roughness: 0.85 }));
+  desk.rotation.x = -Math.PI / 2;
+  desk.receiveShadow = true;
+  scene.add(desk);
+
+  // the owner's round box: yellow side, white lid
+  scene.add(mesh(new THREE.CylinderGeometry(BOX.r, BOX.r, BOX.h - 4, 64), mat(0xe9b93b, { roughness: 0.7 }), BOX.x, (BOX.h - 4) / 2, BOX.z));
+  scene.add(mesh(new THREE.CylinderGeometry(BOX.r + 1.5, BOX.r + 1.5, 4, 64), mat(0xf4f2ec), BOX.x, BOX.h - 2, BOX.z));
+
+  // the cell: holes on top, the white gauge cover near the wired end, its label on the other end
+  const cell = new THREE.Group();
+  cell.add(mesh(new THREE.BoxGeometry(S, S, L), mat(0xc3c8cc, { metalness: 0.55, roughness: 0.45 }), 0, 0, 0));
+  for (const dz of [-31, -23, 23, 31]) cell.add(mesh(new THREE.CylinderGeometry(2.2, 2.2, 0.3, 16), mat(0x3a372f), 0, S / 2 + 0.1, dz));
+  cell.add(mesh(new THREE.BoxGeometry(S + 0.4, 2.2, 10), mat(0xece8d8), 0, S / 2 - 0.6, -11));
+  const label = new THREE.Mesh(new THREE.PlaneGeometry(11, 6), new THREE.MeshBasicMaterial({ map: textTexture((g, w, h) => { g.fillStyle = '#e8d84a'; g.fillRect(0, 0, w, h); g.fillStyle = '#1d2a6b'; g.font = 'bold 54px sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('20Kg ↓', w / 2, h / 2); }, 256, 140) }));
+  label.position.set(0, 0, L / 2 + 0.06);
+  cell.add(label);
+  // its four wires leave the gauge sideways, near the wired end
+  const wireEnds = [];
+  ['#d0453c', '#2b2b2b', '#ecebe6', '#3f9b5a'].forEach((c, k) => {
+    const tubeMat = mat(new THREE.Color(c).getHex());
+    const m = new THREE.Mesh(new THREE.BufferGeometry(), tubeMat);
+    scene.add(m);
+    wireEnds.push({ mesh: m, k });
+  });
+  scene.add(cell);
+
+  // what holds the wired end on the box: two strips of tape and the power bank
+  const holder = new THREE.Group();
+  const tapeMat = mat(0xdcd5bd, { roughness: 0.95 });
+  for (const dz of [-8, 4]) holder.add(mesh(new THREE.BoxGeometry(S + 18, 0.5, 8), tapeMat, 0, S / 2 + 0.3, dz));
+  holder.add(mesh(new THREE.BoxGeometry(62, 16, 34), mat(0xf2f2ee, { roughness: 0.5 }), 0, S / 2 + 8.6, -6));
+  scene.add(holder);
+
+  // a hand gripping the wired end (A), and a finger that presses
+  const skin = mat(0xd9a585, { roughness: 0.7 });
+  const fist = new THREE.Group();
+  fist.add(mesh(new THREE.BoxGeometry(34, 26, 30), skin, 0, 0, 0));
+  scene.add(fist);
+  const finger = new THREE.Group();
+  finger.add(mesh(new THREE.SphereGeometry(5, 20, 14), skin, 0, 5, 0));
+  finger.add(mesh(new THREE.CylinderGeometry(5, 5.4, 40, 20), skin, 0, 25, 0));
+  scene.add(finger);
+
+  // --- where the cell is, for a pose ---------------------------------------------------------
+  // loose: lying flat on the lid as in the owner's photo, nothing holding it.
+  function poseOf(p) {
+    if (p === 'loose') return { pos: [ON_BOX.x, ON_BOX.y, ON_BOX.z - 25], rot: [0, 0.3, 0], held: false, hand: false };
+    if (p === 'hand') return { pos: [IN_HAND.x, IN_HAND.y, IN_HAND.z], rot: [0, 0, 0], held: false, hand: true };
+    if (p === 'C') return { pos: [ON_BOX.x, ON_BOX.y, ON_BOX.z], rot: [0, Math.PI, 0], held: true, hand: false };
+    if (p === 'D') return { pos: [ON_BOX.x, ON_BOX.y, ON_BOX.z], rot: [0, 0, Math.PI], held: true, hand: false };
+    return { pos: [ON_BOX.x, ON_BOX.y, ON_BOX.z], rot: [0, 0, 0], held: true, hand: false };
+  }
+  const lerp = (a, b, k) => a + (b - a) * k;
+
+  // --- labels in the page, pinned to points in 3D ---------------------------------------------
+  const tagsEl = document.getElementById('tags');
+  function tags(list) {
+    const rect = canvas.getBoundingClientRect();
+    tagsEl.innerHTML = list.map(({ at, text, small, tone }) => {
+      const v = new THREE.Vector3(...at).project(camera);
+      if (v.z > 1) return '';
+      const x = (v.x * 0.5 + 0.5) * rect.width, y = (-v.y * 0.5 + 0.5) * rect.height;
+      return `<span class="tag ${tone || ''}" style="left:${x.toFixed(0)}px;top:${y.toFixed(0)}px">${text}${small ? `<small>${small}</small>` : ''}</span>`;
+    }).join('');
+  }
+
+  let fly = null;
+  flyTo = ([pos, target]) => { fly = { t0: performance.now(), p0: camera.position.clone(), q0: controls.target.clone(), p1: new THREE.Vector3(...pos), q1: new THREE.Vector3(...target) }; };
+  controls.addEventListener('start', () => { fly = null; });
+  const ease = (t) => (t <= 0 ? 0 : t >= 1 ? 1 : t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+  const seg = (t, a, b) => ease(Math.min(1, Math.max(0, (t - a) / (b - a))));
+  function resize() {
+    const r = stage.getBoundingClientRect();
+    renderer.setSize(r.width, r.height, false);
+    camera.aspect = r.width / r.height;
+    camera.updateProjectionMatrix();
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function frame(now, once = false) {
+    const s = STEPS[step];
+    const t = reduce ? 1 : Math.min(1, (now - start) / 1000 / s.T);
+    if (fly) {
+      const k = reduce ? 1 : ease(Math.min(1, (now - fly.t0) / 1100));
+      camera.position.lerpVectors(fly.p0, fly.p1, k);
+      controls.target.lerpVectors(fly.q0, fly.q1, k);
+      if (k >= 1) fly = null;
+    }
+    controls.update();
+
+    // the cell moves from the last pose to this one, lifted on the way
+    const a = poseOf(lastPose), b = poseOf(s.pose), k = seg(t, 0, 0.35);
+    const lift = Math.sin(Math.PI * k) * 30;
+    cell.position.set(lerp(a.pos[0], b.pos[0], k), lerp(a.pos[1], b.pos[1], k) + lift, lerp(a.pos[2], b.pos[2], k));
+    cell.rotation.set(lerp(a.rot[0], b.rot[0], k), lerp(a.rot[1], b.rot[1], k), lerp(a.rot[2], b.rot[2], k));
+    cell.updateMatrixWorld();
+    const local = (x, y, z) => new THREE.Vector3(x, y, z).applyMatrix4(cell.matrixWorld);
+
+    // what holds it: tape and power bank on the end that sits on the box, or a hand
+    const heldEnd = s.pose === 'C' ? L / 2 - 20 : -L / 2 + 20;
+    holder.visible = b.held && k > 0.9;
+    const hp = local(0, 0, heldEnd);
+    holder.position.set(hp.x, s.pose === 'D' ? BOX.h + S : hp.y - S / 2, hp.z);
+    fist.visible = b.hand && k > 0.9;
+    const fp = local(0, 0, -L / 2 + 10);
+    fist.position.copy(fp);
+
+    // the finger presses the free end: down, held, up
+    const pressAt = s.press === 'wired' ? -L / 2 + 6 : L / 2 - 6;
+    const down = s.press ? seg(t, 0.45, 0.55) * (1 - seg(t, 0.85, 0.95)) : 0;
+    finger.visible = Boolean(s.press) && t > 0.38;
+    const tip = local(0, S / 2, pressAt);
+    if (s.pose === 'D') tip.y = cell.position.y + S / 2;
+    finger.position.set(tip.x, tip.y + (1 - down) * 22, tip.z);
+
+    // the wires: from the gauge, out to the right, down to the desk
+    wireEnds.forEach(({ mesh: m, k: w }) => {
+      const o = (w - 1.5) * 0.9;
+      const p0 = local(S / 2, 3, -11 + o), p1 = local(S / 2 + 12, 4, -14 + o);
+      const pts = [p0, p1, new THREE.Vector3(p1.x + 30, Math.max(8, p1.y - 20), p1.z + 10), new THREE.Vector3(150 + o * 3, 2, 60)];
+      m.geometry.dispose();
+      m.geometry = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 40, 0.45, 6, false);
+    });
+
+    // labels
+    const list = [];
+    const labelEnd = local(0, S / 2 + 8, L / 2), wiredEnd = local(0, S / 2 + 8, -L / 2);
+    if (step === 0) { list.push({ at: [labelEnd.x, labelEnd.y + 6, labelEnd.z], text: '20Kg ↓ end' }); list.push({ at: [wiredEnd.x, wiredEnd.y + 6, wiredEnd.z], text: 'wired end', small: 'loose: nothing holds it', tone: 'you' }); }
+    if (s.press && t > 0.45) list.push({ at: [tip.x, tip.y + 52, tip.z], text: 'press, hold 3 s', small: `then tell Claude “${s.title[0]} done”`, tone: 'you' });
+    if (b.held && t > 0.4) list.push({ at: [hp.x, hp.y + 30, hp.z], text: 'held: tape + power bank', small: 'this end must not move' });
+    if (b.hand && t > 0.4) list.push({ at: [fp.x, fp.y + 22, fp.z], text: 'grip the wired end', small: 'firmly' });
+    if (step === STEPS.length - 1) list.push({ at: [0, 120, 0], text: 'which one moved most?', small: 'Claude says', tone: 'ok' });
+    tags(list);
+
+    renderer.render(scene, camera);
+    if (!once) requestAnimationFrame(frame);
+  }
+  go(0);
+  frame(performance.now(), true);
+  requestAnimationFrame(frame);
+  // For checking a step by hand: cellPositions.show(step, 0..1).
+  window.cellPositions = { show: (i, t = 1) => { go(i); lastPose = STEPS[i].pose; start = performance.now() - t * STEPS[i].T * 1000; fly = null; camera.position.set(...STEPS[i].cam[0]); controls.target.set(...STEPS[i].cam[1]); frame(performance.now(), true); } };
+})();
+</script>
