@@ -378,6 +378,19 @@ export const MILESTONES: Milestone[] = [
         checks: ['VCC on the 3.3 V rail, not 5 V', 'DT on D6, SCK on D7', 'The 10 µF’s stripe in the − rail', 'Claude says it still boots'],
       },
       {
+        id: 'bench-mount',
+        title: 'Hold the cell still',
+        goal: 'Fixed at one end, free at the other, for the bench.',
+        parts: ['load-cell'],
+        actions: [
+          'The end the wires come out of is the fixed end: clamp it, or tape it down hard, on the edge of the desk or a thick book, the other end out in the air.',
+          'The arrow on its side points down.',
+          'Tape a small light cup on the free end: the masses go in it.',
+          'Nothing may touch the free end: not the desk, not a wire.',
+        ],
+        checks: ['The fixed end does not move', 'The free end touches nothing', 'The arrow points down'],
+      },
+      {
         id: 'cell-wires',
         title: 'The load cell to the HX711',
         goal: 'The cell’s four wires on E+, E−, A−, A+.',
@@ -390,19 +403,6 @@ export const MILESTONES: Milestone[] = [
           'USB back in.',
         ],
         checks: ['Red E+, black E−, white A−, green A+', 'B− and B+ empty'],
-      },
-      {
-        id: 'bench-mount',
-        title: 'Hold the cell still',
-        goal: 'Fixed at one end, free at the other, for the bench.',
-        parts: ['load-cell'],
-        actions: [
-          'The end the wires come out of is the fixed end: clamp it, or tape it down hard, on the edge of the desk or a thick book, the other end out in the air.',
-          'The arrow on its side points down.',
-          'Tape a small light cup on the free end: the masses go in it.',
-          'Nothing may touch the free end: not the desk, not a wire.',
-        ],
-        checks: ['The fixed end does not move', 'The free end touches nothing', 'The arrow points down'],
       },
       {
         id: 'flash-real',
@@ -418,7 +418,7 @@ export const MILESTONES: Milestone[] = [
         id: 'sign',
         title: 'Check the sign',
         goal: 'Pressing the cell makes the counts rise.',
-        actions: ['When Claude says “now”, press the free end gently with a finger, then let go.', 'If Claude says they fall: USB out, swap the white and green sockets, USB in.'],
+        actions: ['When Claude says “now”, press the cup on the free end down gently with a finger, then let go.', 'If Claude says they fall: USB out, swap the white and green sockets, USB in.'],
         claude: ['Watches the raw counts and says whether they rose.'],
         checks: ['The counts rose when you pressed'],
       },

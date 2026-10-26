@@ -46,34 +46,6 @@ export type Ask = {
 
 export const ASKS: Ask[] = [
   {
-    kit: 'hx711',
-    urgency: 'blocking',
-    name: 'Module amplificateur HX711',
-    qty: '1',
-    role: 'Il lit la cellule de charge. La cellule ne donne que quelques millivolts : la carte ne sait pas les lire seule, il faut ce convertisseur entre les deux.',
-    looks: 'Petite carte d’environ 3 × 2 cm, souvent verte, avec une puce marquée HX711. D’un côté E+, E−, A−, A+ (les 4 fils de la cellule) ; de l’autre GND, DT, SCK, VCC. Souvent vendue avec la cellule, dans le même sachet.',
-    instead: 'Tout module HX711, quelle que soit la couleur de la carte.',
-    photo: {
-      kind: 'web',
-      file: 'hx711.jpg',
-      caption: 'Un HX711 (version SparkFun, rouge). Le modèle courant est vert, même puce, mêmes broches.',
-      author: 'SparkFun Electronics',
-      licence: 'CC BY 2.0',
-      licenceUrl: 'https://creativecommons.org/licenses/by/2.0/',
-      source: 'https://www.flickr.com/photos/41898857@N04/18334776264',
-    },
-  },
-  {
-    kit: 'push-button',
-    urgency: 'optional',
-    name: 'Bouton poussoir',
-    qty: '1 de plus',
-    role: 'Un seul bouton suffit : un clic prend la photo, un appui de 5 secondes remet à zéro (TARE). Un deuxième, pour la photo seule, est un confort.',
-    looks: 'Comme celui que nous avons reçu : un bouton carré à quatre pattes.',
-    instead: '6 × 6 mm ou 12 × 12 mm, les deux conviennent.',
-    photo: { kind: 'own', file: 'push-button.jpg', caption: 'Celui que nous avons reçu. Un deuxième est facultatif.' },
-  },
-  {
     kit: 'cap-ceramic',
     urgency: 'useful',
     name: 'Condensateurs céramiques 100 nF',

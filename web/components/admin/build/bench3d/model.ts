@@ -30,9 +30,33 @@ export const ROWS = 63;
 export const rowZ = (row: number) => BB.zFront - 3.5 - (row - 1) * 2.54;
 export const isRail = (col: Col) => col.length === 2;
 
+// --- the HX711, standing on its pins in front of the outer row, like the display -----------------
+/** Its outline is SparkFun's reference board (rig/specs.ts), until the owner's photo shows theirs. */
+export const HX711_AT = { x: -44, y: 14.5, z: 34 };
+/** The end towards the NodeMCU, and the far end; each counted from the back (-Z). */
+export const HX_SIGNAL = ['GND', 'DT', 'SCK', 'VCC'];
+export const HX_CELL = ['E+', 'E−', 'A−', 'A+', 'B−', 'B+'];
+export function hxPin(name: string): V3 {
+  const s = HX_SIGNAL.indexOf(name);
+  if (s >= 0) return [HX711_AT.x + 13.5, HX711_AT.y, HX711_AT.z - 3.81 + s * 2.54];
+  const c = HX_CELL.indexOf(name);
+  if (c < 0) throw new Error(`No HX711 pin ${name}`);
+  return [HX711_AT.x - 13.5, HX711_AT.y, HX711_AT.z - 6.35 + c * 2.54];
+}
+
+// --- the load cell: on a thick book, its wired end taped down, its free end out over the edge -----
+/** 75 × 12.7 × 12.7 mm, the seller's figures (rig/specs.ts). The book is any thick one. */
+export const BOOK = { x0: -128, x1: -72, z0: -80, z1: 0, h: 28 };
+export const CELL = { x: -100, z0: -45, z1: 30, size: 12.7 };
+/** Where a known mass sits: in a small cup taped on the free end. */
+export const CUP: V3 = [CELL.x, BOOK.h + CELL.size, 21];
+/** The blue 4-way connector on the cell's wires, lying on the desk, and its four jumpers' ends. */
+export const CONNECTOR = { x: -80, z: 56 };
+export const connectorPin = (k: number): V3 => [CONNECTOR.x - 3.81 + k * 2.54, 2.6, CONNECTOR.z + 4];
+
 // --- what a scene is made of -----------------------------------------------------------------
-/** A wire's end: a NodeMCU pin, a breadboard hole, a pin of the display (standing on its plugs), or a point. */
-export type End = { pin: ['d' | 'outer', number] } | { hole: [Col, number] } | { dpin: number } | { at: V3 };
+/** A wire's end: a NodeMCU pin, a breadboard hole, a pin of the display or of the HX711 (each standing on its plugs), or a point. */
+export type End = { pin: ['d' | 'outer', number] } | { hole: [Col, number] } | { dpin: number } | { hx: string } | { at: V3 };
 
 export type WireSpec = {
   id: string;
@@ -51,7 +75,17 @@ export type PartSpec =
   | { id: string; kind: 'transistor'; col: Col; row: number }
   | { id: string; kind: 'resistor'; from: [Col, number]; to: [Col, number]; bands: string[] }
   | { id: string; kind: 'diode'; from: [Col, number]; to: [Col, number] }
-  | { id: string; kind: 'buzzer'; col: Col; row: number };
+  | { id: string; kind: 'buzzer'; col: Col; row: number }
+  /** `bare`: no pins yet; `pins` adds the two strips alone. */
+  | { id: string; kind: 'hx711'; bare?: boolean }
+  | { id: string; kind: 'hx-pins' }
+  /** On the book, or lying on the desk where the book will go. */
+  | { id: string; kind: 'loadcell'; onBook?: boolean }
+  | { id: string; kind: 'book' }
+  | { id: string; kind: 'tape' }
+  | { id: string; kind: 'cup' }
+  /** Across two holes: the 10 µF stands on its legs, its striped leg in `to`; the 100 nF is a small disc. */
+  | { id: string; kind: 'cap'; type: 'electrolytic' | 'ceramic'; from: [Col, number]; to: [Col, number] };
 
 export type Tag = { at: End | V3; text: string; small?: string; tone?: 'you' | 'ok' | 'claude' };
 export type Cam = 'bench' | 'mcu' | 'mcu-near' | 'display' | 'usb' | { rows: [number, number]; side?: 'left' | 'right' } | [V3, V3];
@@ -70,6 +104,12 @@ export type Beat = {
   usb?: 'out' | 'in';
   /** The display's screen switches on. */
   screen?: boolean;
+  /** What the display shows from this beat on: top line, the number, the bottom line. */
+  lines?: [string, string, string];
+  /** A finger presses here: `tap` lets go at once, `hold` stays down to the end of the beat. */
+  press?: { at: End | V3; how: 'tap' | 'hold' | 'press' };
+  /** A known mass goes into the cup, or comes out. */
+  mass?: 'in' | 'out';
   T?: number;
 };
 
@@ -95,6 +135,7 @@ export function endPoint(end: End): V3 {
   if ('pin' in end) return [ROW_X[end.pin[0]], PIN_TOP, pinZ(end.pin[1])];
   if ('hole' in end) return [COL_X[end.hole[0]], BB.top, rowZ(end.hole[1])];
   if ('dpin' in end) return displayPin(end.dpin);
+  if ('hx' in end) return hxPin(end.hx);
   return end.at;
 }
 

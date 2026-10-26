@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import {
-  BB, COL_X, DISPLAY, PCB_TOP, ROWS, ROW_X, endPoint, isRail, pinZ, rowZ,
+  BB, BOOK, CELL, COL_X, CONNECTOR, CUP, DISPLAY, HX711_AT, HX_CELL, HX_SIGNAL, PCB_TOP, ROWS, ROW_X, endPoint, hxPin, isRail, pinZ, rowZ,
   type BenchScene, type Cam, type Col, type End, type PartSpec, type Tag, type V3, type WireSpec,
 } from './model';
 
@@ -162,22 +162,33 @@ function usbCable() {
 
 // --- the parts --------------------------------------------------------------------------------
 
-type Display = { group: THREE.Group; screen: THREE.MeshStandardMaterial };
+type Lines = [string, string, string];
+type Display = { group: THREE.Group; screen: THREE.MeshStandardMaterial; paint: (lines: Lines) => void };
+export const READY: Lines = ['CAMERA ?', '0.0 g', 'READY'];
 
 function display(lit: boolean): Display {
   const group = new THREE.Group();
   group.add(boxMesh([27, 1.6, 27], M.blue, [0, -0.8, 0]));
-  const on = canvasTexture((g, w, h) => {
+  const canvas = document.createElement('canvas');
+  canvas.width = 512;
+  canvas.height = 256;
+  const on = new THREE.CanvasTexture(canvas);
+  on.colorSpace = THREE.SRGBColorSpace;
+  // As the firmware draws it: the number large, except the raw counts of an uncalibrated scale.
+  const paint = ([top, number, bottom]: Lines) => {
+    const g = canvas.getContext('2d')!;
     g.fillStyle = '#05070a';
-    g.fillRect(0, 0, w, h);
+    g.fillRect(0, 0, 512, 256);
     g.fillStyle = '#9fd8ff';
     g.font = '34px monospace';
-    g.fillText('CAMERA ?', 18, 52);
-    g.font = 'bold 82px monospace';
-    g.fillText('0.0 g', 18, 150);
+    g.fillText(top, 18, 52);
+    g.font = number.startsWith('raw') ? '40px monospace' : 'bold 82px monospace';
+    g.fillText(number, 18, 150);
     g.font = '34px monospace';
-    g.fillText('READY', 18, 214);
-  }, 512, 256);
+    g.fillText(bottom, 18, 214);
+    on.needsUpdate = true;
+  };
+  paint(READY);
   const screen = new THREE.MeshStandardMaterial({ color: 0x05070a, roughness: 0.2, emissive: 0xffffff, emissiveMap: on, emissiveIntensity: lit ? 1 : 0 });
   group.add(boxMesh([25, 1, 18], screen, [0, 0.8, 2.5]));
   const names = textPlane('VCC GND SCL SDA', 20, 3.2, '#e9eef7', '#1f4fa0');
@@ -187,7 +198,7 @@ function display(lit: boolean): Display {
     group.add(boxMesh([2.54, 2.5, 2.54], material(0xe2c35a), [-3.81 + k * 2.54, -2.6 - 0.8, -12]));
     group.add(boxMesh([0.64, 9, 0.64], M.gold, [-3.81 + k * 2.54, -9.5, -12], false));
   }
-  return { group, screen };
+  return { group, screen, paint };
 }
 
 function button(rows: [number, number]) {
@@ -281,12 +292,170 @@ function buzzer(col: Col, row: number) {
   return group;
 }
 
+/** A label lying flat beside a pin, readable from the owner's side. */
+function pinLabel(text: string, at: V3) {
+  const label = textPlane(text, 5, 2, '#e9eef7', 'transparent');
+  label.position.set(at[0], at[1], at[2]);
+  return label;
+}
+
+function hxPins() {
+  const group = new THREE.Group();
+  for (const name of [...HX_SIGNAL, ...HX_CELL]) {
+    const [x, y, z] = hxPin(name);
+    group.add(boxMesh([2.54, 2.5, 2.54], M.header, [x, y - 3.4, z]));
+    group.add(boxMesh([0.64, 9, 0.64], M.gold, [x, y - 9.5, z], false));
+  }
+  return group;
+}
+
+function hx711(bare: boolean) {
+  const group = new THREE.Group();
+  const { x, y, z } = HX711_AT;
+  group.add(boxMesh([30.48, 1.6, 22.86], M.green, [x, y - 1.6, z]));
+  group.add(boxMesh([7, 1.2, 5], M.black, [x + 1, y, z]));
+  const chip = textPlane('HX711', 6.4, 1.8, '#cfd3d6', 'transparent');
+  chip.position.set(x + 1, y + 1.25, z);
+  group.add(chip);
+  // Each pin's name printed beside it, inboard, as on the board.
+  for (const name of HX_SIGNAL) {
+    const p = hxPin(name);
+    group.add(pinLabel(name, [p[0] - 5, y + 0.02, p[2]]));
+  }
+  for (const name of HX_CELL) {
+    const p = hxPin(name);
+    group.add(pinLabel(name, [p[0] + 4.2, y + 0.02, p[2]]));
+  }
+  if (!bare) group.add(hxPins());
+  return group;
+}
+
+const ALU = material(0xc3c8cc, { metalness: 0.55, roughness: 0.45 });
+
+function book() {
+  const group = new THREE.Group();
+  const w = BOOK.x1 - BOOK.x0, d = BOOK.z1 - BOOK.z0, cx = (BOOK.x0 + BOOK.x1) / 2, cz = (BOOK.z0 + BOOK.z1) / 2;
+  group.add(boxMesh([w, BOOK.h, d], material(0x7a2f2f), [cx, 0, cz]));
+  group.add(boxMesh([w - 1.5, BOOK.h - 3, d + 0.4], material(0xefe9da), [cx + 1, 1.5, cz]));
+  return group;
+}
+
+function loadcell(onBook: boolean) {
+  const group = new THREE.Group();
+  const base = onBook ? BOOK.h : 0;
+  const len = CELL.z1 - CELL.z0, zc = (CELL.z0 + CELL.z1) / 2, top = base + CELL.size;
+  group.add(boxMesh([CELL.size, CELL.size, len], ALU, [CELL.x, base, zc]));
+  for (const dz of [-31, -23, 23, 31]) {
+    const hole = new THREE.Mesh(new THREE.CylinderGeometry(2, 2, 0.1, 16), M.hole);
+    hole.position.set(CELL.x, top + 0.03, zc + dz);
+    group.add(hole);
+  }
+  // The strain gauge under its white cover, where the wires leave.
+  group.add(boxMesh([CELL.size + 0.4, 2.2, 10], material(0xece8d8), [CELL.x, top - 1.6, zc - 9]));
+  // The arrow on its side: the way the load must push.
+  // On the side the views look from (-X).
+  const arrow = textPlane('↓', 8, 8, '#1d1d1d', 'transparent');
+  arrow.rotation.set(0, -Math.PI / 2, 0);
+  arrow.position.set(CELL.x - CELL.size / 2 - 0.06, base + CELL.size / 2, zc + 6);
+  group.add(arrow);
+  // Its four wires, over the book's edge to the blue connector on the desk.
+  ['red', 'black', 'white', 'green'].forEach((colour, k) => {
+    const o = (k - 1.5) * 0.9;
+    const curve = new THREE.CatmullRomCurve3([
+      v([CELL.x + o, top + 0.4, zc - 9]),
+      v([CELL.x + o, top + 3, CELL.z0 + 10]),
+      v([BOOK.x1 + 5 + o, base * 0.55 + 3, CELL.z0 + 16]),
+      v([CONNECTOR.x - 12 + o * 2, 2, 22]),
+      v([CONNECTOR.x - 3.81 + k * 2.54, 2.6, CONNECTOR.z - 4]),
+    ]);
+    group.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 80, 0.4, 6), material(COLOURS[colour])));
+  });
+  group.add(boxMesh([11, 5, 8], material(0x2f6fd6), [CONNECTOR.x, 0, CONNECTOR.z]));
+  return group;
+}
+
+/** Two strips of tape over the wired end, down its sides and onto the book. */
+function tape() {
+  const group = new THREE.Group();
+  const m = material(0xdcd5bd, { roughness: 0.95 });
+  const top = BOOK.h + CELL.size, half = CELL.size / 2;
+  for (const z of [-38, -27]) {
+    group.add(boxMesh([CELL.size + 1, 0.4, 8], m, [CELL.x, top, z]));
+    for (const side of [-1, 1]) {
+      group.add(boxMesh([0.4, CELL.size, 8], m, [CELL.x + side * (half + 0.4), BOOK.h, z]));
+      group.add(boxMesh([10, 0.4, 8], m, [CELL.x + side * (half + 5.4), BOOK.h, z]));
+    }
+  }
+  return group;
+}
+
+function cup() {
+  const group = new THREE.Group();
+  const wall = new THREE.Mesh(new THREE.CylinderGeometry(9, 7, 10, 28, 1, true), material(0xf2f2ef, { side: THREE.DoubleSide }));
+  wall.position.set(CUP[0], CUP[1] + 5, CUP[2]);
+  group.add(wall);
+  const floor = new THREE.Mesh(new THREE.CylinderGeometry(7, 7, 0.6, 28), material(0xf2f2ef));
+  floor.position.set(CUP[0], CUP[1] + 0.3, CUP[2]);
+  group.add(floor);
+  return group;
+}
+
+function capacitor(type: 'electrolytic' | 'ceramic', from: [Col, number], to: [Col, number]) {
+  const group = new THREE.Group();
+  const a = endPoint({ hole: from }), b = endPoint({ hole: to });
+  const mid: V3 = [(a[0] + b[0]) / 2, BB.top, (a[2] + b[2]) / 2];
+  for (const p of [a, b]) group.add(boxMesh([0.45, 4.2, 0.45], M.leg, [p[0], BB.top, p[2]], false));
+  if (type === 'electrolytic') {
+    const body = new THREE.Mesh(new THREE.CylinderGeometry(2.5, 2.5, 5.5, 24), material(0x1f2a6b));
+    body.position.set(mid[0], BB.top + 4 + 2.75, mid[2]);
+    group.add(body);
+    // The stripe marks the − leg: towards `to`.
+    const angle = Math.atan2(b[0] - mid[0], b[2] - mid[2]);
+    const stripe = new THREE.Mesh(new THREE.CylinderGeometry(2.55, 2.55, 5.5, 24, 1, true, angle - 0.55, 1.1), material(0xd9dde3));
+    stripe.position.copy(body.position);
+    group.add(stripe);
+  } else {
+    const disc = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 2.2, 1.1, 20), material(0xd9892b));
+    disc.position.set(mid[0], BB.top + 4 + 2.2, mid[2]);
+    const across = new THREE.Vector3(-(b[2] - a[2]), 0, b[0] - a[0]).normalize();
+    disc.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), across);
+    group.add(disc);
+  }
+  return group;
+}
+
+/** A finger, its tip at the group's origin. */
+function finger() {
+  const group = new THREE.Group();
+  const skin = material(0xd9a585, { roughness: 0.7 });
+  const tip = new THREE.Mesh(new THREE.SphereGeometry(4.2, 20, 14), skin);
+  tip.position.y = 4.2;
+  const shaft = new THREE.Mesh(new THREE.CylinderGeometry(4.2, 4.6, 36, 20), skin);
+  shaft.position.y = 4.2 + 18;
+  group.add(tip, shaft);
+  group.traverse((o) => ((o as THREE.Mesh).castShadow = true));
+  return group;
+}
+
+/** A known mass, its base at the group's origin. */
+function knownMass() {
+  const group = new THREE.Group();
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(6, 6, 9, 28), material(0xb08d57, { metalness: 0.7, roughness: 0.3 }));
+  body.position.y = 4.5;
+  const knob = new THREE.Mesh(new THREE.CylinderGeometry(2.4, 2.4, 3.4, 20), material(0xb08d57, { metalness: 0.7, roughness: 0.3 }));
+  knob.position.y = 9 + 1.7;
+  group.add(body, knob);
+  group.traverse((o) => ((o as THREE.Mesh).castShadow = true));
+  return group;
+}
+
 // --- wires --------------------------------------------------------------------------------------
 
 type Built = { object: THREE.Object3D; grow?: (p: number) => void; drop?: (p: number) => void; tip: V3 };
 
-function housing(at: V3, kind: 'm' | 'f', end: End) {
-  if ('dpin' in end) return boxMesh([2.6, 14, 2.6], M.black, [at[0], at[1] - 14.4, at[2]]);
+function housing(at: V3, kind: 'm' | 'f', end: End): THREE.Object3D {
+  if ('dpin' in end || 'hx' in end) return boxMesh([2.6, 14, 2.6], M.black, [at[0], at[1] - 14.4, at[2]]);
+  if ('at' in end) return new THREE.Group(); // the blue connector covers it
   if (kind === 'f') return boxMesh([2.6, 13.4, 2.6], M.black, [at[0], PCB_TOP + 4.6, at[2]]);
   return boxMesh([2.6, 9, 2.6], M.black, [at[0], BB.top, at[2]]);
 }
@@ -294,9 +463,18 @@ function housing(at: V3, kind: 'm' | 'f', end: End) {
 /** Where the wire leaves the plastic at this end. */
 function wireExit(end: End, kind: 'm' | 'f'): V3 {
   const p = endPoint(end);
-  if ('dpin' in end) return [p[0], 0.8, p[2]];
+  if ('dpin' in end || 'hx' in end) return [p[0], 0.8, p[2]];
+  if ('at' in end) return p;
   if (kind === 'f') return [p[0], PCB_TOP + 18, p[2]];
   return [p[0], BB.top + 9, p[2]];
+}
+
+/** A wire that leaves along the desk (from under a socket, or from the connector), arches, and lands. */
+function lowPath(a: THREE.Vector3, b: THREE.Vector3, lift: number) {
+  const flat = b.clone().sub(a).setY(0).normalize();
+  const leave = (p: THREE.Vector3, dir: THREE.Vector3) => (p.y < 8 ? p.clone().add(dir.clone().multiplyScalar(7)).setY(p.y + 1.5) : p.clone().setY(p.y + 10));
+  const mid = a.clone().lerp(b, 0.5).setY(Math.max(a.y, b.y) + lift);
+  return [a, leave(a, flat), mid, leave(b, flat.clone().negate()), b];
 }
 
 function wire(spec: WireSpec): Built {
@@ -306,9 +484,12 @@ function wire(spec: WireSpec): Built {
   const span = Math.hypot(b[0] - a[0], b[2] - a[2]);
   const lift = spec.lift ?? 6 + span * 0.22;
   const top = Math.max(a[1], b[1]) + lift;
+  const low = (e: End) => 'hx' in e || 'at' in e;
   const pts = 'dpin' in spec.from
     ? [v(a), v([a[0], a[1], a[2] - 5]), v([(a[0] + b[0]) / 2 + 3, (a[1] + b[1]) / 2 + 4, (a[2] + b[2]) / 2 + 6]), v([b[0], b[1] + 10, b[2] + 2]), v(b)]
-    : [v(a), v([a[0], top, a[2]]).lerp(v([b[0], top, b[2]]), 0.15), v([b[0], top, b[2]]).lerp(v([a[0], top, a[2]]), 0.15), v(b)];
+    : low(spec.from) || low(spec.to)
+      ? lowPath(v(a), v(b), spec.lift ?? 6 + span * 0.12)
+      : [v(a), v([a[0], top, a[2]]).lerp(v([b[0], top, b[2]]), 0.15), v([b[0], top, b[2]]).lerp(v([a[0], top, a[2]]), 0.15), v(b)];
   const curve = new THREE.CatmullRomCurve3(pts);
   const geometry = new THREE.TubeGeometry(curve, 140, 0.75, 10, false);
   const tube = new THREE.Mesh(geometry, material(COLOURS[spec.colour] ?? 0x888888, { roughness: 0.45 }));
@@ -361,6 +542,34 @@ function part(spec: PartSpec, displayRef: { current?: Display }): Built {
     case 'buzzer':
       object = buzzer(spec.col, spec.row);
       tip = [COL_X[spec.col] + 10, BB.top + 12, rowZ(spec.row + 1)];
+      break;
+    case 'hx711':
+      object = hx711(Boolean(spec.bare));
+      tip = [HX711_AT.x, HX711_AT.y + 4, HX711_AT.z];
+      break;
+    case 'hx-pins':
+      object = hxPins();
+      tip = [HX711_AT.x, HX711_AT.y, HX711_AT.z];
+      break;
+    case 'book':
+      object = book();
+      tip = [(BOOK.x0 + BOOK.x1) / 2, BOOK.h + 4, (BOOK.z0 + BOOK.z1) / 2];
+      break;
+    case 'loadcell':
+      object = loadcell(spec.onBook ?? true);
+      tip = [CELL.x, (spec.onBook ?? true ? BOOK.h : 0) + CELL.size + 4, (CELL.z0 + CELL.z1) / 2];
+      break;
+    case 'tape':
+      object = tape();
+      tip = [CELL.x, BOOK.h + CELL.size + 4, -32];
+      break;
+    case 'cup':
+      object = cup();
+      tip = [CUP[0], CUP[1] + 12, CUP[2]];
+      break;
+    case 'cap':
+      object = capacitor(spec.type, spec.from, spec.to);
+      tip = endPoint({ hole: spec.from });
       break;
   }
   object.traverse((o) => {
@@ -440,6 +649,23 @@ export function createBench(canvas: HTMLCanvasElement, tagsEl: HTMLElement, scen
   const ring = new THREE.Mesh(new THREE.TorusGeometry(2.4, 0.35, 8, 32), new THREE.MeshBasicMaterial({ color: 0xff8a3d }));
   ring.rotation.x = Math.PI / 2;
   scene.add(ring);
+  const hand = finger();
+  hand.visible = false;
+  scene.add(hand);
+  const weight = knownMass();
+  weight.visible = false;
+  scene.add(weight);
+  // What the display shows at a beat: the last lines set at or before it.
+  const linesFor = (i: number) => {
+    for (let k = i; k >= 0; k--) if (scene3.beats[k].lines) return scene3.beats[k].lines!;
+    return READY;
+  };
+  let painted = '';
+  const massIn = (i: number) => {
+    let inCup = false;
+    for (let k = 0; k < i; k++) if (scene3.beats[k].mass) inCup = scene3.beats[k].mass === 'in';
+    return inCup;
+  };
 
   let beat = 0;
   let start = performance.now();
@@ -477,7 +703,7 @@ export function createBench(canvas: HTMLCanvasElement, tagsEl: HTMLElement, scen
       .map(({ at, text, small, tone }) => {
         // Above the part, so the tag never hides what it names.
         const base = Array.isArray(at) ? at : endPoint(at);
-        const point: V3 = Array.isArray(at) ? base : [base[0], base[1] + ('hole' in at ? 12 : 'pin' in at ? 14 : 0), base[2]];
+        const point: V3 = Array.isArray(at) ? base : [base[0], base[1] + ('hole' in at ? 12 : 'pin' in at ? 14 : 'hx' in at ? 8 : 0), base[2]];
         const p = v(point).project(camera);
         if (p.z > 1) return '';
         const x = (p.x * 0.5 + 0.5) * rect.width, y = (-p.y * 0.5 + 0.5) * rect.height;
@@ -520,13 +746,33 @@ export function createBench(canvas: HTMLCanvasElement, tagsEl: HTMLElement, scen
     const nowIn = b.usb ? b.usb === 'in' : wasIn;
     const out = wasIn === nowIn ? (nowIn ? 0 : 1) : nowIn ? 1 - seg(t, 0.1, 0.6) : seg(t, 0.1, 0.6);
     usb.position.z = -out * 16;
-    // The display's screen.
+    // The display's screen, and what it says: a beat's own lines show once its action is done.
     if (displayRef.current && b.screen !== undefined) displayRef.current.screen.emissiveIntensity = b.screen ? seg(t, 0.5, 0.85) : 0;
+    if (displayRef.current) {
+      const lines = b.lines && t < 0.5 ? linesFor(beat - 1) : linesFor(beat);
+      const key = lines.join('|');
+      if (key !== painted) {
+        displayRef.current.paint(lines);
+        painted = key;
+      }
+    }
+    // A finger pressing: down, then up again unless it holds.
+    hand.visible = Boolean(b.press);
+    if (b.press) {
+      const at = Array.isArray(b.press.at) ? b.press.at : endPoint(b.press.at);
+      const how = b.press.how;
+      const down = how === 'tap' ? seg(t, 0.3, 0.42) * (1 - seg(t, 0.5, 0.62)) : how === 'press' ? seg(t, 0.25, 0.45) * (1 - seg(t, 0.75, 0.9)) : seg(t, 0.12, 0.28);
+      hand.position.set(at[0], at[1] + (1 - down) * 22, at[2]);
+    }
+    // The known mass: lowered into the cup, or lifted out.
+    const lowered = b.mass === 'in' ? seg(t, 0.2, 0.55) : b.mass === 'out' ? 1 - seg(t, 0.2, 0.55) : massIn(beat) ? 1 : 0;
+    weight.visible = lowered > 0;
+    weight.position.set(CUP[0], CUP[1] + 0.6 + (1 - lowered) * 34, CUP[2]);
     // The ring.
     ring.visible = Boolean(b.ring);
     if (b.ring) {
       const p = endPoint(b.ring);
-      ring.position.set(p[0], 'pin' in b.ring ? PCB_TOP + 2.6 : BB.top + 0.2, p[2]);
+      ring.position.set(p[0], 'pin' in b.ring ? PCB_TOP + 2.6 : 'hx' in b.ring ? HX711_AT.y + 0.6 : 'at' in b.ring ? p[1] : BB.top + 0.2, p[2]);
       ring.scale.setScalar(1 + Math.sin(now / 160) * 0.12);
     }
     tags(t > 0.35 || reduce ? b.tags ?? [] : []);

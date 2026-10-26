@@ -1,4 +1,4 @@
-import { pinName, pinWords, type BenchScene, type WireSpec } from './model';
+import { BOOK, CELL, COL_X, CONNECTOR, CUP, connectorPin, pinName, pinWords, rowZ, BB, type BenchScene, type PartSpec, type V3, type WireSpec } from './model';
 
 /**
  * Every step that has its 3D explanation, keyed `milestone/step`. Drawn from the owner's
@@ -35,6 +35,50 @@ const BUZZER: WireSpec[] = [
 ];
 
 const CHECK = 'Claude reads the board from the laptop. The live page, Wire it, live, shows the same.';
+
+// Milestone 1, finished: what is on the bench when milestone 2 starts.
+const M1_PARTS: PartSpec[] = [
+  { id: 'display', kind: 'display', lit: true },
+  { id: 'button', kind: 'button', rows: [8, 10] },
+  { id: 'q1', kind: 'transistor', col: 'c', row: 16 },
+  { id: 'r1k', kind: 'resistor', from: ['b', 14], to: ['b', 17], bands: ['brown', 'black', 'red'] },
+  { id: 'buzzer', kind: 'buzzer', col: 'j', row: 16 },
+  { id: 'diode', kind: 'diode', from: ['h', 16], to: ['h', 18] },
+];
+const M1_WIRES: WireSpec[] = [...RAILS, ...DISPLAY_WIRES, GROUND_BRIDGE, ...BUTTON, ...BUZZER];
+
+// Milestone 2: the HX711 standing on its sockets left of the NodeMCU, the cell on a book further left.
+const HX: PartSpec = { id: 'hx711', kind: 'hx711' };
+const HX_WIRES: WireSpec[] = [
+  { id: 'hx-gnd', from: { hx: 'GND' }, to: { hole: ['L-', 5] }, colour: 'black', ends: 'fm', lift: 18 },
+  { id: 'hx-vcc', from: { hx: 'VCC' }, to: { hole: ['L+', 5] }, colour: 'red', ends: 'fm', lift: 22 },
+  { id: 'hx-dt', from: { hx: 'DT' }, to: pin('d', 9), colour: 'yellow', ends: 'ff', lift: 26 },
+  { id: 'hx-sck', from: { hx: 'SCK' }, to: pin('d', 10), colour: 'orange', ends: 'ff', lift: 30 },
+];
+const HX_CAPS: PartSpec[] = [
+  { id: 'c10u', kind: 'cap', type: 'electrolytic', from: ['L+', 7], to: ['L-', 7] },
+  { id: 'c100n', kind: 'cap', type: 'ceramic', from: ['L+', 9], to: ['L-', 9] },
+];
+const MOUNT: PartSpec[] = [{ id: 'book', kind: 'book' }, { id: 'cell', kind: 'loadcell' }, { id: 'tape', kind: 'tape' }, { id: 'cup', kind: 'cup' }];
+// The cell's own wire colours: the jumpers leaving the blue connector are recoloured from the owner's photo.
+const CELL_PINS = [['E+', 'red'], ['E−', 'black'], ['A−', 'white'], ['A+', 'green']] as const;
+const CELL_WIRES: WireSpec[] = CELL_PINS.map(([name, colour], k) => ({ id: `cw-${colour}`, from: { at: connectorPin(k) }, to: { hx: name }, colour, ends: 'mf', lift: 10 + k * 2 }));
+const M2_PARTS: PartSpec[] = [...M1_PARTS, HX, ...HX_CAPS, ...MOUNT];
+const M2_WIRES: WireSpec[] = [...M1_WIRES, ...HX_WIRES, ...CELL_WIRES];
+
+// Where to look.
+const CAM_HX: [V3, V3] = [[-112, 62, 112], [-44, 8, 34]];
+const CAM_CELL: [V3, V3] = [[-185, 82, 110], [-95, 14, -8]];
+const CAM_FREE_END: [V3, V3] = [[-150, 70, 95], [-100, 30, 15]];
+const CAM_HX_RAILS: [V3, V3] = [[-8, 105, 150], [-6, 6, 26]];
+const CAM_E_PINS: [V3, V3] = [[-120, 58, 120], [-62, 6, 42]];
+const CAM_LEFT: [V3, V3] = [[-55, 165, 200], [-35, 0, -5]];
+/** The top of the button, for a finger. */
+const BUTTON_TOP: V3 = [(COL_X.e + COL_X.f) / 2, BB.top + 7.4, (rowZ(8) + rowZ(10)) / 2];
+const FREE_END: V3 = [CELL.x, BOOK.h + CELL.size, 27];
+/** The cup's front rim, where a finger presses. */
+const CUP_RIM: V3 = [CUP[0], CUP[1] + 10, CUP[2] + 8];
+const CUP_TAG: V3 = [CUP[0], CUP[1] + 16, CUP[2]];
 
 export const BENCH_SCENES: Record<string, BenchScene> = {
   'm1-scale-brain/port': {
@@ -160,6 +204,127 @@ export const BENCH_SCENES: Record<string, BenchScene> = {
     beats: [
       { title: 'The scale’s brain, whole', who: 'you', text: ['Everything from milestone 1 on the bench. Leave the USB in.'], cam: 'bench' },
       { title: 'Claude runs the whole test', who: 'claude', screen: true, text: ['Pretend plate 420 g, tare, pretend food 150 g, a photo: the display shows each, the buzzer beeps.', 'Claude reads PASS for each part.'], cam: 'bench', tags: [{ at: [14, 26, 52], text: '150.0 g', small: 'NO CAMERA: right, for now', tone: 'ok' }] },
+    ],
+  },
+
+  // --- milestone 2, real weight ------------------------------------------------------------------
+  'm2-real-weight/meet-hx711': {
+    parts: M1_PARTS,
+    wires: M1_WIRES,
+    newParts: [HX, { id: 'cell', kind: 'loadcell', onBook: false }],
+    beats: [
+      { title: 'The HX711', who: 'you', add: ['hx711'], text: ['A small green board: it turns the load cell’s tiny signal into a number for the NodeMCU.', 'Read the names printed beside its pins: GND, DT, SCK, VCC on one end; E+, E−, A−, A+, B−, B+ on the other.'], cam: CAM_HX, tags: [{ at: { hx: 'SCK' }, text: 'GND DT SCK VCC', small: 'to the NodeMCU', tone: 'you' }, { at: { hx: 'A−' }, text: 'E+ E− A− A+ B− B+', small: 'to the load cell', tone: 'you' }, { at: [-44, 30, 20], text: 'drawn from a reference board', small: 'yours may differ: your photo decides' }] },
+      { title: 'The load cell', who: 'you', add: ['cell'], text: ['The aluminium bar: it bends a hair under weight. The arrow on its side shows the way the weight must push.', 'Its four wires, red, black, white, green, run into the blue connector; four jumpers leave it, ending in sockets.'], cam: [[-175, 50, 120], [-92, 4, 14]], tags: [{ at: [CELL.x - 7, 12, 4], text: 'the arrow', small: 'the way the weight pushes' }, { at: [CONNECTOR.x, 9, CONNECTOR.z], text: 'blue connector', small: 'four jumpers leave it', tone: 'you' }] },
+      { title: 'Two photos for Claude', who: 'you', text: ['On Bench Photos: the HX711 from above, its labels readable; and the blue connector, close, every wire colour showing on both sides.', 'Claude redraws your HX711, and each jumper in its real colour, before you wire anything.'], cam: CAM_LEFT, tags: [{ at: [-44, 26, 34], text: 'photo 1: the HX711', tone: 'you' }, { at: [CONNECTOR.x, 14, CONNECTOR.z], text: 'photo 2: the connector', tone: 'you' }] },
+    ],
+    cards: [
+      { title: 'HX711', text: 'GND DT SCK VCC to the NodeMCU; E+ E− A− A+ to the cell; B− B+ unused.' },
+      { title: 'Load cell', text: 'Red, black, white, green, through the blue connector to four jumpers with sockets.' },
+      { title: 'Photos', text: 'The HX711 from above; the blue connector close. On Bench Photos.' },
+    ],
+  },
+  'm2-real-weight/headers': {
+    parts: M1_PARTS,
+    wires: M1_WIRES,
+    newParts: [{ id: 'hx711', kind: 'hx711', bare: true }, { id: 'hx-pins', kind: 'hx-pins' }],
+    beats: [
+      { title: 'Pins already on? Skip this', who: 'you', add: ['hx711'], text: ['Look at your HX711’s two ends: pins already sticking out? Then this step is done.', 'Only holes, and the pins loose in the bag? Then they are soldered in at the lab.'], cam: CAM_HX, tags: [{ at: [-30, 18, 34], text: '4 holes', small: 'GND DT SCK VCC' }, { at: [-58, 18, 34], text: '6 holes', small: 'E+ to B+' }] },
+      { title: 'The two strips, soldered', who: 'you', add: ['hx-pins'], text: ['A strip of 4 pins in the GND to VCC holes, a strip of 6 in the E+ to B+ holes, their long side down.', 'Each pin soldered on top, at the lab. Ask the technician if you have not soldered before.'], cam: CAM_HX, tags: [{ at: [-44, 24, 34], text: 'solder each pin on top', small: 'at the lab', tone: 'you' }] },
+    ],
+  },
+  'm2-real-weight/hx711-wires': {
+    parts: [...M1_PARTS, HX],
+    wires: M1_WIRES,
+    newParts: HX_CAPS,
+    newWires: HX_WIRES,
+    beats: [
+      { title: 'USB out', who: 'you', text: ['Nothing is wired with the power on.'], cam: 'bench', usb: 'out', screen: false },
+      { title: 'GND → the left − rail', who: 'you', add: ['hx-gnd'], ring: { hx: 'GND' }, text: ['A female–male jumper: socket on the HX711’s GND, its pin into the left − rail (the blue line), beside row 5.'], cam: CAM_HX_RAILS, tags: [{ at: { hx: 'GND' }, text: 'GND', tone: 'you' }, { at: { hole: ['L-', 5] }, text: 'left − rail', small: 'beside row 5' }] },
+      { title: 'VCC → the left + rail', who: 'you', add: ['hx-vcc'], ring: { hx: 'VCC' }, text: ['Socket on VCC, its pin into the left + rail (the red line), beside row 5: the 3.3 V rail.', 'Never the + rail on the right: that one is 5 V.'], cam: CAM_HX_RAILS, tags: [{ at: { hx: 'VCC' }, text: 'VCC', tone: 'you' }, { at: { hole: ['L+', 5] }, text: 'left + rail, 3.3 V', small: 'not the right one' }] },
+      { title: 'DT → 9th pin', who: 'you', add: ['hx-dt'], ring: pin('d', 9), text: ['A female–female jumper: DT to the row next to the breadboard, the 9th pin from the far end: D6.'], cam: 'mcu', tags: [{ at: pin('d', 9), text: 'DT → 9th pin', small: 'that pin is D6', tone: 'you' }] },
+      { title: 'SCK → 10th pin', who: 'you', add: ['hx-sck'], ring: pin('d', 10), text: ['SCK to the next pin, the 10th: D7.'], cam: 'mcu', tags: [{ at: pin('d', 10), text: 'SCK → 10th pin', small: 'that pin is D7', tone: 'you' }] },
+      { title: 'The two capacitors', who: 'you', add: ['c10u', 'c100n'], text: ['The 10 µF across the left + and − rails, beside row 7: its striped leg in the − rail.', 'The 100 nF beside row 9, the same way; it has no stripe, either way round.'], cam: [[20, 88, 48], [33, 9, 21]], tags: [{ at: { hole: ['L-', 7] }, text: '10 µF', small: 'stripe in the − rail', tone: 'you' }, { at: { hole: ['L+', 9] }, text: '100 nF', small: 'beside row 9' }] },
+      { title: 'USB in', who: 'claude', usb: 'in', screen: true, text: ['Claude restarts the board and reads its boot line: it still starts, so nothing is short-circuited.'], cam: 'bench', tags: [{ at: [0, 20, 0], text: 'E boot node=a', small: 'it still starts', tone: 'ok' }] },
+    ],
+    cards: [
+      { title: 'GND → left − rail', text: 'Female–male, beside row 5.', colour: 'black' },
+      { title: 'VCC → left + rail', text: 'The 3.3 V rail, beside row 5. Never the 5 V rail.', colour: 'red' },
+      { title: 'DT → 9th pin', text: 'Row next to the breadboard: D6. Female–female.', colour: 'yellow' },
+      { title: 'SCK → 10th pin', text: 'Row next to the breadboard: D7. Female–female.', colour: 'orange' },
+      { title: '10 µF and 100 nF', text: 'Across the left rails, beside rows 7 and 9. The 10 µF’s stripe in the − rail.' },
+    ],
+  },
+  'm2-real-weight/bench-mount': {
+    parts: [...M1_PARTS, HX, ...HX_CAPS],
+    wires: [...M1_WIRES, ...HX_WIRES],
+    newParts: MOUNT,
+    beats: [
+      { title: 'A thick book', who: 'you', add: ['book'], text: ['A thick book on the desk, left of the HX711. Or the desk’s own edge.'], cam: CAM_CELL },
+      { title: 'The cell on it', who: 'you', add: ['cell'], text: ['The end its wires come out of on the book; the other end out over the front edge, in the air.', 'The arrow on its side points down.'], cam: CAM_CELL, tags: [{ at: [CELL.x - 7, BOOK.h + 12, 4], text: 'arrow points down', tone: 'you' }, { at: FREE_END, text: 'free end', small: 'in the air' }] },
+      { title: 'Tape it down hard', who: 'you', add: ['tape'], text: ['Two strips of strong tape over the wired end, pressed down onto the book. Or a clamp.', 'That end must not move at all.'], cam: CAM_CELL, tags: [{ at: [CELL.x, BOOK.h + 20, -32], text: 'tape, pressed hard', tone: 'you' }] },
+      { title: 'A cup on the free end', who: 'you', add: ['cup'], text: ['Tape a small, light cup on the free end: the masses go in it.', 'Nothing else may touch the free end: not the book, not a wire.'], cam: CAM_FREE_END, tags: [{ at: CUP_TAG, text: 'a small light cup', small: 'touches nothing else', tone: 'you' }] },
+    ],
+    cards: [
+      { title: 'Fixed end', text: 'The wired end, taped hard to a thick book.' },
+      { title: 'Free end', text: 'Out in the air, the arrow pointing down, a small cup on top.' },
+    ],
+  },
+  'm2-real-weight/cell-wires': {
+    parts: [...M1_PARTS, HX, ...HX_CAPS, ...MOUNT],
+    wires: [...M1_WIRES, ...HX_WIRES],
+    newWires: CELL_WIRES,
+    beats: [
+      { title: 'USB out', who: 'you', text: ['Nothing is wired with the power on.'], cam: 'bench', usb: 'out', screen: false },
+      ...CELL_PINS.map(([name, colour], k) => ({
+        title: `${colour[0].toUpperCase()}${colour.slice(1)} → ${name}`,
+        who: 'you' as const,
+        add: [`cw-${colour}`],
+        ring: { hx: name },
+        text: [`Follow the cell’s ${colour} wire through the blue connector to its jumper. That jumper’s socket onto ${name}.`, ...(k === 3 ? ['B− and B+ stay empty.'] : [])],
+        cam: CAM_E_PINS,
+        tags: [{ at: { hx: name }, text: `${colour} → ${name}`, tone: 'you' as const }],
+      })),
+      { title: 'USB in', who: 'claude', usb: 'in', screen: true, text: ['Claude restarts the board: it still starts. The real scale goes on in the next step.'], cam: 'bench' },
+    ],
+    cards: CELL_PINS.map(([name, colour]) => ({ title: `${colour} → ${name}`, text: 'Follow the cell wire of this colour through the blue connector.', colour })),
+  },
+  'm2-real-weight/flash-real': {
+    parts: M2_PARTS,
+    wires: M2_WIRES,
+    beats: [
+      { title: 'Claude flashes the real scale', who: 'claude', text: ['From the laptop, over the USB: the image that reads the load cell. You do nothing.'], cam: CAM_LEFT, tags: [{ at: [0, 20, 0], text: 'flashing…', small: 'node-a-nodemcu', tone: 'claude' }] },
+      { title: 'Raw counts, not grams yet', who: 'claude', lines: ['CAMERA ?', 'raw …', 'NOT CALIBRATED'], text: ['The display shows raw counts and NOT CALIBRATED: right, until the calibration.', 'Claude reads the counts from the laptop: they move a little on their own. That is the cell, alive.'], cam: 'display', tags: [{ at: [14, 26, 52], text: 'NOT CALIBRATED', small: 'right, for now', tone: 'ok' }] },
+    ],
+  },
+  'm2-real-weight/sign': {
+    parts: M2_PARTS,
+    wires: M2_WIRES,
+    beats: [
+      { title: 'Hands off', who: 'claude', lines: ['CAMERA ?', 'raw …', 'NOT CALIBRATED'], text: ['Claude reads the counts with nothing on the cell.'], cam: CAM_FREE_END },
+      { title: 'Press the cup down', who: 'you', press: { at: CUP_RIM, how: 'press' }, text: ['When Claude says “now”: press the cup down gently with one finger, then let go.'], cam: CAM_FREE_END, T: 3.4, tags: [{ at: [CUP_RIM[0], CUP_RIM[1] + 34, CUP_RIM[2]], text: 'press gently', small: 'then let go', tone: 'you' }] },
+      { title: 'Up, or down?', who: 'claude', ring: { hx: 'A−' }, text: ['Rose: done. Fell: USB out, swap the white and green sockets on A− and A+, USB in, and press again.'], cam: CAM_E_PINS, tags: [{ at: { hx: 'A−' }, text: 'white on A−' }, { at: { hx: 'A+' }, text: 'green on A+', small: 'swap only if Claude says' }] },
+    ],
+  },
+  'm2-real-weight/calibrate': {
+    parts: M2_PARTS,
+    wires: M2_WIRES,
+    beats: [
+      { title: 'Empty cup', who: 'claude', lines: ['CAMERA ?', 'raw …', 'NOT CALIBRATED'], text: ['Claude zeroes the scale with the cup empty.'], cam: CAM_FREE_END },
+      { title: 'A known mass in', who: 'you', mass: 'in', text: ['Put a known mass in the cup and tell Claude its weight in grams.', 'A calibration mass from the lab, or something you weighed on a kitchen scale.'], cam: CAM_FREE_END, tags: [{ at: CUP_TAG, text: 'a known mass', small: 'say its grams', tone: 'you' }] },
+      { title: 'Steady counts', who: 'claude', text: ['Claude reads the counts until they are steady, for that mass.'], cam: CAM_FREE_END, tags: [{ at: CUP_TAG, text: 'hands off', small: 'until Claude says' }] },
+      { title: 'The next one', who: 'you', mass: 'out', text: ['Take it out; then the next mass, when Claude asks. Three to five of them, light to heavy.'], cam: CAM_FREE_END },
+      { title: 'Saved on the board', who: 'claude', lines: ['CAMERA ?', '0.0 g', 'READY'], text: ['Claude works out the counts per gram and saves it on the board. Then it checks each mass again: each within a gram or two.'], cam: 'display', tags: [{ at: [14, 26, 52], text: '0.0 g', small: 'grams now', tone: 'ok' }] },
+    ],
+  },
+  'm2-real-weight/by-hand': {
+    parts: M2_PARTS,
+    wires: M2_WIRES,
+    beats: [
+      { title: 'Hold the button', who: 'you', press: { at: BUTTON_TOP, how: 'hold' }, lines: ['CAMERA ?', '0.0 g', 'HOLD: TARE IN 3 s'], text: ['Cup empty. Hold the button down: the display counts down 5, 4, 3, 2, 1.'], cam: [[60, 70, 120], [30, 8, 30]], T: 4, tags: [{ at: [BUTTON_TOP[0], BUTTON_TOP[1] + 30, BUTTON_TOP[2]], text: 'hold it', small: '5 seconds', tone: 'you' }] },
+      { title: 'TARE OK', who: 'you', lines: ['CAMERA ?', '0.0 g', 'TARE OK'], text: ['At 0: a short beep and TARE OK. Let go.'], cam: 'display', tags: [{ at: [14, 26, 52], text: 'TARE OK', tone: 'ok' }] },
+      { title: 'A known mass in', who: 'you', mass: 'in', lines: ['CAMERA ?', '150.0 g', 'TARE OK'], text: ['Put a known mass in the cup: the display shows its weight.'], cam: CAM_LEFT, tags: [{ at: [14, 26, 52], text: '150.0 g', small: 'with a 150 g mass, for example', tone: 'ok' }] },
+      { title: 'Click: PHOTO', who: 'you', press: { at: BUTTON_TOP, how: 'tap' }, lines: ['CAMERA ?', '150.0 g', 'NO CAMERA'], text: ['Click the button once, quickly: that is PHOTO.', 'NO CAMERA and a long low beep: right, there is no camera yet.'], cam: [[60, 70, 120], [30, 8, 30]], tags: [{ at: [14, 26, 52], text: 'NO CAMERA', small: 'right, for now', tone: 'ok' }] },
+      { title: 'Claude checks', who: 'claude', text: ['Claude reads E tare for the hold, and E capture with the grams for the click.'], cam: 'bench', tags: [{ at: [0, 20, 0], text: 'E capture g=150.0', small: 'for a 150 g mass', tone: 'ok' }] },
     ],
   },
 };

@@ -93,10 +93,10 @@ export const KIT: KitItem[] = [
     id: 'push-button',
     line: 7,
     bom: 'Tactile push button',
-    qty: '2',
-    status: 'check',
+    qty: '1',
+    status: 'have',
     photo: 'push-button.jpg',
-    why: '12 × 12 mm, larger than the 6 × 6 asked for: same four legs, same job. The scale uses one: a click is PHOTO, a 5-second hold is TARE. The other is a spare.',
+    why: '12 × 12 mm, larger than the 6 × 6 asked for: same four legs, same job. The scale has this one button only: a click is PHOTO, a 5-second hold is TARE.',
   },
   {
     id: 'buzzer',

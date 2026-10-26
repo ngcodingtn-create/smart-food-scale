@@ -219,15 +219,15 @@
   // The build steps, as on /admin/build. The value is the step's path there.
   const STEPS = [
     ['1 · The scale’s brain', [['m1-scale-brain/port', '1.1 Plug it in, find the port'], ['m1-scale-brain/flash', '1.2 Flash the pretend scale'], ['m1-scale-brain/rails', '1.3 Power rails'], ['m1-scale-brain/display', '1.4 The display'], ['m1-scale-brain/tare', '1.5 The button'], ['m1-scale-brain/buzzer', '1.6 The buzzer and its transistor'], ['m1-scale-brain/bench', '1.7 The whole test']]],
-    ['2 · The camera online', [['m2-camera/flash-camera', '2.1 The camera on its base'], ['m2-camera/hotspot', '2.2 Phone hotspot on 2.4 GHz'], ['m2-camera/backend', '2.3 The server on the laptop'], ['m2-camera/wifi', '2.4 Wi-Fi on the camera'], ['m2-camera/test-photo', '2.5 A test photo']]],
-    ['3 · The light', [['m3-light/off-the-base', '3.1 The camera onto the breadboard'], ['m3-light/light-wires', '3.2 The light’s transistor and LEDs'], ['m3-light/light-on', '3.3 Light on']]],
-    ['4 · Both boards together', [['m4-together/find', '4.1 The scale finds the camera'], ['m4-together/meal-test', '4.2 The whole-meal test'], ['m4-together/rehearse', '4.3 Rehearse the real weight']]],
-    ['8 · Finished scale', [['m8-finish/card', '8.1 The microSD card'], ['m8-finish/power', '8.2 Power without the laptop'], ['m8-finish/rig', '8.3 The rig']]],
-    ['9 · Real weight', [['m9-real-weight/headers', '9.1 Solder the HX711’s pins'], ['m9-real-weight/hx711-wires', '9.2 Wire the HX711'], ['m9-real-weight/cell-wires', '9.3 The load cell’s wires'], ['m9-real-weight/photo-button', '9.4 One button or two'], ['m9-real-weight/mount', '9.7 Mount the cell'], ['m9-real-weight/calibrate', '9.8 Calibrate']]],
+    ['2 · Real weight', [['m2-real-weight/meet-hx711', '2.1 The HX711 and the load cell'], ['m2-real-weight/headers', '2.2 The HX711’s pins'], ['m2-real-weight/hx711-wires', '2.3 Wire the HX711'], ['m2-real-weight/bench-mount', '2.4 Hold the cell still'], ['m2-real-weight/cell-wires', '2.5 The load cell to the HX711'], ['m2-real-weight/sign', '2.7 Check the sign'], ['m2-real-weight/calibrate', '2.8 Calibrate'], ['m2-real-weight/by-hand', '2.9 The real scale, by hand']]],
+    ['3 · The camera online', [['m3-camera/flash-camera', '3.1 The camera on its base'], ['m3-camera/hotspot', '3.2 Phone hotspot on 2.4 GHz'], ['m3-camera/backend', '3.3 The server on the laptop'], ['m3-camera/wifi', '3.4 Wi-Fi on the camera'], ['m3-camera/test-photo', '3.5 A test photo']]],
+    ['4 · The light', [['m4-light/off-the-base', '4.1 The camera onto the breadboard'], ['m4-light/light-wires', '4.2 The light’s transistor and LEDs'], ['m4-light/light-on', '4.3 Light on']]],
+    ['5 · Both boards together', [['m5-together/find', '5.1 The scale finds the camera'], ['m5-together/meal-test', '5.2 The whole-meal test']]],
+    ['9 · Finished scale', [['m9-finish/card', '9.1 The microSD card'], ['m9-finish/power', '9.2 Power without the laptop'], ['m9-finish/rig', '9.3 The rig'], ['m9-finish/recalibrate', '9.4 Calibrate again, in the rig']]],
     ['Other', [['other/parts', 'A part: what is this?'], ['other/other', 'Something else']]],
   ];
   const TITLES = Object.fromEntries(STEPS.flatMap(([, list]) => list));
-  const DEFAULT_STEP = 'm1-scale-brain/display';
+  const DEFAULT_STEP = 'm2-real-weight/meet-hx711';
   const MAX_SIDE = 2400; // big enough to read the pin names, small enough to send quickly
 
   const $ = (id) => document.getElementById(id);
