@@ -77,7 +77,7 @@ export const KIT: KitItem[] = [
     qty: '1',
     status: 'have',
     photo: 'load-cell.jpg',
-    why: 'Red, black, white and green wires, already plugged into a blue 4-way connector and extended with jumper wires. No HX711 is attached: those jumpers end loose. Its capacity is not readable in the photo: send a close-up of the label or engraving on its side.',
+    why: 'Red, black, white and green wires, plugged into a blue 4-way connector and extended with jumpers: red → yellow, black → red, white → brown, green → green (photos, 26 October). Its end label reads 20Kg: a 20 kg cell, not the 3 kg the plan assumed, so it weighs more coarsely; calibration measures how much.',
   },
   { id: 'hx711', line: 5, bom: 'HX711', qty: '1', status: 'have', why: 'Here (26 October). It goes in at milestone 2, right after the scale’s brain: the board cannot read the load cell without it. It is not the blue part on the load cell’s wires, which is only a 4-way connector. A photo of it from above, labels readable, goes on Bench Photos before it is wired.' },
   {

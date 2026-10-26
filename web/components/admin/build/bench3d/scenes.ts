@@ -59,16 +59,17 @@ const HX_WIRES: WireSpec[] = [
 /** One electrolytic (the owner's 100 µF 25 V): no ceramics in the kit, and the HX711 board has its own. */
 const HX_CAPS: PartSpec[] = [{ id: 'c10u', kind: 'cap', type: 'electrolytic', from: ['L+', 7], to: ['L-', 7] }];
 const MOUNT: PartSpec[] = [{ id: 'book', kind: 'book' }, { id: 'cell', kind: 'loadcell' }, { id: 'tape', kind: 'tape' }, { id: 'cup', kind: 'cup' }];
-// The cell's own wire colours: the jumpers leaving the blue connector are recoloured from the owner's photo.
-const CELL_PINS = [['E+', 'red'], ['E−', 'black'], ['A−', 'white'], ['A+', 'green']] as const;
-const CELL_WIRES: WireSpec[] = CELL_PINS.map(([name, colour], k) => ({ id: `cw-${colour}`, from: { at: connectorPin(k) }, to: { hx: name }, colour, ends: 'mf', lift: 10 + k * 2 }));
+// Each HX711 pin, the cell's wire it needs, and the jumper that carries that wire out of the blue
+// connector (the owner's photos, 26 October): red → yellow, black → red, white → brown, green → green.
+const CELL_PINS = [['E+', 'red', 'yellow'], ['E−', 'black', 'red'], ['A−', 'white', 'brown'], ['A+', 'green', 'green']] as const;
+const CELL_WIRES: WireSpec[] = CELL_PINS.map(([name, wire, jumper], k) => ({ id: `cw-${wire}`, from: { at: connectorPin(k) }, to: { hx: name }, colour: jumper, ends: 'mf', lift: 10 + k * 2 }));
 const M2_PARTS: PartSpec[] = [...M1_PARTS, HX, ...HX_CAPS, ...MOUNT];
 const M2_WIRES: WireSpec[] = [...M1_WIRES, ...HX_WIRES, ...CELL_WIRES];
 
 // Where to look.
 const CAM_HX: [V3, V3] = [[-112, 62, 112], [-44, 8, 34]];
-const CAM_CELL: [V3, V3] = [[-185, 82, 110], [-95, 14, -8]];
-const CAM_FREE_END: [V3, V3] = [[-150, 70, 95], [-100, 30, 15]];
+const CAM_CELL: [V3, V3] = [[-200, 130, 140], [-95, 40, -25]];
+const CAM_FREE_END: [V3, V3] = [[-165, 105, 115], [-100, 58, 15]];
 const CAM_HX_RAILS: [V3, V3] = [[-8, 105, 150], [-6, 6, 26]];
 const CAM_E_PINS: [V3, V3] = [[-120, 58, 120], [-62, 6, 42]];
 const CAM_LEFT: [V3, V3] = [[-55, 165, 200], [-35, 0, -5]];
@@ -266,7 +267,7 @@ export const BENCH_SCENES: Record<string, BenchScene> = {
     newParts: [HX, { id: 'cell', kind: 'loadcell', onBook: false }],
     beats: [
       { title: 'The HX711', who: 'you', add: ['hx711'], text: ['A small green board: it turns the load cell’s tiny signal into a number for the NodeMCU.', 'Read the names printed beside its pins: GND, DT, SCK, VCC on one end; E+, E−, A−, A+, B−, B+ on the other.'], cam: CAM_HX, tags: [{ at: { hx: 'SCK' }, text: 'GND DT SCK VCC', small: 'to the NodeMCU', tone: 'you' }, { at: { hx: 'A−' }, text: 'E+ E− A− A+ B− B+', small: 'to the load cell', tone: 'you' }, { at: [-44, 30, 20], text: 'your XFW-HX711', small: 'its pins already soldered on' }] },
-      { title: 'The load cell', who: 'you', add: ['cell'], text: ['The aluminium bar: it bends a hair under weight. The arrow on its side shows the way the weight must push.', 'Its four wires, red, black, white, green, run into the blue connector; four jumpers leave it, ending in sockets.'], cam: [[-175, 50, 120], [-92, 4, 14]], tags: [{ at: [CELL.x - 7, 12, 4], text: 'the arrow', small: 'the way the weight pushes' }, { at: [CONNECTOR.x, 9, CONNECTOR.z], text: 'blue connector', small: 'four jumpers leave it', tone: 'you' }] },
+      { title: 'The load cell', who: 'you', add: ['cell'], text: ['The aluminium bar: it bends a hair under weight. The label on one end, “20Kg ↓”, says what it carries and the way the weight must push.', 'Its four wires, red, black, white, green, leave near the other end and run into the blue connector; four jumpers leave it: yellow, red, brown, green.'], cam: [[-160, 50, 140], [-95, 4, 14]], tags: [{ at: [CELL.x, 18, CELL.z1], text: '20Kg ↓', small: 'the label end' }, { at: [CONNECTOR.x, 9, CONNECTOR.z], text: 'blue connector', small: 'four jumpers leave it', tone: 'you' }] },
       { title: 'A photo of the connector', who: 'you', text: ['Your HX711 is drawn from your photos. One more on Bench Photos: the blue connector, close, every wire colour showing on both sides.', 'Claude then gives each jumper its real colour, before you wire anything.'], cam: CAM_LEFT, tags: [{ at: [-44, 26, 34], text: 'the HX711', small: 'photographed: done', tone: 'ok' }, { at: [CONNECTOR.x, 14, CONNECTOR.z], text: 'the connector', small: 'a photo, please', tone: 'you' }] },
     ],
     cards: [
@@ -311,9 +312,9 @@ export const BENCH_SCENES: Record<string, BenchScene> = {
     wires: [...M1_WIRES, ...HX_WIRES],
     newParts: MOUNT,
     beats: [
-      { title: 'A thick book', who: 'you', add: ['book'], text: ['A thick book on the desk, left of the HX711. Or the desk’s own edge.'], cam: CAM_CELL },
-      { title: 'The cell on it', who: 'you', add: ['cell'], text: ['The end its wires come out of on the book; the other end out over the front edge, in the air.', 'The arrow on its side points down.'], cam: CAM_CELL, tags: [{ at: [CELL.x - 7, BOOK.h + 12, 4], text: 'arrow points down', tone: 'you' }, { at: FREE_END, text: 'free end', small: 'in the air' }] },
-      { title: 'Tape it down hard', who: 'you', add: ['tape'], text: ['Two strips of strong tape over the wired end, pressed down onto the book. Or a clamp.', 'That end must not move at all.'], cam: CAM_CELL, tags: [{ at: [CELL.x, BOOK.h + 20, -32], text: 'tape, pressed hard', tone: 'you' }] },
+      { title: 'Your round box', who: 'you', add: ['book'], text: ['Your round box, firm, on the desk left of the HX711. Any box or thick book that does not squash will do.'], cam: CAM_CELL },
+      { title: 'The cell on it', who: 'you', add: ['cell'], text: ['The end its wires come out of on the box. The label end, “20Kg ↓”, out over the edge, in the air: about 3 cm out, at least.', 'Threaded holes up; the label’s arrow points down.'], cam: CAM_CELL, tags: [{ at: [CELL.x, BOOK.h + 18, CELL.z1], text: '20Kg ↓ end', small: 'out in the air', tone: 'you' }, { at: [CELL.x, BOOK.h + 22, -38], text: 'wired end', small: 'on the box' }] },
+      { title: 'Hold the wired end down', who: 'you', add: ['tape'], text: ['Two strips of strong tape over the wired end, pressed down onto the box, then something heavy on top, like your power bank.', 'That end must not move at all. Lying loose, the bar only rocks: the readings mean nothing.'], cam: CAM_CELL, tags: [{ at: [CELL.x, BOOK.h + 40, -40], text: 'tape + something heavy', small: 'that end must not move', tone: 'you' }] },
       { title: 'A cup on the free end', who: 'you', add: ['cup'], text: ['Tape a small, light cup on the free end: the masses go in it.', 'Nothing else may touch the free end: not the book, not a wire.'], cam: CAM_FREE_END, tags: [{ at: CUP_TAG, text: 'a small light cup', small: 'touches nothing else', tone: 'you' }] },
     ],
     cards: [
@@ -327,18 +328,18 @@ export const BENCH_SCENES: Record<string, BenchScene> = {
     newWires: CELL_WIRES,
     beats: [
       { title: 'USB out', who: 'you', text: ['Nothing is wired with the power on.'], cam: 'bench', usb: 'out', screen: false },
-      ...CELL_PINS.map(([name, colour], k) => ({
-        title: `${colour[0].toUpperCase()}${colour.slice(1)} → ${name}`,
+      ...CELL_PINS.map(([name, wire, jumper], k) => ({
+        title: `${jumper[0].toUpperCase()}${jumper.slice(1)} jumper → ${name}`,
         who: 'you' as const,
-        add: [`cw-${colour}`],
+        add: [`cw-${wire}`],
         ring: { hx: name },
-        text: [`Follow the cell’s ${colour} wire through the blue connector to its jumper. That jumper’s socket onto ${name}.`, ...(k === 3 ? ['B− and B+ stay empty.'] : [])],
+        text: [`The ${jumper} jumper carries the cell’s ${wire} wire: its socket onto ${name}.`, ...(k === 1 ? ['Careful: the red jumper is not E+. It carries the black wire.'] : []), ...(k === 3 ? ['B− and B+ stay empty.'] : [])],
         cam: CAM_E_PINS,
-        tags: [{ at: { hx: name }, text: `${colour} → ${name}`, tone: 'you' as const }],
+        tags: [{ at: { hx: name }, text: `${jumper} → ${name}`, small: `the cell’s ${wire}`, tone: 'you' as const }],
       })),
       { title: 'USB in', who: 'claude', usb: 'in', screen: true, text: ['Claude restarts the board: it still starts. The real scale goes on in the next step.'], cam: 'bench' },
     ],
-    cards: CELL_PINS.map(([name, colour]) => ({ title: `${colour} → ${name}`, text: 'Follow the cell wire of this colour through the blue connector.', colour })),
+    cards: CELL_PINS.map(([name, wire, jumper]) => ({ title: `${jumper} jumper → ${name}`, text: `It carries the cell’s ${wire} wire.`, colour: jumper })),
   },
   'm2-real-weight/flash-real': {
     parts: M2_PARTS,
@@ -354,7 +355,7 @@ export const BENCH_SCENES: Record<string, BenchScene> = {
     beats: [
       { title: 'Hands off', who: 'claude', lines: ['CAMERA ?', 'raw …', 'NOT CALIBRATED'], text: ['Claude reads the counts with nothing on the cell.'], cam: CAM_FREE_END },
       { title: 'Press the cup down', who: 'you', press: { at: CUP_RIM, how: 'press' }, text: ['When Claude says “now”: press the cup down gently with one finger, then let go.'], cam: CAM_FREE_END, T: 3.4, tags: [{ at: [CUP_RIM[0], CUP_RIM[1] + 34, CUP_RIM[2]], text: 'press gently', small: 'then let go', tone: 'you' }] },
-      { title: 'Up, or down?', who: 'claude', ring: { hx: 'A−' }, text: ['Rose: done. Fell: USB out, swap the white and green sockets on A− and A+, USB in, and press again.'], cam: CAM_E_PINS, tags: [{ at: { hx: 'A−' }, text: 'white on A−' }, { at: { hx: 'A+' }, text: 'green on A+', small: 'swap only if Claude says' }] },
+      { title: 'Up, or down?', who: 'claude', ring: { hx: 'A−' }, text: ['Rose: done. Fell, with the cell held as in step 2.4: USB out, swap the brown and green jumpers on A− and A+, USB in, and press again.'], cam: CAM_E_PINS, tags: [{ at: { hx: 'A−' }, text: 'brown on A−' }, { at: { hx: 'A+' }, text: 'green on A+', small: 'swap only if Claude says' }] },
     ],
   },
   'm2-real-weight/calibrate': {

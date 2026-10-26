@@ -338,11 +338,15 @@ function hx711(bare: boolean) {
 
 const ALU = material(0xc3c8cc, { metalness: 0.55, roughness: 0.45 });
 
+/** The owner's round box: yellow round its side, a white lid. */
 function book() {
   const group = new THREE.Group();
-  const w = BOOK.x1 - BOOK.x0, d = BOOK.z1 - BOOK.z0, cx = (BOOK.x0 + BOOK.x1) / 2, cz = (BOOK.z0 + BOOK.z1) / 2;
-  group.add(boxMesh([w, BOOK.h, d], material(0x7a2f2f), [cx, 0, cz]));
-  group.add(boxMesh([w - 1.5, BOOK.h - 3, d + 0.4], material(0xefe9da), [cx + 1, 1.5, cz]));
+  const r = (BOOK.x1 - BOOK.x0) / 2, cx = (BOOK.x0 + BOOK.x1) / 2, cz = (BOOK.z0 + BOOK.z1) / 2;
+  const side = new THREE.Mesh(new THREE.CylinderGeometry(r, r, BOOK.h - 4, 64), material(0xe9b93b, { roughness: 0.7 }));
+  side.position.set(cx, (BOOK.h - 4) / 2, cz);
+  const lid = new THREE.Mesh(new THREE.CylinderGeometry(r + 1.5, r + 1.5, 4, 64), material(0xf4f2ec, { roughness: 0.6 }));
+  lid.position.set(cx, BOOK.h - 2, cz);
+  group.add(side, lid);
   return group;
 }
 
@@ -358,20 +362,20 @@ function loadcell(onBook: boolean) {
   }
   // The strain gauge under its white cover, where the wires leave.
   group.add(boxMesh([CELL.size + 0.4, 2.2, 10], material(0xece8d8), [CELL.x, top - 1.6, zc - 9]));
-  // The arrow on its side: the way the load must push.
-  // On the side the views look from (-X).
-  const arrow = textPlane('↓', 8, 8, '#1d1d1d', 'transparent');
-  arrow.rotation.set(0, -Math.PI / 2, 0);
-  arrow.position.set(CELL.x - CELL.size / 2 - 0.06, base + CELL.size / 2, zc + 6);
-  group.add(arrow);
+  // Its label on the free end's face, as on the owner's cell: "20Kg ↓", the way the load must push.
+  const label = textPlane('20Kg ↓', 11, 6, '#1d2a6b', '#e8d84a');
+  label.rotation.set(0, 0, 0);
+  label.position.set(CELL.x, base + CELL.size / 2, CELL.z1 + 0.06);
+  group.add(label);
   // Its four wires, over the book's edge to the blue connector on the desk.
   ['red', 'black', 'white', 'green'].forEach((colour, k) => {
     const o = (k - 1.5) * 0.9;
     const curve = new THREE.CatmullRomCurve3([
       v([CELL.x + o, top + 0.4, zc - 9]),
-      v([CELL.x + o, top + 3, CELL.z0 + 10]),
-      v([BOOK.x1 + 5 + o, base * 0.55 + 3, CELL.z0 + 16]),
-      v([CONNECTOR.x - 12 + o * 2, 2, 22]),
+      v([CELL.x + 6 + o, top + 2, zc - 4]),
+      v([CELL.x + 14 + o, base + 1.5, BOOK.z1 - 6]),
+      v([CELL.x + 18 + o, base * 0.5, BOOK.z1 + 6]),
+      v([CONNECTOR.x - 12 + o * 2, 2, 24]),
       v([CONNECTOR.x - 3.81 + k * 2.54, 2.6, CONNECTOR.z - 4]),
     ]);
     group.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 80, 0.4, 6), material(COLOURS[colour])));
@@ -380,7 +384,7 @@ function loadcell(onBook: boolean) {
   return group;
 }
 
-/** Two strips of tape over the wired end, down its sides and onto the book. */
+/** Two strips of tape over the wired end, down its sides and onto the box; something heavy on top. */
 function tape() {
   const group = new THREE.Group();
   const m = material(0xdcd5bd, { roughness: 0.95 });
@@ -392,6 +396,8 @@ function tape() {
       group.add(boxMesh([10, 0.4, 8], m, [CELL.x + side * (half + 5.4), BOOK.h, z]));
     }
   }
+  // Something heavy on the wired end, like the owner's power bank.
+  group.add(boxMesh([60, 16, 34], material(0xf2f2ee, { roughness: 0.5 }), [CELL.x, top + 0.4, -40]));
   return group;
 }
 

@@ -383,12 +383,12 @@ export const MILESTONES: Milestone[] = [
         goal: 'Fixed at one end, free at the other, for the bench.',
         parts: ['load-cell'],
         actions: [
-          'The end the wires come out of is the fixed end: clamp it, or tape it down hard, on the edge of the desk or a thick book, the other end out in the air.',
-          'The arrow on its side points down.',
+          'On a firm box or a thick book (yours: the round box). The end the wires come out of is the fixed end: on the box, taped down hard, with something heavy on top, like your power bank.',
+          'The label end, “20Kg ↓”, out over the edge, in the air, about 3 cm at least. Threaded holes up; the arrow points down.',
           'Tape a small light cup on the free end: the masses go in it.',
           'Nothing may touch the free end: not the desk, not a wire.',
         ],
-        checks: ['The fixed end does not move', 'The free end touches nothing', 'The arrow points down'],
+        checks: ['The wired end does not move', 'The label end is out in the air and touches nothing', 'The arrow points down'],
       },
       {
         id: 'cell-wires',
@@ -398,11 +398,11 @@ export const MILESTONES: Milestone[] = [
         wires: { node: 'a', ids: ['a-cell-red', 'a-cell-black', 'a-cell-white', 'a-cell-green'] },
         actions: [
           'USB out.',
-          'The four jumper sockets on the cell’s wires onto the HX711, by the colour of the cell wire each one carries: red E+, black E−, white A−, green A+.',
+          'The four jumpers out of the blue connector onto the HX711: yellow (the cell’s red) on E+, red (the cell’s black) on E−, brown (the cell’s white) on A−, green on A+. The red jumper is not E+.',
           'B− and B+ stay empty.',
           'USB back in.',
         ],
-        checks: ['Red E+, black E−, white A−, green A+', 'B− and B+ empty'],
+        checks: ['Yellow E+, red E−, brown A−, green A+', 'B− and B+ empty'],
       },
       {
         id: 'flash-real',
@@ -418,7 +418,7 @@ export const MILESTONES: Milestone[] = [
         id: 'sign',
         title: 'Check the sign',
         goal: 'Pressing the cell makes the counts rise.',
-        actions: ['When Claude says “now”, press the cup on the free end down gently with a finger, then let go.', 'If Claude says they fall: USB out, swap the white and green sockets, USB in.'],
+        actions: ['Press the cup on the free end down gently with a finger and hold it; while holding, tell Claude “holding”.', 'If Claude says they fall, and the cell is held as in step 2.4: USB out, swap the brown and green jumpers on A− and A+, USB in.'],
         claude: ['Watches the raw counts and says whether they rose.'],
         checks: ['The counts rose when you pressed'],
       },

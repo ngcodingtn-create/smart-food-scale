@@ -48,9 +48,13 @@ export function hxPin(name: string): V3 {
   return [HX711_AT.x + HX_BOARD.cellPinX, HX711_AT.y, HX711_AT.z - 6.35 + c * 2.54];
 }
 
-// --- the load cell: on a thick book, its wired end taped down, its free end out over the edge -----
-/** 75 × 12.7 × 12.7 mm, the seller's figures (rig/specs.ts). The book is any thick one. */
-export const BOOK = { x0: -128, x1: -72, z0: -80, z1: 0, h: 28 };
+// --- the load cell: on the owner's round box, its wired end held down, its label end out over the edge --
+/**
+ * The support: the owner's round cheese box (photos, 26 October), about 150 mm across and 55 mm
+ * tall, judged against the cell. Its front edge is at z1. The cell is drawn 75 × 12.7 × 12.7 mm
+ * (rig/specs.ts); the owner's is labelled 20 kg, and its exact length was not measured.
+ */
+export const BOOK = { x0: -175, x1: -25, z0: -150, z1: 0, h: 55 };
 export const CELL = { x: -100, z0: -45, z1: 30, size: 12.7 };
 /** Where a known mass sits: in a small cup taped on the free end. */
 export const CUP: V3 = [CELL.x, BOOK.h + CELL.size, 21];
