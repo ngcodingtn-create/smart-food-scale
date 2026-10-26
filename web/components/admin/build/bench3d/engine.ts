@@ -384,20 +384,14 @@ function loadcell(onBook: boolean) {
   return group;
 }
 
-/** Two strips of tape over the wired end, down its sides and onto the box; something heavy on top. */
+/**
+ * What holds the wired end: the owner's power bank laid flat across it, and nothing else. No tape:
+ * tape that reached the sensor stopped the bar bending (tried on the bench, 26 October).
+ */
 function tape() {
   const group = new THREE.Group();
-  const m = material(0xdcd5bd, { roughness: 0.95 });
-  const top = BOOK.h + CELL.size, half = CELL.size / 2;
-  for (const z of [-15, -6]) {
-    group.add(boxMesh([CELL.size + 1, 0.4, 8], m, [CELL.x, top, z]));
-    for (const side of [-1, 1]) {
-      group.add(boxMesh([0.4, CELL.size, 8], m, [CELL.x + side * (half + 0.4), BOOK.h, z]));
-      group.add(boxMesh([10, 0.4, 8], m, [CELL.x + side * (half + 5.4), BOOK.h, z]));
-    }
-  }
-  // Something heavy on the wired end, like the owner's power bank.
-  group.add(boxMesh([60, 16, 34], material(0xf2f2ee, { roughness: 0.5 }), [CELL.x, top + 0.4, -19]));
+  const top = BOOK.h + CELL.size;
+  group.add(boxMesh([60, 16, 34], material(0xf2f2ee, { roughness: 0.5 }), [CELL.x, top, -19]));
   return group;
 }
 
