@@ -44,9 +44,20 @@
     ],
     "m1-scale-brain/buzzer": [
       0
+    ],
+    "m1-scale-brain/bench": [
+      0,
+      1,
+      2
+    ],
+    "m2-real-weight/meet-hx711": [
+      0
+    ],
+    "m2-real-weight/headers": [
+      0
     ]
   },
-  "updated": "2026-10-26T17:59:18.000Z",
+  "updated": "2026-10-26T18:01:05.000Z",
   "sfs-wired-v1": [
     "a-3v3",
     "a-5v",

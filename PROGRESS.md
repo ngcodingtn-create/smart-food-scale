@@ -10,9 +10,10 @@ Nothing is marked done unless it has been run. Newest work first.
 
 ## ▶ Continue here (26 October 2026)
 
-To pick up, tell Claude: **"continue from progress.md"**. The build is on the bench, at
-**milestone 1, step 1.6, the buzzer**; next comes **milestone 2, real weight** (the HX711
-has arrived).
+To pick up, tell Claude: **"continue from progress.md"**. **Milestone 1 is done** (26 October).
+The build is at **milestone 2, real weight, step 2.3: wire the HX711**
+(http://localhost:3000/admin/build/m2-real-weight/hx711-wires). 2.1 and 2.2 are ticked; the
+connector photo for 2.5 is still to send.
 
 ### The plan, in order (changed 26 October)
 
@@ -39,12 +40,12 @@ more male–male jumpers.
 | Step | State |
 | --- | --- |
 | 1.1 USB port | ✅ COM5, CH340 |
-| 1.2 Flash | ✅ Pretend scale, firmware 0.3.5 on the NodeMCU |
+| 1.2 Flash | ✅ Pretend scale, now firmware 0.3.6 (one button) on the NodeMCU |
 | 1.3 Rails | ✅ 3V and G from the outer row; **5 V now from VU** (see below) |
 | 1.4 Display | ✅ Four female–female jumpers straight to the board; it lights up |
 | 1.5 Button | ✅ The board reads it |
-| 1.6 Buzzer | ❌ **In progress:** no beep yet, not ticked |
-| 1.7 Whole test | ⏳ Claude runs `board.py meal-test --no-camera` once 1.6 beeps |
+| 1.6 Buzzer | ✅ It beeps (5 V from VU; the buzzer rewired from the 3D) |
+| 1.7 Whole test | ✅ All six checks passed; the owner saw 150.0 g, then NO CAMERA with the long beep |
 
 ### The buzzer, so far
 
