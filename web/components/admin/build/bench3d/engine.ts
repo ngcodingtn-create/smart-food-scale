@@ -338,15 +338,10 @@ function hx711(bare: boolean) {
 
 const ALU = material(0xc3c8cc, { metalness: 0.55, roughness: 0.45 });
 
-/** The owner's round box: yellow round its side, a white lid. */
+/** The owner's power bank, lying flat: the support. */
 function book() {
   const group = new THREE.Group();
-  const r = (BOOK.x1 - BOOK.x0) / 2, cx = (BOOK.x0 + BOOK.x1) / 2, cz = (BOOK.z0 + BOOK.z1) / 2;
-  const side = new THREE.Mesh(new THREE.CylinderGeometry(r, r, BOOK.h - 4, 64), material(0xe9b93b, { roughness: 0.7 }));
-  side.position.set(cx, (BOOK.h - 4) / 2, cz);
-  const lid = new THREE.Mesh(new THREE.CylinderGeometry(r + 1.5, r + 1.5, 4, 64), material(0xf4f2ec, { roughness: 0.6 }));
-  lid.position.set(cx, BOOK.h - 2, cz);
-  group.add(side, lid);
+  group.add(boxMesh([BOOK.x1 - BOOK.x0, BOOK.h, BOOK.z1 - BOOK.z0], material(0xf2f2ee, { roughness: 0.5 }), [(BOOK.x0 + BOOK.x1) / 2, 0, (BOOK.z0 + BOOK.z1) / 2]));
   return group;
 }
 
@@ -385,13 +380,21 @@ function loadcell(onBook: boolean) {
 }
 
 /**
- * What holds the wired end: the owner's power bank laid flat across it, and nothing else. No tape:
- * tape that reached the sensor stopped the bar bending (tried on the bench, 26 October).
+ * What holds the wired end: the owner's hand, flat on it (26 October). No tape: tape that reached
+ * the sensor stopped the bar bending. For calibration something heavy replaces the hand.
  */
 function tape() {
   const group = new THREE.Group();
   const top = BOOK.h + CELL.size;
-  group.add(boxMesh([60, 16, 34], material(0xf2f2ee, { roughness: 0.5 }), [CELL.x, top, -19]));
+  const skin = material(0xd9a585, { roughness: 0.7 });
+  // The palm on the power bank behind the cell, the fingers on its last 2 cm only: never past the edge.
+  group.add(boxMesh([40, 14, 30], skin, [CELL.x, top, -34]));
+  for (let f = 0; f < 4; f++) {
+    const finger = new THREE.Mesh(new THREE.CylinderGeometry(4, 4, 18, 14), skin);
+    finger.position.set(CELL.x - 13 + f * 8.6, top + 4, -10);
+    finger.rotation.x = Math.PI / 2;
+    group.add(finger);
+  }
   return group;
 }
 

@@ -383,12 +383,12 @@ export const MILESTONES: Milestone[] = [
         goal: 'Fixed at one end, free at the other, for the bench.',
         parts: ['load-cell'],
         actions: [
-          'On a firm box or a thick book (yours: the round box). Only the last 2 cm of the wired end, with its two holes, on the box, held down by your power bank laid across it. No tape: tape that reaches the white patch stops the bar bending.',
+          'On something solid lying flat (yours: the power bank). Only the last 2 cm of the wired end, with its two holes, on it, held down by your hand; for the calibration, by something heavy across it. No tape: tape that reaches the white patch stops the bar bending.',
           'The white patch in the middle (the sensor) and the “20Kg ↓” end out in the air. Threaded holes up; the arrow points down.',
           'A small light cup on the free end, a little tape under it only: the masses go in it.',
           'Nothing may touch the free end: not the desk, not a wire.',
         ],
-        checks: ['Only the wired end’s last 2 cm on the box, and it does not move', 'The white patch and the label end in the air, touching nothing', 'The arrow points down'],
+        checks: ['Only the wired end’s last 2 cm on the power bank, and it does not move', 'The white patch and the label end in the air, touching nothing', 'The arrow points down'],
       },
       {
         id: 'cell-wires',

@@ -50,11 +50,11 @@ export function hxPin(name: string): V3 {
 
 // --- the load cell: on the owner's round box, its wired end held down, its label end out over the edge --
 /**
- * The support: the owner's round cheese box (photos, 26 October), about 150 mm across and 55 mm
- * tall, judged against the cell. Its front edge is at z1. The cell is drawn 75 × 12.7 × 12.7 mm
+ * The support: the owner's power bank lying flat (26 October: solid and square), its size judged
+ * from their photos, not measured. Its front edge is at z1. The cell is drawn 75 × 12.7 × 12.7 mm
  * (rig/specs.ts); the owner's is labelled 20 kg, and its exact length was not measured.
  */
-export const BOOK = { x0: -175, x1: -25, z0: -150, z1: 0, h: 55 };
+export const BOOK = { x0: -135, x1: -65, z0: -140, z1: 0, h: 25 };
 /** Only the wired end's last 20 mm on the box: the sensor (the white patch) must hang free, as tried on the bench. */
 export const CELL = { x: -100, z0: -20, z1: 55, size: 12.7 };
 /** Where a known mass sits: in a small cup taped on the free end. */

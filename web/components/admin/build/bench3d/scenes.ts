@@ -312,13 +312,13 @@ export const BENCH_SCENES: Record<string, BenchScene> = {
     wires: [...M1_WIRES, ...HX_WIRES],
     newParts: MOUNT,
     beats: [
-      { title: 'Your round box', who: 'you', add: ['book'], text: ['Your round box, firm, on the desk left of the HX711. Any box or thick book that does not squash will do.'], cam: CAM_CELL },
-      { title: 'The cell on it', who: 'you', add: ['cell'], text: ['Only the last 2 cm of the wired end, with its two holes, on the box.', 'The white patch in the middle (the sensor) and the “20Kg ↓” end out in the air. Holes up; the arrow points down.'], cam: CAM_CELL, tags: [{ at: [CELL.x, BOOK.h + 18, CELL.z1], text: '20Kg ↓ end', small: 'in the air', tone: 'you' }, { at: [CELL.x, BOOK.h + 20, 8], text: 'white patch', small: 'in the air too' }, { at: [CELL.x, BOOK.h + 22, -12], text: 'only 2 cm', small: 'on the box' }] },
-      { title: 'The power bank holds it', who: 'you', add: ['tape'], text: ['Lay your power bank flat across the 2 cm on the box: its weight holds that end. Nothing else.', 'No tape: tape that reaches the white patch stops the bar bending, and the reading stops moving.'], cam: CAM_CELL, tags: [{ at: [CELL.x, BOOK.h + 40, -19], text: 'the power bank only', small: 'no tape', tone: 'you' }] },
-      { title: 'A cup on the free end', who: 'you', add: ['cup'], text: ['A small, light cup on the free end, a little tape under it only: the masses go in it.', 'Nothing else may touch the free end or the white patch: not the box, not a wire.'], cam: CAM_FREE_END, tags: [{ at: CUP_TAG, text: 'a small light cup', small: 'touches nothing else', tone: 'you' }] },
+      { title: 'Your power bank, lying flat', who: 'you', add: ['book'], text: ['Your power bank, lying flat on the desk left of the HX711: solid and square. Anything that does not squash will do.'], cam: CAM_CELL },
+      { title: 'The cell on it', who: 'you', add: ['cell'], text: ['Only the last 2 cm of the wired end, with its two holes, on the power bank.', 'The white patch in the middle (the sensor) and the “20Kg ↓” end out in the air. Holes up; the arrow points down.'], cam: CAM_CELL, tags: [{ at: [CELL.x, BOOK.h + 18, CELL.z1], text: '20Kg ↓ end', small: 'in the air', tone: 'you' }, { at: [CELL.x, BOOK.h + 20, 8], text: 'white patch', small: 'in the air too' }, { at: [CELL.x, BOOK.h + 22, -12], text: 'only 2 cm', small: 'on the power bank' }] },
+      { title: 'Your hand holds it', who: 'you', add: ['tape'], text: ['One hand holds those 2 cm flat on the power bank. No tape: tape that reaches the white patch stops the bar bending.', 'For the calibration, something heavy laid across that end takes the hand’s place: a hand moves.'], cam: CAM_CELL, tags: [{ at: [CELL.x, BOOK.h + 40, -19], text: 'your hand', small: 'no tape', tone: 'you' }] },
+      { title: 'A cup on the free end', who: 'you', add: ['cup'], text: ['A small, light cup on the free end, a little tape under it only: the masses go in it.', 'Nothing else may touch the free end or the white patch: not the power bank, not a wire.'], cam: CAM_FREE_END, tags: [{ at: CUP_TAG, text: 'a small light cup', small: 'touches nothing else', tone: 'you' }] },
     ],
     cards: [
-      { title: 'Held end', text: 'The wired end’s last 2 cm on the box, under the power bank. No tape.' },
+      { title: 'Held end', text: 'The wired end’s last 2 cm on the power bank, held by your hand; for calibration, by something heavy. No tape.' },
       { title: 'Free end', text: 'Out in the air, the arrow pointing down, a small cup on top.' },
     ],
   },

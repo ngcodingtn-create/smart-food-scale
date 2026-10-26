@@ -129,16 +129,17 @@
   // the owner. The cell is drawn 75 × 12.7 × 12.7 (its length was not measured); its label end,
   // "20Kg ↓", at local +Z; the end its wires leave from at local -Z.
   // ---------------------------------------------------------------------------------
-  const BOX = { x: 0, z: -40, r: 75, h: 55 };
+  // The support: the owner's power bank lying flat (its size judged from their photos, not measured).
+  const BOX = { x: 0, z: -40, w: 70, l: 140, h: 25 };
   const L = 75, S = 12.7;
-  const ON_BOX = { x: 0, y: BOX.h + S / 2, z: BOX.z + BOX.r - L / 2 + 55 };   // only the held end's last 20 mm on the box
+  const ON_BOX = { x: 0, y: BOX.h + S / 2, z: BOX.z + BOX.l / 2 - L / 2 + 55 };   // only the held end's last 20 mm on the power bank
   const IN_HAND = { x: 110, y: 70, z: 40 };
   // Each step: where the cell is (position, turned end for end, upside down), what holds it, where the finger presses.
   const STEPS = [
     { title: 'Where you are', who: 'you', text: ['Pressing does nothing yet: the bar has to bend, and it only bends if one end is held still and the other is free.', 'Four ways to try, one after the other. After each, tell Claude: Claude reads the board each time.'], cam: [[150, 170, 240], [20, 30, -10]], T: 1.4, pose: 'loose' },
     { title: 'A · In your hands', who: 'you', text: ['Pick the cell up. One hand grips the end the wires leave from, firmly.', 'With the other thumb, press the 20Kg ↓ end down, hold it 3 seconds, let go. Then tell Claude “A done”.'], cam: [[210, 130, 170], [110, 62, 40]], T: 3.6, pose: 'hand', press: 'label' },
-    { title: 'B · Label end out', who: 'you', text: ['Back on the box: only the last 2 cm of the wired end on the lid. The white patch and the 20Kg ↓ end out in the air. Holes up.', 'The power bank alone, laid across it, holds that short end. No tape. Press the label end down and hold it. Tell Claude “holding”. This is the one that works.'], cam: [[130, 150, 190], [0, 55, 20]], T: 3.6, pose: 'B', press: 'label' },
-    { title: 'C · Turned end for end', who: 'you', text: ['The same, but turned round: the label end held on the box, the wired end out over the edge.', 'Press the wired end down, hold 3 s, let go. Tell Claude “C done”.'], cam: [[130, 150, 190], [0, 55, 20]], T: 3.6, pose: 'C', press: 'wired' },
+    { title: 'B · Label end out', who: 'you', text: ['On the power bank, lying flat: only the last 2 cm of the wired end on it. The white patch and the 20Kg ↓ end out in the air. Holes up.', 'One hand holds that short end flat on the power bank. No tape. With the other, press the label end down and hold it. Tell Claude “holding”. This is the one that works.'], cam: [[130, 150, 190], [0, 55, 20]], T: 3.6, pose: 'B', press: 'label' },
+    { title: 'C · Turned end for end', who: 'you', text: ['The same, but turned round: the label end held on the power bank, the wired end out over the edge.', 'Press the wired end down, hold 3 s, let go. Tell Claude “C done”.'], cam: [[130, 150, 190], [0, 55, 20]], T: 3.6, pose: 'C', press: 'wired' },
     { title: 'D · Upside down', who: 'you', text: ['As B, but the bar turned over: holes down, the label’s arrow pointing up.', 'Press the label end down, hold 3 s, let go. Tell Claude “D done”.'], cam: [[130, 150, 190], [0, 55, 20]], T: 3.6, pose: 'D', press: 'label' },
     { title: 'Found: B, with the sensor free', who: 'claude', text: ['Tried on 26 October: in the hands (A) and B with only 2 cm on the box, the counts rose about 125 000 under a press and came back.', 'With more of the bar on the box, nothing moved: the white patch is the sensor, and it must hang free.'], cam: [[150, 170, 240], [20, 30, -10]], T: 1.4, pose: 'B' },
   ];
@@ -232,8 +233,7 @@
   scene.add(desk);
 
   // the owner's round box: yellow side, white lid
-  scene.add(mesh(new THREE.CylinderGeometry(BOX.r, BOX.r, BOX.h - 4, 64), mat(0xe9b93b, { roughness: 0.7 }), BOX.x, (BOX.h - 4) / 2, BOX.z));
-  scene.add(mesh(new THREE.CylinderGeometry(BOX.r + 1.5, BOX.r + 1.5, 4, 64), mat(0xf4f2ec), BOX.x, BOX.h - 2, BOX.z));
+  scene.add(mesh(new THREE.BoxGeometry(BOX.w, BOX.h, BOX.l), mat(0xf2f2ee, { roughness: 0.5 }), BOX.x, BOX.h / 2, BOX.z));
 
   // the cell: holes on top, the white gauge cover near the wired end, its label on the other end
   const cell = new THREE.Group();
@@ -253,13 +253,13 @@
   });
   scene.add(cell);
 
-  // what holds the wired end on the box: the power bank alone (tape that reached the sensor stopped it bending)
-  const holder = new THREE.Group();
-  holder.add(mesh(new THREE.BoxGeometry(62, 16, 34), mat(0xf2f2ee, { roughness: 0.5 }), 0, S / 2 + 8.6, -10));
-  scene.add(holder);
-
-  // a hand gripping the wired end (A), and a finger that presses
+  // a hand gripping the wired end (A), a hand holding it down on the power bank (B to D), and a finger that presses
   const skin = mat(0xd9a585, { roughness: 0.7 });
+  const holder = new THREE.Group();
+  // the palm behind, the fingers on the held 2 cm only: never past the edge, where the sensor is
+  holder.add(mesh(new THREE.BoxGeometry(40, 14, 30), skin, 0, S / 2 + 7, -24));
+  for (let f = 0; f < 4; f++) holder.add(mesh(new THREE.CylinderGeometry(4, 4, 18, 14), skin, -13 + f * 8.6, S / 2 + 4, 2));
+  scene.add(holder);
   const fist = new THREE.Group();
   fist.add(mesh(new THREE.BoxGeometry(34, 26, 30), skin, 0, 0, 0));
   scene.add(fist);
@@ -330,6 +330,7 @@
     holder.visible = b.held && k > 0.9;
     const hp = local(0, 0, heldEnd);
     holder.position.set(hp.x, s.pose === 'D' ? BOX.h + S : hp.y - S / 2, hp.z);
+    holder.rotation.y = s.pose === 'C' ? Math.PI : 0;
     fist.visible = b.hand && k > 0.9;
     const fp = local(0, 0, -L / 2 + 10);
     fist.position.copy(fp);
@@ -356,7 +357,7 @@
     const labelEnd = local(0, S / 2 + 8, L / 2), wiredEnd = local(0, S / 2 + 8, -L / 2);
     if (step === 0) { list.push({ at: [labelEnd.x, labelEnd.y + 6, labelEnd.z], text: '20Kg ↓ end' }); list.push({ at: [wiredEnd.x, wiredEnd.y + 6, wiredEnd.z], text: 'wired end', small: 'loose: nothing holds it', tone: 'you' }); }
     if (s.press && t > 0.45) list.push({ at: [tip.x, tip.y + 52, tip.z], text: 'press, hold 3 s', small: `then tell Claude “${s.title[0]} done”`, tone: 'you' });
-    if (b.held && t > 0.4) list.push({ at: [hp.x, hp.y + 30, hp.z], text: 'held: the power bank only', small: 'no tape' });
+    if (b.held && t > 0.4) list.push({ at: [hp.x, hp.y + 30, hp.z], text: 'your hand holds this end', small: 'flat on the power bank; no tape' });
     if (b.hand && t > 0.4) list.push({ at: [fp.x, fp.y + 22, fp.z], text: 'grip the wired end', small: 'firmly' });
     if (step === STEPS.length - 1) list.push({ at: [0, 120, 0], text: 'which one moved most?', small: 'Claude says', tone: 'ok' });
     tags(list);
