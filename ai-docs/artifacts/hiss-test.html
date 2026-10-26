@@ -1,0 +1,472 @@
+<title>The Hiss Test</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,650&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  /* Layout: the 3D bench first, full width; the step under it; the four wires as a table at the end.
+     The Smart Food Scale palette: terracotta for what your hands do, teal for what Claude checks. */
+  :root {
+    --ink: oklch(0.2 0.012 60); --ink-soft: oklch(0.42 0.014 62); --ink-faint: oklch(0.54 0.012 65);
+    --paper: oklch(0.985 0.006 85); --raised: oklch(1 0 0); --sunken: oklch(0.964 0.008 82);
+    --rule: oklch(0.905 0.008 78); --rule-strong: oklch(0.83 0.01 75);
+    --accent: oklch(0.56 0.16 42); --accent-soft: oklch(0.955 0.03 60); --accent-ink: oklch(0.45 0.15 40); --on-accent: oklch(0.99 0.005 80);
+    --measure: oklch(0.52 0.085 188); --measure-soft: oklch(0.95 0.025 188); --measure-ink: oklch(0.4 0.075 190);
+    --display: "Fraunces", Georgia, serif;
+    --body: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: oklch(0.94 0.008 80); --ink-soft: oklch(0.77 0.01 75); --ink-faint: oklch(0.63 0.01 75);
+      --paper: oklch(0.17 0.008 70); --raised: oklch(0.212 0.009 70); --sunken: oklch(0.145 0.008 70);
+      --rule: oklch(0.275 0.01 70); --rule-strong: oklch(0.37 0.012 70);
+      --accent: oklch(0.73 0.14 50); --accent-soft: oklch(0.275 0.045 48); --accent-ink: oklch(0.81 0.115 58); --on-accent: oklch(0.18 0.02 50);
+      --measure: oklch(0.76 0.09 182); --measure-soft: oklch(0.255 0.03 188); --measure-ink: oklch(0.83 0.08 180);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: oklch(0.94 0.008 80); --ink-soft: oklch(0.77 0.01 75); --ink-faint: oklch(0.63 0.01 75);
+    --paper: oklch(0.17 0.008 70); --raised: oklch(0.212 0.009 70); --sunken: oklch(0.145 0.008 70);
+    --rule: oklch(0.275 0.01 70); --rule-strong: oklch(0.37 0.012 70);
+    --accent: oklch(0.73 0.14 50); --accent-soft: oklch(0.275 0.045 48); --accent-ink: oklch(0.81 0.115 58); --on-accent: oklch(0.18 0.02 50);
+    --measure: oklch(0.76 0.09 182); --measure-soft: oklch(0.255 0.03 188); --measure-ink: oklch(0.83 0.08 180);
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--paper); color: var(--ink); font: 16px/1.5 var(--body);
+    padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 18px 44px;
+  }
+  .page { max-width: 980px; margin: 0 auto; display: grid; gap: 18px; }
+  .eyebrow { font: 500 12px/1.2 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); }
+  h1 { font: 650 clamp(28px, 6vw, 42px)/1.05 var(--display); margin: 6px 0 0; text-wrap: balance; letter-spacing: -0.01em; }
+  h2 { font: 650 22px/1.2 var(--display); margin: 0; }
+  p { margin: 0; }
+  .lede { color: var(--ink-soft); max-width: 64ch; margin-top: 8px; }
+
+  .stage { position: relative; border-radius: 14px; overflow: hidden; border: 1px solid var(--rule); background: #c9a679; aspect-ratio: 16 / 10; max-width: 100%; touch-action: none; }
+  @media (max-width: 560px) { .stage { aspect-ratio: 4 / 5; } }
+  .stage canvas { display: block; width: 100%; height: 100%; }
+  .tags { position: absolute; inset: 0; pointer-events: none; }
+  .tag {
+    position: absolute; transform: translate(-50%, -100%); white-space: nowrap; font: 600 13px/1.2 var(--body);
+    padding: 5px 9px; border-radius: 8px; background: rgba(255, 250, 242, 0.94); color: #2b2420; border: 1px solid rgba(0, 0, 0, 0.12);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); margin-top: -10px;
+  }
+  .tag small { display: block; font: 500 11px/1.3 var(--mono); color: #6b625a; }
+  .tag.you { background: #fbe7d6; color: #8a4518; border-color: #e7b48f; }
+  .tag.ok { background: #dff1e7; color: #1d6b42; border-color: #a8d8bb; }
+  .hint { position: absolute; right: 10px; bottom: 10px; font: 500 12px var(--mono); color: rgba(40, 25, 10, 0.75); background: rgba(255, 250, 242, 0.7); padding: 4px 8px; border-radius: 6px; }
+  .nogl { position: absolute; inset: 0; display: grid; place-items: center; padding: 20px; text-align: center; color: #2b2420; }
+
+  .steps { display: flex; flex-wrap: wrap; gap: 6px; }
+  .pill { font: 500 13px/1 var(--mono); border-radius: 999px; padding: 8px 11px; border: 1px solid var(--rule-strong); background: var(--raised); color: var(--ink-soft); cursor: pointer; }
+  .pill[aria-current="step"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+  .pill.seen { border-color: var(--accent); color: var(--accent-ink); }
+  .caption { display: grid; gap: 8px; min-height: 104px; }
+  .caption h3 { font: 600 19px/1.3 var(--body); margin: 0; }
+  .doer { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; align-items: start; }
+  .who { font: 500 11px/1 var(--mono); letter-spacing: 0.06em; text-transform: uppercase; border-radius: 6px; padding: 5px 7px; margin-top: 3px; }
+  .who.you { background: var(--accent-soft); color: var(--accent-ink); }
+  .who.claude { background: var(--measure-soft); color: var(--measure-ink); }
+  .doer ol { margin: 0; padding-left: 18px; display: grid; gap: 3px; }
+  .nav { display: flex; gap: 10px; flex-wrap: wrap; }
+  .btn { font: 600 15px/1 var(--body); border-radius: 10px; border: 1px solid var(--rule-strong); background: var(--raised); color: var(--ink); padding: 12px 16px; cursor: pointer; min-height: 46px; }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); flex: 1 1 180px; }
+  .btn:disabled { opacity: 0.45; cursor: default; }
+  .btn:focus-visible, .pill:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+  .wires { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+  .wire { border: 1px solid var(--rule); border-radius: 12px; padding: 12px 14px; background: var(--raised); display: grid; gap: 4px; }
+  .wire b { font: 600 17px/1.2 var(--body); display: flex; align-items: center; gap: 8px; }
+  .wire b i { width: 14px; height: 14px; border-radius: 4px; display: inline-block; }
+  .wire span { color: var(--ink-soft); font-size: 14px; }
+  .wire code { font: 500 13px var(--mono); }
+  .note { color: var(--ink-soft); font-size: 14px; max-width: 70ch; }
+</style>
+
+<div class="page">
+  <header>
+    <span class="eyebrow">Smart Food Scale · step 1.6, the buzzer</span>
+    <h1>Where does the hiss come from?</h1>
+    <p class="lede">A constant faint hiss means current flows through the buzzer all the time, so a beep has nothing to switch. Either the transistor is switched on all the time, or the buzzer’s − reaches ground without it. One move tells which: pull the transistor out and listen. Drag to turn; scroll or pinch to zoom.</p>
+  </header>
+
+  <div class="stage" id="stage">
+    <canvas id="gl" aria-label="Your bench in 3D: the buzzer in the breadboard, and the transistor next to the 1 kΩ resistor pulled straight up out of its rows while the USB stays in."></canvas>
+    <div class="tags" id="tags"></div>
+    <span class="hint">drag to turn · scroll to zoom</span>
+  </div>
+  <div class="steps" id="pills" aria-label="Steps"></div>
+  <div class="caption" id="caption" aria-live="polite"></div>
+  <div class="nav">
+    <button class="btn" id="prev" type="button">← Back</button>
+    <button class="btn" id="replay" type="button">Replay</button>
+    <button class="btn primary" id="next" type="button">Next step →</button>
+  </div>
+
+  <section style="display:grid;gap:10px" aria-labelledby="w-title">
+    <h2 id="w-title">What the hiss tells</h2>
+    <div class="wires">
+      <div class="wire"><b><i style="background:#2f9e5b"></i>Hiss stops</b><span>The transistor was on all the time: its middle leg gets a pin that is high, or it sits in the wrong rows.</span></div>
+      <div class="wire"><b><i style="background:#d0453c"></i>Hiss goes on</b><span>The buzzer’s − reaches ground without the transistor: a wire or a pin in the wrong row.</span></div>
+    </div>
+    <p class="note">USB stays in, so you can hear it. Afterwards the transistor goes back exactly as it was: same three rows, flat face the same way.</p>
+  </section>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(() => {
+  // ---------------------------------------------------------------------------------
+  // The steps. Units are millimetres. X: across (the breadboard is on the +X side),
+  // Y: up, Z: towards you (the NodeMCU's far end is towards you, its USB away).
+  // ---------------------------------------------------------------------------------
+  const D_ROW_X = 11.43, OUT_ROW_X = -11.43;
+  const pinZ = (i) => 17.78 - i * 2.54;                   // i = 0 is the far end's first pin
+  const D_ROW = ['D0', 'D1', 'D2', 'D3', 'D4', '3V', 'G', 'D5', 'D6', 'D7', 'D8', 'RX', 'TX', 'G', '3V'];
+  const OUT_ROW = ['A0', 'G', 'VU', 'S3', 'S2', 'S1', 'SC', 'S0', 'SK', 'G', '3V', 'EN', 'RST', 'G', 'VIN'];
+  const PCB_TOP = 5;           // the board lies on its Wi-Fi module, back side up
+  const PIN_TIP = PCB_TOP + 8.5;
+  const MOD = { x: -24, z: 48, y: 14.5 };                   // the buzzer module, standing on its plugs
+  const MPIN = (k) => [MOD.x - 2.54 + k * 2.54, MOD.y, MOD.z - 9];   // k: 0 is −, 1 the middle, 2 is S
+  const REST = [-6, 30, 30];                 // S's socket, held in the air
+  const MEET_A = [16, 20, 44], MEET_B = [34, 22, 56];   // where the loose pins are brought
+  const STEPS = [
+    { title: 'Hear the hiss', who: 'you', text: ['USB in, the buzzer in its rows: the faint hiss you hear now.'], cam: [[-10, 110, 90], [55, 0, -18]], T: 1.5 },
+    { title: 'Pull the transistor out', who: 'you', text: ['The transistor for the buzzer: small, black, three legs, next to the 1 kΩ resistor.', 'Note which way its flat face looks. Then pull it straight up out of the breadboard. USB stays in.'], cam: [[-20, 70, 60], [41, 6, -6]], T: 2.8, ring: true },
+    { title: 'Listen', who: 'you', text: ['Ear close to the buzzer. Is the hiss gone, or still there?'], cam: [[-10, 110, 90], [55, 0, -18]], T: 2.5 },
+    { title: 'What it means', who: 'claude', text: ['Hiss stops: the transistor was on all the time. Its middle leg gets a pin that is high, or it sits in the wrong rows.', 'Hiss goes on: the buzzer’s − reaches ground without the transistor.', 'Tell Claude which. Then push the transistor back exactly as it was.'], cam: [[-10, 110, 90], [55, 0, -18]], T: 1.5 },
+  ];
+
+  // --- the player's chrome, which works without WebGL ---------------------------------
+  const pills = document.getElementById('pills'), caption = document.getElementById('caption');
+  const seen = new Set([0]);
+  let step = 0, start = performance.now();
+  STEPS.forEach((s, i) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'pill'; b.textContent = i === 0 ? 'Bench' : String(i);
+    b.setAttribute('aria-label', s.title);
+    b.addEventListener('click', () => go(i));
+    pills.append(b);
+  });
+  function go(i) {
+    step = Math.max(0, Math.min(STEPS.length - 1, i));
+    seen.add(step);
+    start = performance.now();
+    flyTo(STEPS[step].cam);
+    const s = STEPS[step];
+    caption.innerHTML = `<h3>${step ? step + '. ' : ''}${s.title}</h3><div class="doer"><span class="who ${s.who}">${s.who === 'you' ? 'You do' : 'Claude'}</span>` +
+      (s.text.length > 1 ? `<ol>${s.text.map((t) => `<li>${t}</li>`).join('')}</ol>` : `<p>${s.text[0]}</p>`) + '</div>';
+    [...pills.children].forEach((b, k) => { b.toggleAttribute('aria-current', k === step); if (k === step) b.setAttribute('aria-current', 'step'); b.classList.toggle('seen', seen.has(k) && k !== step); });
+    document.getElementById('prev').disabled = step === 0;
+    const next = document.getElementById('next');
+    next.disabled = step === STEPS.length - 1;
+    next.textContent = step === STEPS.length - 1 ? 'That’s all' : 'Next step →';
+  }
+  document.getElementById('prev').addEventListener('click', () => go(step - 1));
+  document.getElementById('next').addEventListener('click', () => go(step + 1));
+  document.getElementById('replay').addEventListener('click', () => { start = performance.now(); flyTo(STEPS[step].cam); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'ArrowRight') go(step + 1); if (e.key === 'ArrowLeft') go(step - 1); });
+
+  let flyTo = () => {};
+  const stage = document.getElementById('stage');
+  if (!window.THREE || !(() => { try { return document.createElement('canvas').getContext('webgl'); } catch { return null; } })()) {
+    stage.insertAdjacentHTML('beforeend', '<p class="nogl">This browser cannot draw the 3D bench. The steps below still say what to do.</p>');
+    go(0);
+    return;
+  }
+
+  // --- the scene ------------------------------------------------------------------------
+  const canvas = document.getElementById('gl');
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
+  renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0xc9a679);
+  const camera = new THREE.PerspectiveCamera(38, 16 / 10, 1, 2000);
+  camera.position.set(...STEPS[0].cam[0]);
+  const controls = new THREE.OrbitControls(camera, canvas);
+  controls.target.set(...STEPS[0].cam[1]);
+  controls.enableDamping = true;
+  controls.maxPolarAngle = Math.PI * 0.47;
+  controls.minDistance = 35;
+  controls.maxDistance = 400;
+
+  scene.add(new THREE.HemisphereLight(0xfff6e8, 0x6b5136, 0.75));
+  const sun = new THREE.DirectionalLight(0xffffff, 0.85);
+  sun.position.set(-60, 140, 90);
+  sun.castShadow = true;
+  sun.shadow.mapSize.set(2048, 2048);
+  Object.assign(sun.shadow.camera, { left: -140, right: 140, top: 140, bottom: -140, near: 10, far: 400 });
+  scene.add(sun);
+
+  const mat = (color, extra = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.6, metalness: 0.05, ...extra });
+  const BLACK = mat(0x17181b), HEADER = mat(0x26282c), GOLD = mat(0xd9b44a, { metalness: 0.7, roughness: 0.35 }), PCB = mat(0x121316), METAL = mat(0xb8bec3, { metalness: 0.8, roughness: 0.3 });
+  function box(w, h, d, material, x, y, z, shadow = true) {
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), material);
+    mesh.position.set(x, y + h / 2, z);
+    mesh.castShadow = shadow;
+    mesh.receiveShadow = true;
+    scene.add(mesh);
+    return mesh;
+  }
+  function textTexture(draw, w, h) {
+    const c = document.createElement('canvas');
+    c.width = w; c.height = h;
+    draw(c.getContext('2d'), w, h);
+    const t = new THREE.CanvasTexture(c);
+    t.encoding = THREE.sRGBEncoding;
+    t.anisotropy = 4;
+    return t;
+  }
+
+  // the desk
+  const deskTex = textTexture((g, w, h) => {
+    g.fillStyle = '#c9a679'; g.fillRect(0, 0, w, h);
+    for (let i = 0; i < 70; i++) { g.strokeStyle = `rgba(120,80,40,${0.05 + Math.random() * 0.06})`; g.lineWidth = 1 + Math.random() * 2; g.beginPath(); const y = Math.random() * h; g.moveTo(0, y); g.bezierCurveTo(w * 0.3, y + 10, w * 0.6, y - 10, w, y + 4); g.stroke(); }
+  }, 1024, 1024);
+  const desk = new THREE.Mesh(new THREE.PlaneGeometry(900, 900), new THREE.MeshStandardMaterial({ map: deskTex, roughness: 0.85 }));
+  desk.rotation.x = -Math.PI / 2;
+  desk.receiveShadow = true;
+  scene.add(desk);
+
+  // the breadboard, on the NodeMCU's right
+  const BB = { x: 27, z: -40, w: 55, l: 165, h: 9 };
+  const bbTex = textTexture((g, w, h) => {
+    const sx = w / BB.w, sz = h / BB.l;
+    g.fillStyle = '#f3f1ea'; g.fillRect(0, 0, w, h);
+    g.fillStyle = '#e1ddd1'; g.fillRect(26.2 * sx, 0, 2.6 * sx, h);
+    const line = (x, c) => { g.fillStyle = c; g.fillRect(x * sx, 4 * sz, 0.6 * sx, h - 8 * sz); };
+    line(1.6, '#d0453c'); line(8.4, '#3b6fd0'); line(46, '#3b6fd0'); line(53, '#d0453c');
+    g.fillStyle = '#3a372f';
+    const cols = [4, 6.5, 12, 14.54, 17.08, 19.62, 22.16, 32.3, 34.84, 37.38, 39.92, 42.46, 48.5, 51];
+    for (let r = 0; r < 63; r++) for (const c of cols) { if ((c < 8 || c > 46) && r % 6 === 5) continue; g.fillRect((c - 0.5) * sx, (3.5 + r * 2.54) * sz, 1 * sx, 1 * sz); }
+  }, 512, 1536);
+  const bbMats = [mat(0xe6e2d6), mat(0xe6e2d6), new THREE.MeshStandardMaterial({ map: bbTex, roughness: 0.7 }), mat(0xe6e2d6), mat(0xe6e2d6), mat(0xe6e2d6)];
+  const bb = new THREE.Mesh(new THREE.BoxGeometry(BB.w, BB.h, BB.l), bbMats);
+  bb.position.set(BB.x + BB.w / 2, BB.h / 2, BB.z);
+  bb.castShadow = true; bb.receiveShadow = true;
+  scene.add(bb);
+
+  // the NodeMCU, upside down: lying on its Wi-Fi module, back up, pins up, USB away
+  box(16, 3.4, 24, METAL, 0, 0, 8);
+  box(31, 1.6, 58, PCB, 0, 3.4, 0);
+  const label = textTexture((g, w, h) => {
+    g.fillStyle = '#121316'; g.fillRect(0, 0, w, h);
+    g.fillStyle = '#e7e9ec'; g.font = 'bold 44px monospace'; g.textAlign = 'center';
+    g.save(); g.translate(w / 2, h / 2); g.rotate(-Math.PI / 2); g.fillText('NodeMcu V3', 0, 14); g.restore();
+  }, 256, 512);
+  const back = new THREE.Mesh(new THREE.PlaneGeometry(16, 40), new THREE.MeshStandardMaterial({ map: label, roughness: 0.6 }));
+  back.rotation.x = -Math.PI / 2;
+  back.position.set(0, PCB_TOP + 0.02, 0);
+  back.scale.x = -1;  // the canvas text would read mirrored on this face
+  back.material.side = THREE.DoubleSide;
+  scene.add(back);
+  box(8, 3, 7, METAL, 0, 1.2, -31);                                  // the USB socket, at the far side
+  const usb = new THREE.Group();
+  const plug = new THREE.Mesh(new THREE.BoxGeometry(10, 6, 14), BLACK); plug.position.set(0, 2.8, -42); plug.castShadow = true; usb.add(plug);
+  const cable = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 2.2, 120, 12), BLACK); cable.rotation.x = Math.PI / 2; cable.position.set(0, 2.4, -109); usb.add(cable);
+  scene.add(usb);
+  for (const x of [D_ROW_X, OUT_ROW_X]) {
+    box(2.54, 2.5, 15 * 2.54, HEADER, x, PCB_TOP, pinZ(7));
+    for (let i = 0; i < 15; i++) box(0.64, 6, 0.64, GOLD, x, PCB_TOP + 2.5, pinZ(i), false);
+  }
+  // the three rail wires the owner already has, from the outer row: G, 3V, VIN (left as they are)
+  const railWires = new THREE.Group();
+  scene.add(railWires);
+
+  // --- jumpers ----------------------------------------------------------------------------
+  function socket(x, y, z, up = true) {
+    const g = new THREE.Group();
+    const body = new THREE.Mesh(new THREE.BoxGeometry(2.6, 14, 2.6), BLACK);
+    body.position.y = up ? 7 : -7;
+    body.castShadow = true;
+    g.add(body);
+    g.position.set(x, y, z);
+    scene.add(g);
+    return g;
+  }
+  function tube(points, colour) {
+    const curve = new THREE.CatmullRomCurve3(points.map((p) => new THREE.Vector3(...p)));
+    const geometry = new THREE.TubeGeometry(curve, 120, 0.75, 10, false);
+    const mesh = new THREE.Mesh(geometry, mat(colour, { roughness: 0.45 }));
+    mesh.castShadow = true;
+    scene.add(mesh);
+    return mesh;
+  }
+  // a wire whose ends move: its tube is rebuilt only when a point changes
+  function liveWire(colour) {
+    const mesh = new THREE.Mesh(new THREE.BufferGeometry(), mat(colour, { roughness: 0.45 }));
+    mesh.castShadow = true;
+    scene.add(mesh);
+    let key = '';
+    liveWire.last = mesh;
+    return (points) => {
+      const k = points.map((p) => p.map((v) => v.toFixed(1)).join(',')).join(';');
+      if (k === key) return;
+      key = k;
+      mesh.geometry.dispose();
+      mesh.geometry = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points.map((p) => new THREE.Vector3(...p))), 90, 0.75, 10, false);
+    };
+  }
+  const mix = (a, b, k) => a.map((v, i) => v + (b[i] - v) * k);
+  const pinHousing = () => { const m = new THREE.Mesh(new THREE.BoxGeometry(2.6, 9, 2.6), BLACK); m.castShadow = true; scene.add(m); return m; };
+  const pinTip = () => { const m = new THREE.Mesh(new THREE.BoxGeometry(0.64, 4, 0.64), GOLD); scene.add(m); return m; };
+
+  // G and 3V from the outer row to the left rails: left as they are
+  for (const [i, colour, to] of [[9, 0x8d949a, [BB.x + 4, BB.h, -40]], [10, 0x1fa99a, [BB.x + 6.5, BB.h, -45]]]) {
+    const p = [OUT_ROW_X, PCB_TOP + 2.5, pinZ(i)];
+    socket(p[0], p[1], p[2]);
+    tube([[p[0], p[1] + 14, p[2]], [p[0] - 6, p[1] + 30, p[2] - 10], [to[0] - 10, 45, to[2] + 10], [to[0], to[1] + 22, to[2]], [to[0], to[1] + 10, to[2]]], colour);
+    box(2.6, 9, 2.6, BLACK, to[0], to[1], to[2]);
+  }
+  // purple: VIN (outer row, last pin) to the right + rail; its pin can come out
+  const VIN = [OUT_ROW_X, PCB_TOP + 2.5, pinZ(14)];
+  const PR = [BB.x + 51, BB.h, -60];
+  const VU = [OUT_ROW_X, PCB_TOP + 2.5, pinZ(2)];
+  const vinSock = socket(...VIN);
+  const purple = liveWire(0x7a6a4f), purpleHouse = pinHousing(), purpleTip = pinTip();
+  // the wire from the buzzer's S row to the right + rail; its row end can come out
+  const RR = [BB.x + 51, BB.h, -12], RROW = [BB.x + 37.38, BB.h, -26];
+  box(2.6, 9, 2.6, BLACK, RR[0], RR[1], RR[2]);
+  const red = liveWire(0xb8322a), redHouse = pinHousing(), redTip = pinTip();
+
+  // the buzzer module, out of the breadboard, standing on its plugs
+  const display = new THREE.Group();
+  const mpcb = new THREE.Mesh(new THREE.BoxGeometry(15, 1.6, 20), mat(0x1e7a4c)); mpcb.castShadow = true; display.add(mpcb);
+  const can = new THREE.Mesh(new THREE.CylinderGeometry(5.5, 5.5, 7, 32), mat(0x151618)); can.position.set(0, 4.3, 2); can.castShadow = true; display.add(can);
+  const pinLabels = textTexture((g, w, h) => { g.fillStyle = '#1e7a4c'; g.fillRect(0, 0, w, h); g.fillStyle = '#e9eef7'; g.font = 'bold 34px monospace'; g.textAlign = 'center'; ['−', '', 'S'].forEach((n, k) => g.fillText(n, w / 2 - 70 + k * 70, 46)); }, 256, 64);
+  const plate = new THREE.Mesh(new THREE.PlaneGeometry(12, 3), new THREE.MeshStandardMaterial({ map: pinLabels }));
+  plate.rotation.x = -Math.PI / 2; plate.position.set(0, 0.81, -7); display.add(plate);
+  for (let k = 0; k < 3; k++) {
+    const leg = new THREE.Mesh(new THREE.BoxGeometry(0.64, 9, 0.64), GOLD); leg.position.set(-2.54 + k * 2.54, -4.5, -9); display.add(leg);
+    const hdr = new THREE.Mesh(new THREE.BoxGeometry(2.54, 2.5, 2.54), mat(0x26282c)); hdr.position.set(-2.54 + k * 2.54, -1.3, -9); display.add(hdr);
+  }
+  display.position.set(MOD.x, MOD.y, MOD.z);
+  const IN_BB = [BB.x + 34.84 + 9, BB.h + 3.3, RROW[2] + 2.54];
+  const TR = [BB.x + 14.54, BB.h, RROW[2] + 20];
+  const q1 = new THREE.Group();
+  const tBody = new THREE.Mesh(new THREE.CylinderGeometry(2.4, 2.4, 5, 24, 1, false, 0, Math.PI), mat(0x17181b));
+  tBody.position.y = 6.2; tBody.castShadow = true; q1.add(tBody);
+  const tFlat = new THREE.Mesh(new THREE.BoxGeometry(0.2, 5, 4.8), mat(0x26282c)); tFlat.position.set(0, 6.2, 0); q1.add(tFlat);
+  for (const dz of [-2.54, 0, 2.54]) { const leg = new THREE.Mesh(new THREE.BoxGeometry(0.45, 6, 0.45), METAL); leg.position.set(0, 1, dz); q1.add(leg); }
+  q1.position.set(...TR);
+  scene.add(q1);
+  const res = new THREE.Group();
+  const rBody = new THREE.Mesh(new THREE.CylinderGeometry(1.1, 1.1, 6.5, 16), mat(0xd9c49a)); rBody.rotation.x = Math.PI / 2; rBody.position.y = 3; res.add(rBody);
+  for (const [dz, c] of [[-2, 0x6b4a2b], [-0.8, 0x111111], [0.4, 0xd0453c]]) { const band = new THREE.Mesh(new THREE.CylinderGeometry(1.15, 1.15, 0.5, 16), mat(c)); band.rotation.x = Math.PI / 2; band.position.set(0, 3, dz); res.add(band); }
+  res.position.set(TR[0] - 7.62, BB.h, TR[2] + 6);
+  scene.add(res);
+  tube([[D_ROW_X, PCB_TOP + 16, pinZ(10)], [D_ROW_X + 4, 30, pinZ(10) + 4], [TR[0] - 10, 24, TR[2] + 14], [TR[0] - 7.62, BB.h + 14, TR[2] + 10.16], [TR[0] - 7.62, BB.h + 6, TR[2] + 10.16]], 0xe0b62e);
+  socket(D_ROW_X, PCB_TOP + 2.5, pinZ(10));
+  scene.add(display);
+  const waves = [0, 1, 2].map(() => { const w = new THREE.Mesh(new THREE.TorusGeometry(6, 0.3, 8, 48), new THREE.MeshBasicMaterial({ color: 0xfff1c9, transparent: true, opacity: 0 })); w.rotation.x = Math.PI / 2; w.position.set(MOD.x, MOD.y + 9, MOD.z + 2); scene.add(w); return w; });
+
+  // the two jumpers on the module: S (its socket moves) and − (touched on and off G)
+  const S_FROM = MPIN(2), M_FROM = MPIN(0);
+  const sOnMod = socket(S_FROM[0], S_FROM[1] - 0.5, S_FROM[2], false);
+  const mOnMod = socket(M_FROM[0], M_FROM[1] - 0.5, M_FROM[2], false);
+  const sWire = liveWire(0x169e8f), sWireMesh = liveWire.last, sSock = socket(0, 0, 0);
+  const G = [D_ROW_X, PCB_TOP + 2.5, pinZ(13)];
+  const mSock = socket(0, 0, 0);
+  const mTube = tube([[M_FROM[0], 0.8, M_FROM[2]], [M_FROM[0], 0.8, M_FROM[2] - 10], [(M_FROM[0] + G[0]) / 2 - 8, 12, (M_FROM[2] + G[2]) / 2], [G[0] - 4, G[1] + 33, G[2] + 4], [G[0], G[1] + 20, G[2]]], 0xe9e6dc);
+  // where S's socket sits, by name
+  const V3 = [D_ROW_X, PCB_TOP + 6.5, pinZ(14)];
+  const SPOT = { v3: V3, rest: REST, a: [MEET_A[0], MEET_A[1] + 4.5, MEET_A[2]], b: [MEET_B[0], MEET_B[1] + 4.5, MEET_B[2]] };
+
+  // a ring that pulses round a pin
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(2.4, 0.35, 8, 32), new THREE.MeshBasicMaterial({ color: 0xff8a3d }));
+  ring.rotation.x = Math.PI / 2;
+  scene.add(ring);
+
+  // --- labels in the page, pinned to points in 3D ---------------------------------------------
+  const tagsEl = document.getElementById('tags');
+  function tags(list) {
+    const rect = canvas.getBoundingClientRect();
+    tagsEl.innerHTML = list.map(({ at, text, small, tone }) => {
+      const v = new THREE.Vector3(...at).project(camera);
+      if (v.z > 1) return '';
+      const x = (v.x * 0.5 + 0.5) * rect.width, y = (-v.y * 0.5 + 0.5) * rect.height;
+      return `<span class="tag ${tone || ''}" style="left:${x.toFixed(0)}px;top:${y.toFixed(0)}px">${text}${small ? `<small>${small}</small>` : ''}</span>`;
+    }).join('');
+  }
+
+  // --- the camera between steps ------------------------------------------------------------
+  let fly = null;
+  flyTo = ([pos, target]) => { fly = { t0: performance.now(), p0: camera.position.clone(), q0: controls.target.clone(), p1: new THREE.Vector3(...pos), q1: new THREE.Vector3(...target) }; };
+  controls.addEventListener('start', () => { fly = null; });
+  const ease = (t) => (t <= 0 ? 0 : t >= 1 ? 1 : t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+  const seg = (t, a, b) => ease(Math.min(1, Math.max(0, (t - a) / (b - a))));
+
+  function resize() {
+    const r = stage.getBoundingClientRect();
+    renderer.setSize(r.width, r.height, false);
+    camera.aspect = r.width / r.height;
+    camera.updateProjectionMatrix();
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function frame(now, once = false) {
+    const s = STEPS[step];
+    const t = reduce ? 1 : Math.min(1, (now - start) / 1000 / s.T);
+    if (fly) {
+      const k = reduce ? 1 : ease(Math.min(1, (now - fly.t0) / 1100));
+      camera.position.lerpVectors(fly.p0, fly.p1, k);
+      controls.target.lerpVectors(fly.q0, fly.q1, k);
+      if (k >= 1) fly = null;
+    }
+    controls.update();
+
+    // everything as left: brown in the rail, test jumpers off, the module in its rows
+    const pEnd = [...PR];
+    purpleHouse.position.set(pEnd[0], pEnd[1] + 4.5, pEnd[2]); purpleTip.visible = false;
+    vinSock.position.set(...VU);
+    purple([[VU[0], VU[1] + 14, VU[2]], [VU[0] - 6, VU[1] + 30, VU[2] - 10], [(VU[0] + pEnd[0]) / 2, 45, (VU[2] + pEnd[2]) / 2], [pEnd[0], pEnd[1] + 30, pEnd[2] - 8], [pEnd[0], pEnd[1] + 9, pEnd[2]]]);
+    redHouse.position.set(RROW[0], RROW[1] + 4.5, RROW[2]); redTip.visible = false;
+    red([[RR[0], RR[1] + 9, RR[2]], [RR[0], RR[1] + 22, RR[2]], [(RR[0] + RROW[0]) / 2, 30, (RR[2] + RROW[2]) / 2], [RROW[0], RROW[1] + 24, RROW[2] - 6], [RROW[0], RROW[1] + 9, RROW[2]]]);
+    for (const o of [sOnMod, mOnMod, sSock, mSock, sWireMesh, mTube]) o.visible = false;
+    display.position.set(...IN_BB);
+    display.rotation.y = Math.PI / 2;
+    // the transistor: in, then straight up and set down beside the breadboard
+    const qk = step === 0 ? 0 : step === 1 ? seg(t, 0.2, 0.9) : 1;
+    const up = Math.min(1, qk * 2), aside = Math.max(0, qk * 2 - 1);
+    q1.position.set(TR[0], aside > 0 ? (TR[1] + 22) * (1 - aside) : TR[1] + up * 22, TR[2] + aside * 58);
+    // the hiss: faint waves; step 2 is the question
+    const hissing = step === 0 || step === 1;
+    waves.forEach((w, k) => {
+      const p = (now / 900 + k / 3) % 1;
+      w.position.set(display.position.x, display.position.y + 9, display.position.z);
+      w.material.opacity = hissing ? 0.3 * (1 - p) : step === 2 ? 0.18 * (1 - p) : 0;
+      w.scale.setScalar(1 + p * 0.8);
+    });
+
+    // highlight and labels
+    const list = [];
+    ring.visible = !!s.ring && qk < 0.5;
+    ring.scale.setScalar(1 + Math.sin(now / 160) * 0.12);
+    ring.position.set(TR[0], BB.h + 0.2, TR[2]);
+    if (step === 0) list.push({ at: [IN_BB[0], BB.h + 24, IN_BB[2]], text: 'hiss', small: 'all the time', tone: 'you' });
+    if (step === 1) { list.push({ at: [q1.position.x, q1.position.y + 14, q1.position.z], text: 'the transistor', small: 'note its flat face · pull it straight up', tone: 'you' }); list.push({ at: [res.position.x, BB.h + 8, res.position.z], text: '1 kΩ', small: 'it sits next to this' }); }
+    if (step === 2) list.push({ at: [IN_BB[0], BB.h + 24, IN_BB[2]], text: 'hiss gone?', small: 'or still there', tone: 'ok' });
+    if (step === 3) list.push({ at: [IN_BB[0], BB.h + 24, IN_BB[2]], text: 'stops or goes on?', small: 'tell Claude', tone: 'you' });
+    tags(list);
+
+    renderer.render(scene, camera);
+    if (!once) requestAnimationFrame(frame);
+  }
+  go(0);
+  frame(performance.now(), true);  // drawn once now, so the bench shows even where animation frames are paused
+  requestAnimationFrame(frame);
+  // For checking a step by hand: hissTest.show(step, 0..1).
+  window.hissTest = { show: (i, t = 1) => { go(i); start = performance.now() - t * STEPS[i].T * 1000; fly = null; camera.position.set(...STEPS[i].cam[0]); controls.target.set(...STEPS[i].cam[1]); frame(performance.now(), true); } };
+})();
+</script>
