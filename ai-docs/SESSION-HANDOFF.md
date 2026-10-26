@@ -16,7 +16,37 @@ owner's own messages are the `type:"user"` lines. Mine it with Python run as `py
 
 ---
 
-## 0d. Latest (26 Oct, small hours): the silent buzzer was VIN. Read this first
+## 0e. Latest (26 Oct): HX711 arrived, real weight is milestone 2, one button. Read this first
+
+- **New order** (`web/components/admin/roadmap.ts`, ids renumbered): 0 parts, 1 scale's brain,
+  **2 real weight** (`m2-real-weight`: meet-hx711, headers, hx711-wires, bench-mount,
+  cell-wires, flash-real, sign, calibrate, by-hand), 3 camera, 4 light, 5 together (the
+  pretend-weight rehearsal is gone), 6 server, 7 app, 8 pairing, 9 finish (card, power, rig,
+  **recalibrate in the rig**, accuracy, demo). `plan.ts` days, `scenes/index.ts`,
+  `Bench Photos` (republished, opens on 2.1) all follow. Commit `0a01a5f`.
+- **One button only**: click PHOTO, hold 5 s TARE. The optional second button is gone from
+  `wiring.ts`, `boards.tsx`, the Wokwi sketch, the kit and missing-parts pages; **firmware
+  0.3.6** drops D3/FLASH as PHOTO and `button` prints `E button main=N` only. Built (all four
+  envs) and published to `web/public/workbench/firmware/`. **Not yet flashed**: the board still
+  runs 0.3.5 (sim). Flash 0.3.6 sim next time the board is free. The `/prototype` simulator
+  has the one button too (click < 0.8 s PHOTO, hold 5 s TARE, as `config.h`).
+- **Milestone 2 in 3D** (commit `f69acac`): the engine (`bench3d/engine.ts`) gained part kinds
+  `hx711` (`bare`), `hx-pins`, `loadcell` (`onBook`), `book`, `tape`, `cup`, `cap`; End
+  `{ hx: 'DT' }`; beats `press` (tap/press/hold finger), `mass` (in/out) and `lines` (display
+  text). Every m2 step has a scene; all were looked at frame by frame.
+  **Waiting on the owner's photos** (asked on step 2.1): the HX711 is drawn from SparkFun's
+  reference outline with the common pin order (GND DT SCK VCC / E+ E− A− A+ B− B+), and the
+  cell's four jumpers in the cell's own wire colours. Redraw both from the photos.
+- **Checking scenes without signing in**: the browser pane may have no admin cookie. A
+  temporary `web/app/zz-bench3d/page.tsx` rendering `<Bench3DLazy sceneKey={search 's'} />`
+  works (outside `/admin`, so the proxy does not guard it); resize to 1100×800, wait for
+  `window.bench3d`, then `frameAt(beat, t)`. Delete it before committing.
+- **Still to do, in build order: 3D for milestones 3, 4, 5, 9** (camera on its MB base, the
+  hotspot, the light's LEDs, both boards, microSD, power, the rig), then simpler scenes for
+  6–8. They need an ESP32-CAM + MB base model, drawn from `public/workbench/kit/esp32-cam*.jpg`.
+- The buzzer (1.6) is still not ticked: the owner was rewiring it from the full 3D.
+
+## 0d. 26 Oct, small hours: the silent buzzer was VIN
 
 - **Found:** on the owner's NodeMCU, **VIN gives no 5 V while it runs on USB**. Proven by click
   tests with the buzzer module out of the breadboard on female–female jumpers. On 3V it

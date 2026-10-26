@@ -8,10 +8,30 @@ Nothing is marked done unless it has been run. Newest work first.
 
 ---
 
-## ▶ Continue here (26 October 2026, small hours)
+## ▶ Continue here (26 October 2026)
 
 To pick up, tell Claude: **"continue from progress.md"**. The build is on the bench, at
-**milestone 1, step 1.6, the buzzer**.
+**milestone 1, step 1.6, the buzzer**; next comes **milestone 2, real weight** (the HX711
+has arrived).
+
+### The plan, in order (changed 26 October)
+
+| # | Milestone | 3D for every hands-on step |
+| --- | --- | --- |
+| 0 | Know the parts | 2.5D |
+| 1 | The scale's brain (pretend weight) | ✅ |
+| **2** | **Real weight: HX711, load cell, calibration** | ✅ (redrawn from your HX711 photo when it comes) |
+| 3 | The camera online | ⏳ to do |
+| 4 | The light | ⏳ to do |
+| 5 | Both boards together | ⏳ to do |
+| 6–8 | Server, app, pairing (on the laptop and phone) | ⏳ simpler scenes to do |
+| 9 | Finished scale: microSD, power, rig, calibrate again, accuracy, demo | ⏳ to do |
+
+**One button only**: a click is PHOTO, a 5-second hold is TARE. The second button is gone
+everywhere; firmware 0.3.6 is built but not yet flashed (the board runs 0.3.5).
+
+**Waiting on you for milestone 2:** two photos on Bench Photos (it opens on step 2.1): the
+HX711 from above, labels readable; and the blue connector on the cell's wires, close.
 
 ### Milestone 1, the scale's brain
 
@@ -52,11 +72,13 @@ To pick up, tell Claude: **"continue from progress.md"**. The build is on the be
 2. Still silent or hissing: the Hiss Test, then check the D8 wire really is on D8 (a pin
    that is always on would keep the transistor on).
 3. Step 1.7, the whole test.
-4. **Asked, not yet answered:** "the final 3D, how it should be after all": the whole
-   milestone-1 bench in one 3D view. The step 1.7 page
-   (`/admin/build/m1-scale-brain/bench`) already draws it; a standalone artifact is still
-   to do if the owner wants one.
-5. Milestone 2 onwards in 3D: an ESP32-CAM and MB-base model is needed first.
+4. Claude flashes firmware 0.3.6 (one button) when the board is free.
+5. Milestone 2, real weight: redraw the HX711 and the cell's jumpers from the photos, then
+   the steps at `/admin/build/m2-real-weight`.
+6. 3D for milestones 3, 4, 5 and 9 (an ESP32-CAM and MB-base model first), then 6–8.
+7. **Asked, not yet answered:** "the final 3D, how it should be after all": the whole
+   bench in one 3D view. The step 1.7 page draws milestone 1's; step 2.9 draws it with the
+   HX711 and the cell.
 
 ### Open questions on the bench
 
@@ -92,7 +114,7 @@ The full technical handoff for Claude is `ai-docs/SESSION-HANDOFF.md`.
 | Architecture (`/project/architecture`) | ✅ Rebuilt | A playable system map and three drawings |
 | 3D rig (`/rig`) | ✅ Rebuilt | 3 kg cell, six white LEDs, lens at 320 mm; four drawings computed from one dimension file |
 | Docs site | ✅ Live | 16 pages, static, on Vercel |
-| Firmware, Node A | 🚧 On the board | 0.3.5 on the NodeMCU as a pretend scale; display and button work; buzzer being fixed |
+| Firmware, Node A | 🚧 On the board | 0.3.5 on the NodeMCU as a pretend scale (0.3.6, one button, built); display and button work; buzzer being fixed |
 | Firmware, Node B | 🚧 Written | Compiles; upload format checked against the backend; not on a board yet |
 | Mobile app | 📋 Not started | — |
 | Hardware | 🚧 Being wired | Parts in hand except the HX711; milestone 1 on the breadboard |

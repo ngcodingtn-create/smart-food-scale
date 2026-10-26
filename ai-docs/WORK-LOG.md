@@ -617,3 +617,19 @@ right")
 - Noticed: the photos put the breadboard beside the outer row; the 3D scenes draw it beside
   the D row. Pin counts are unaffected; the scenes need mirroring.
 - Not done: the buzzer back in place and a `beep` from the board; step 1.6 is still un-ticked.
+
+**26 October: the HX711 arrived; real weight becomes milestone 2; one button** (the owner:
+"make fixing the hx711 not in the end but in the correct order … only one button, hold for
+tare … perfect 3D … end to end")
+
+- Plan reordered: real weight is milestone 2, right after the scale's brain; the camera, the
+  light and the rest move down one; the rig milestone recalibrates once the cell is mounted;
+  the pretend-weight rehearsal is dropped. Plan page, scene keys and Bench Photos follow.
+- One button: the second button is gone from the wiring, drawings, Wokwi sketch, kit and
+  missing pages; firmware 0.3.6 (built, published, not yet flashed) no longer takes a photo
+  on D3/FLASH; the `/prototype` front panel has one button timed like the firmware.
+- Milestone 2 in 3D, nine scenes, checked in the browser: HX711, its pins, its wires and
+  capacitors, the cell on a book with a cup, its wires, flashing, the sign (a finger presses
+  the cup), calibration (a known mass), and the scale by hand (hold, mass, click).
+- Not done: the HX711 and the cell's jumper colours wait for the owner's photos; 3D for
+  milestones 3–9; flashing 0.3.6; the buzzer (1.6).
