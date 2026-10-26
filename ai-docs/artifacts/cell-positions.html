@@ -131,16 +131,16 @@
   // ---------------------------------------------------------------------------------
   const BOX = { x: 0, z: -40, r: 75, h: 55 };
   const L = 75, S = 12.7;
-  const ON_BOX = { x: 0, y: BOX.h + S / 2, z: BOX.z + BOX.r - L / 2 + 35 };   // 35 mm out past the front edge
+  const ON_BOX = { x: 0, y: BOX.h + S / 2, z: BOX.z + BOX.r - L / 2 + 55 };   // only the held end's last 20 mm on the box
   const IN_HAND = { x: 110, y: 70, z: 40 };
   // Each step: where the cell is (position, turned end for end, upside down), what holds it, where the finger presses.
   const STEPS = [
     { title: 'Where you are', who: 'you', text: ['Pressing does nothing yet: the bar has to bend, and it only bends if one end is held still and the other is free.', 'Four ways to try, one after the other. After each, tell Claude: Claude reads the board each time.'], cam: [[150, 170, 240], [20, 30, -10]], T: 1.4, pose: 'loose' },
     { title: 'A · In your hands', who: 'you', text: ['Pick the cell up. One hand grips the end the wires leave from, firmly.', 'With the other thumb, press the 20Kg ↓ end down, hold it 3 seconds, let go. Then tell Claude “A done”.'], cam: [[210, 130, 170], [110, 62, 40]], T: 3.6, pose: 'hand', press: 'label' },
-    { title: 'B · Label end out', who: 'you', text: ['Back on the box: the wired end on the lid, the 20Kg ↓ end out over the edge by about 3 cm. Holes up.', 'Tape and the power bank hold the wired end. Press the label end down, hold 3 s, let go. Tell Claude “B done”.'], cam: [[130, 150, 190], [0, 55, 20]], T: 3.6, pose: 'B', press: 'label' },
+    { title: 'B · Label end out', who: 'you', text: ['Back on the box: only the last 2 cm of the wired end on the lid. The white patch and the 20Kg ↓ end out in the air. Holes up.', 'Tape and the power bank hold that short end. Press the label end down and hold it. Tell Claude “holding”. This is the one that works.'], cam: [[130, 150, 190], [0, 55, 20]], T: 3.6, pose: 'B', press: 'label' },
     { title: 'C · Turned end for end', who: 'you', text: ['The same, but turned round: the label end held on the box, the wired end out over the edge.', 'Press the wired end down, hold 3 s, let go. Tell Claude “C done”.'], cam: [[130, 150, 190], [0, 55, 20]], T: 3.6, pose: 'C', press: 'wired' },
     { title: 'D · Upside down', who: 'you', text: ['As B, but the bar turned over: holes down, the label’s arrow pointing up.', 'Press the label end down, hold 3 s, let go. Tell Claude “D done”.'], cam: [[130, 150, 190], [0, 55, 20]], T: 3.6, pose: 'D', press: 'label' },
-    { title: 'The one that moves most', who: 'claude', text: ['The right position is the one where the counts move a lot while you press and come straight back when you let go.', 'Claude says which. The cup then goes on the free end, and the next step is the sign.'], cam: [[150, 170, 240], [20, 30, -10]], T: 1.4, pose: 'B' },
+    { title: 'Found: B, with the sensor free', who: 'claude', text: ['Tried on 26 October: in the hands (A) and B with only 2 cm on the box, the counts rose about 125 000 under a press and came back.', 'With more of the bar on the box, nothing moved: the white patch is the sensor, and it must hang free.'], cam: [[150, 170, 240], [20, 30, -10]], T: 1.4, pose: 'B' },
   ];
 
   // --- the player's chrome, which works without WebGL ---------------------------------
@@ -328,7 +328,7 @@
     const local = (x, y, z) => new THREE.Vector3(x, y, z).applyMatrix4(cell.matrixWorld);
 
     // what holds it: tape and power bank on the end that sits on the box, or a hand
-    const heldEnd = s.pose === 'C' ? L / 2 - 20 : -L / 2 + 20;
+    const heldEnd = s.pose === 'C' ? L / 2 - 10 : -L / 2 + 10;
     holder.visible = b.held && k > 0.9;
     const hp = local(0, 0, heldEnd);
     holder.position.set(hp.x, s.pose === 'D' ? BOX.h + S : hp.y - S / 2, hp.z);

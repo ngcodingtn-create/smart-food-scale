@@ -128,7 +128,7 @@ const CAM_RIG_HIGH: [V3, V3] = [[300, 520, 260], [0, 330, -50]];
 const CAM_RIG_FRONT: [V3, V3] = [[60, 140, 260], [0, 50, 90]];
 const RIG_BUTTON_TOP: V3 = [27, 38 + 3.6 + 3, 101];
 
-const FREE_END: V3 = [CELL.x, BOOK.h + CELL.size, 27];
+const FREE_END: V3 = [CELL.x, BOOK.h + CELL.size, 52];
 /** The cup's front rim, where a finger presses. */
 const CUP_RIM: V3 = [CUP[0], CUP[1] + 10, CUP[2] + 8];
 const CUP_TAG: V3 = [CUP[0], CUP[1] + 16, CUP[2]];
@@ -313,8 +313,8 @@ export const BENCH_SCENES: Record<string, BenchScene> = {
     newParts: MOUNT,
     beats: [
       { title: 'Your round box', who: 'you', add: ['book'], text: ['Your round box, firm, on the desk left of the HX711. Any box or thick book that does not squash will do.'], cam: CAM_CELL },
-      { title: 'The cell on it', who: 'you', add: ['cell'], text: ['The end its wires come out of on the box. The label end, “20Kg ↓”, out over the edge, in the air: about 3 cm out, at least.', 'Threaded holes up; the label’s arrow points down.'], cam: CAM_CELL, tags: [{ at: [CELL.x, BOOK.h + 18, CELL.z1], text: '20Kg ↓ end', small: 'out in the air', tone: 'you' }, { at: [CELL.x, BOOK.h + 22, -38], text: 'wired end', small: 'on the box' }] },
-      { title: 'Hold the wired end down', who: 'you', add: ['tape'], text: ['Two strips of strong tape over the wired end, pressed down onto the box, then something heavy on top, like your power bank.', 'That end must not move at all. Lying loose, the bar only rocks: the readings mean nothing.'], cam: CAM_CELL, tags: [{ at: [CELL.x, BOOK.h + 40, -40], text: 'tape + something heavy', small: 'that end must not move', tone: 'you' }] },
+      { title: 'The cell on it', who: 'you', add: ['cell'], text: ['Only the last 2 cm of the wired end, with its two holes, on the box.', 'The white patch in the middle (the sensor) and the “20Kg ↓” end out in the air. Holes up; the arrow points down.'], cam: CAM_CELL, tags: [{ at: [CELL.x, BOOK.h + 18, CELL.z1], text: '20Kg ↓ end', small: 'in the air', tone: 'you' }, { at: [CELL.x, BOOK.h + 20, 8], text: 'white patch', small: 'in the air too' }, { at: [CELL.x, BOOK.h + 22, -12], text: 'only 2 cm', small: 'on the box' }] },
+      { title: 'Hold the wired end down', who: 'you', add: ['tape'], text: ['Two strips of strong tape over the wired end, pressed down onto the box, then something heavy on top, like your power bank.', 'That end must not move at all. Lying loose, the bar only rocks: the readings mean nothing.'], cam: CAM_CELL, tags: [{ at: [CELL.x, BOOK.h + 40, -19], text: 'tape + something heavy', small: 'that end must not move', tone: 'you' }] },
       { title: 'A cup on the free end', who: 'you', add: ['cup'], text: ['Tape a small, light cup on the free end: the masses go in it.', 'Nothing else may touch the free end: not the book, not a wire.'], cam: CAM_FREE_END, tags: [{ at: CUP_TAG, text: 'a small light cup', small: 'touches nothing else', tone: 'you' }] },
     ],
     cards: [

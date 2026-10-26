@@ -55,9 +55,10 @@ export function hxPin(name: string): V3 {
  * (rig/specs.ts); the owner's is labelled 20 kg, and its exact length was not measured.
  */
 export const BOOK = { x0: -175, x1: -25, z0: -150, z1: 0, h: 55 };
-export const CELL = { x: -100, z0: -45, z1: 30, size: 12.7 };
+/** Only the wired end's last 20 mm on the box: the sensor (the white patch) must hang free, as tried on the bench. */
+export const CELL = { x: -100, z0: -20, z1: 55, size: 12.7 };
 /** Where a known mass sits: in a small cup taped on the free end. */
-export const CUP: V3 = [CELL.x, BOOK.h + CELL.size, 21];
+export const CUP: V3 = [CELL.x, BOOK.h + CELL.size, 45];
 /** The blue 4-way connector on the cell's wires, lying on the desk, and its four jumpers' ends. */
 export const CONNECTOR = { x: -80, z: 56 };
 export const connectorPin = (k: number): V3 => [CONNECTOR.x - 3.81 + k * 2.54, 2.6, CONNECTOR.z + 4];
