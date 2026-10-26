@@ -126,7 +126,7 @@ export const BENCH_SCENES: Record<string, BenchScene> = {
     newWires: BUZZER,
     beats: [
       { title: 'USB out', who: 'you', text: ['Nothing is wired with the power on.'], cam: 'bench', usb: 'out', screen: false },
-      { title: 'The transistor', who: 'you', add: ['q1'], text: ['Column c, rows 16, 17, 18. Its flat face to the left.', 'From row 16: E (emitter), B (base), C (collector).'], cam: { rows: [13, 19] }, tags: [{ at: { hole: ['c', 17] }, text: 'E · B · C', small: 'rows 16 · 17 · 18, flat face left', tone: 'you' }] },
+      { title: 'The transistor', who: 'you', add: ['q1'], text: ['Column c, rows 16, 17, 18, its flat face towards the middle gap.', 'Looking at the flat face, legs down, the left leg is E: it goes in row 16, the row whose wire goes to the − rail. Then B in 17, C in 18.'], cam: { rows: [13, 19] }, tags: [{ at: { hole: ['c', 17] }, text: 'E · B · C', small: 'rows 16 · 17 · 18 · flat face to the gap', tone: 'you' }] },
       { title: 'The 1 kΩ resistor', who: 'you', add: ['r1k'], text: ['Column b, from row 14 to row 17: its far end joins the base’s row.', 'Bands brown, black, red: 1 kΩ.'], cam: { rows: [12, 19] }, tags: [{ at: { hole: ['b', 14] }, text: 'row 14' }, { at: { hole: ['b', 17] }, text: 'row 17: the base', tone: 'you' }] },
       { title: 'D8 → row 14', who: 'you', add: ['buz-d8'], ring: pin('d', 11), text: ['Row next to the breadboard, the 11th pin from the far end: D8.', 'Socket on D8, its pin into row 14, column a.'], cam: 'mcu', tags: [{ at: pin('d', 11), text: '11th pin', small: 'that pin is D8', tone: 'you' }] },
       { title: 'Emitter to ground', who: 'you', add: ['buz-e'], text: ['From row 16, column a, to the left − rail.'], cam: { rows: [13, 19] }, tags: [{ at: { hole: ['a', 16] }, text: 'row 16 → − rail', tone: 'you' }] },
@@ -137,7 +137,7 @@ export const BENCH_SCENES: Record<string, BenchScene> = {
       { title: 'USB in: a beep', who: 'claude', usb: 'in', screen: true, text: ['Claude sends “beep” from the laptop: you hear a short beep.', CHECK], cam: 'bench', tags: [{ at: [74, 26, -4], text: 'beep', tone: 'ok' }] },
     ],
     cards: [
-      { title: 'Transistor', text: 'Column c, rows 16–18, flat face left: E, B, C.' },
+      { title: 'Transistor', text: 'Column c, rows 16–18, flat face towards the gap. E (left leg, looking at the flat face) in row 16, the ground row.' },
       { title: '1 kΩ', text: 'Column b, row 14 to row 17.' },
       { title: 'D8 → row 14', text: 'Row next to the breadboard, 11th pin from the far end.', colour: 'yellow' },
       { title: 'Row 16 → left − rail', text: 'The emitter to ground.', colour: 'black' },

@@ -205,9 +205,14 @@ function button(rows: [number, number]) {
 
 function transistor(col: Col, row: number) {
   const group = new THREE.Group();
-  // A TO-92 standing up: a half-round body, its flat face to the left (-X), the legs in one column.
-  const body = new THREE.Mesh(new THREE.CylinderGeometry(2.4, 2.4, 4.8, 24, 1, false, 0, Math.PI), material(0x1e1f21));
-  body.position.set(COL_X[col] - 0.6, BB.top + 5.4, rowZ(row + 1));
+  // A TO-92 standing up, its flat face towards the middle gap (+X). Looking at the flat face,
+  // legs down, the left leg is E: here that is the leg nearest the owner, in `row`.
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(2.4, 2.4, 4.8, 24, 1, false, Math.PI, Math.PI), material(0x1e1f21));
+  body.position.set(COL_X[col] + 0.6, BB.top + 5.4, rowZ(row + 1));
+  const face = textPlane('E B C', 4.4, 1.6, '#cfd3d6', 'transparent');
+  face.rotation.set(0, Math.PI / 2, 0);
+  face.position.set(COL_X[col] + 0.62, BB.top + 5.6, rowZ(row + 1));
+  group.add(face);
   body.castShadow = true;
   group.add(body);
   for (let k = 0; k < 3; k++) group.add(boxMesh([0.45, 3, 0.45], M.leg, [COL_X[col], BB.top, rowZ(row + k)], false));
