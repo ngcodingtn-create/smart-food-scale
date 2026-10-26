@@ -4,7 +4,79 @@ Where the Smart Food Scale project stands, what changed recently, and what is ne
 Nothing is marked done unless it has been run. Newest work first.
 
 **Live site:** https://web-ivory-ten-26.vercel.app (deploys on every push to `main`)
-**Last updated:** 13 October 2026
+**Last updated:** 26 October 2026
+
+---
+
+## ▶ Continue here (26 October 2026, small hours)
+
+To pick up, tell Claude: **"continue from progress.md"**. The build is on the bench, at
+**milestone 1, step 1.6, the buzzer**.
+
+### Milestone 1, the scale's brain
+
+| Step | State |
+| --- | --- |
+| 1.1 USB port | ✅ COM5, CH340 |
+| 1.2 Flash | ✅ Pretend scale, firmware 0.3.5 on the NodeMCU |
+| 1.3 Rails | ✅ 3V and G from the outer row; **5 V now from VU** (see below) |
+| 1.4 Display | ✅ Four female–female jumpers straight to the board; it lights up |
+| 1.5 Button | ✅ The board reads it |
+| 1.6 Buzzer | ❌ **In progress:** no beep yet, not ticked |
+| 1.7 Whole test | ⏳ Claude runs `board.py meal-test --no-camera` once 1.6 beeps |
+
+### The buzzer, so far
+
+- **Fixed:** the transistor faced the wrong way; the diode was checked (the board no longer
+  drops off USB on a beep).
+- **Found and fixed:** on this NodeMCU, **VIN gives no 5 V on USB**. Click tests proved it:
+  silent on VIN, a click on **VU** (outer row, 3rd pin from the far end: A0, G, VU). Every
+  page now says VU (commit `faa0fc9`). The brown wire is on VU.
+- **The buzzer itself works:** it clicked wired straight to the NodeMCU.
+- **Last seen:** back in the breadboard, the board answered `E beep` and stayed on USB, but
+  no beep was heard, only a **constant faint hiss**. That means current flows through the
+  buzzer all the time: the transistor is on all the time, or the buzzer's − reaches ground
+  without it. The Hiss Test (pull the transistor out, listen) was sent; its answer is not in.
+- **Then the owner said "I messed up"** and is **rewiring the whole buzzer** from the full 3D
+  on the build page: http://localhost:3000/admin/build/m1-scale-brain/buzzer. Everything for
+  the buzzer comes out (transistor, 1 kΩ, diode, module, their wires); rails, display and
+  button stay. The 3D puts it in rows 14–18: transistor column c rows 16–18 (flat face to the
+  gap, E in 16), 1 kΩ b14→b17, D8 (11th pin) → a14, a16 → left − rail, module down column j
+  (S row 16, − row 18), d18 → f18, g16 → right + rail row 24, diode h16→h18 band at 16.
+
+### Next, in order
+
+1. The owner says the buzzer is rewired and the USB is in. Claude runs `beep`
+   (`firmware/.venv/Scripts/python.exe firmware/tools/board.py send beep --expect "E beep"`;
+   close the Wire it, live tab first). **Tick 1.6 only when the owner hears it.**
+2. Still silent or hissing: the Hiss Test, then check the D8 wire really is on D8 (a pin
+   that is always on would keep the transistor on).
+3. Step 1.7, the whole test.
+4. **Asked, not yet answered:** "the final 3D, how it should be after all": the whole
+   milestone-1 bench in one 3D view. The step 1.7 page
+   (`/admin/build/m1-scale-brain/bench`) already draws it; a standalone artifact is still
+   to do if the owner wants one.
+5. Milestone 2 onwards in 3D: an ESP32-CAM and MB-base model is needed first.
+
+### Open questions on the bench
+
+- The owner's photos put the breadboard beside the NodeMCU's **outer** row; the 3D scenes
+  draw it beside the D row. Pin counts from the far end are right either way. Confirm with a
+  photo before mirroring the scenes.
+- The 3D's buzzer rows (14–18) are a clean layout, not where the owner first put it.
+
+### 3D pages made for the buzzer (claude.ai artifacts, sources in `ai-docs/artifacts/`)
+
+| Page | What it answers |
+| --- | --- |
+| [Buzzer, Straight to the Board](https://claude.ai/artifact/Jr2bSJtndwYhR1H5xbmxd2) | Does the module itself work? (yes) |
+| [Find the 5 V](https://claude.ai/artifact/Wm53mCXzA14eaYvtgG6SgD) | Where the 5 V stops (VIN) |
+| [VIN or VU](https://claude.ai/artifact/KSjaDit9K26vnimfEXa53W) | VU carries it (it clicked) |
+| [Buzzer, Back in Place](https://claude.ai/artifact/XDmqoG4FhwWFVF1LoQmJ9a) | Put it all back, then the beep |
+| [The Hiss Test](https://claude.ai/artifact/4auBFx4pdLSJ7Feh8dh5qF) | Transistor stuck on, or − grounded? (answer pending) |
+
+Photos come in through **Bench Photos** (https://claude.ai/artifact/KAKPb1zWgcn6Tv6pjPx9fV).
+The full technical handoff for Claude is `ai-docs/SESSION-HANDOFF.md`.
 
 ---
 
@@ -20,10 +92,10 @@ Nothing is marked done unless it has been run. Newest work first.
 | Architecture (`/project/architecture`) | ✅ Rebuilt | A playable system map and three drawings |
 | 3D rig (`/rig`) | ✅ Rebuilt | 3 kg cell, six white LEDs, lens at 320 mm; four drawings computed from one dimension file |
 | Docs site | ✅ Live | 16 pages, static, on Vercel |
-| Firmware, Node A | 🚧 Written | Compiles; runs in the Wokwi simulator; not on a board yet |
+| Firmware, Node A | 🚧 On the board | 0.3.5 on the NodeMCU as a pretend scale; display and button work; buzzer being fixed |
 | Firmware, Node B | 🚧 Written | Compiles; upload format checked against the backend; not on a board yet |
 | Mobile app | 📋 Not started | — |
-| Hardware | 📋 Not ordered | Waiting on the component request |
+| Hardware | 🚧 Being wired | Parts in hand except the HX711; milestone 1 on the breadboard |
 
 ---
 
