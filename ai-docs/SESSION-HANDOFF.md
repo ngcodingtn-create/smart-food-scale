@@ -16,7 +16,19 @@ owner's own messages are the `type:"user"` lines. Mine it with Python run as `py
 
 ---
 
-## 0f. Latest (26 Oct, evening): every step of milestones 1 to 9 is in 3D. Read this first
+## 0g. Latest: milestone 1 done; no ceramic capacitors. Read this first
+
+- **Milestone 1 is done** (1.6 the owner heard the beep; 1.7 all six checks passed and the
+  owner saw 150.0 g, then NO CAMERA with the long beep). The board runs **firmware 0.3.6**
+  (one button). 2.1 and 2.2 ticked. **Next: step 2.3, wire the HX711.**
+- **No 100 nF ceramics** (the owner has none, but several electrolytics): the plan uses
+  electrolytics only. `cap-ceramic` is `skip` in `kit.ts`, gone from the missing page; the
+  HX711 gets one electrolytic across the left rails (their 100 µF 25 V, or a 10 µF), the
+  camera a 1000 µF, the light 10–100 µF; `a-decouple` is gone. The reason, stated on the
+  pages: the HX711, ESP32-CAM and NodeMCU boards carry their own small ceramics.
+- Production was pushed on the owner's "push to prod" (`ccb5312`); later commits are local.
+
+## 0f. 26 Oct, evening: every step of milestones 1 to 9 is in 3D
 
 - **The owner's HX711** (photos on Bench Photos, answered): an **XFW-HX711**, about 24.6 × 16 mm
   (measured from the photo against the pin pitch), **pins already soldered** (step 2.2 says to

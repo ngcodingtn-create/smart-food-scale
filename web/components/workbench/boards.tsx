@@ -121,7 +121,6 @@ const A_WIRES: Record<string, WireArt> = {
   'a-3v3': line(aRight('3V'), [A_V33, aRight('3V')[1]]),
   'a-gnd': line(aRight('G'), [A_GND, aRight('G')[1]]),
   'a-5v': line(aLeft('VU'), [A_V5, aLeft('VU')[1]]),
-  'a-decouple': line([A_V33, 544], [A_GND, 544], [210, 544]),
   // HX711
   'a-hx-vcc': line([A_MOD, 426], [A_V33, 426]),
   'a-hx-gnd': line([A_MOD, 360], [A_GND, 360]),

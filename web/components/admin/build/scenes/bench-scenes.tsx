@@ -433,7 +433,7 @@ function wireVariant(variant: string): WireVariant {
           { from: pinL(5), to: P(227, 119, 9), colour: COLOURS.yellow, say: 'DT to D6', label: 'DT' },
           { from: pinL(6), to: P(231, 119, 9), colour: COLOURS.green, say: 'SCK to D7', label: 'SCK' },
         ],
-        end: { T: 2.4, beats: [{ at: 0, text: '100 nF and 10 µF across VCC and GND, close to the HX711' }], draw: () => null },
+        end: { T: 2.4, beats: [{ at: 0, text: 'One electrolytic across VCC and GND, close to the HX711, stripe to GND' }], draw: () => null },
       };
     case 'cell':
     default:

@@ -56,10 +56,8 @@ const HX_WIRES: WireSpec[] = [
   { id: 'hx-dt', from: { hx: 'DT' }, to: pin('d', 9), colour: 'yellow', ends: 'ff', lift: 26 },
   { id: 'hx-sck', from: { hx: 'SCK' }, to: pin('d', 10), colour: 'orange', ends: 'ff', lift: 30 },
 ];
-const HX_CAPS: PartSpec[] = [
-  { id: 'c10u', kind: 'cap', type: 'electrolytic', from: ['L+', 7], to: ['L-', 7] },
-  { id: 'c100n', kind: 'cap', type: 'ceramic', from: ['L+', 9], to: ['L-', 9] },
-];
+/** One electrolytic (the owner's 100 µF 25 V): no ceramics in the kit, and the HX711 board has its own. */
+const HX_CAPS: PartSpec[] = [{ id: 'c10u', kind: 'cap', type: 'electrolytic', from: ['L+', 7], to: ['L-', 7] }];
 const MOUNT: PartSpec[] = [{ id: 'book', kind: 'book' }, { id: 'cell', kind: 'loadcell' }, { id: 'tape', kind: 'tape' }, { id: 'cup', kind: 'cup' }];
 // The cell's own wire colours: the jumpers leaving the blue connector are recoloured from the owner's photo.
 const CELL_PINS = [['E+', 'red'], ['E−', 'black'], ['A−', 'white'], ['A+', 'green']] as const;
@@ -297,7 +295,7 @@ export const BENCH_SCENES: Record<string, BenchScene> = {
       { title: 'VCC → the left + rail', who: 'you', add: ['hx-vcc'], ring: { hx: 'VCC' }, text: ['Socket on VCC, its pin into the left + rail (the red line), beside row 5: the 3.3 V rail.', 'Never the + rail on the right: that one is 5 V.'], cam: CAM_HX_RAILS, tags: [{ at: { hx: 'VCC' }, text: 'VCC', tone: 'you' }, { at: { hole: ['L+', 5] }, text: 'left + rail, 3.3 V', small: 'not the right one' }] },
       { title: 'DT → 9th pin', who: 'you', add: ['hx-dt'], ring: pin('d', 9), text: ['A female–female jumper: DT to the row next to the breadboard, the 9th pin from the far end: D6.'], cam: 'mcu', tags: [{ at: pin('d', 9), text: 'DT → 9th pin', small: 'that pin is D6', tone: 'you' }] },
       { title: 'SCK → 10th pin', who: 'you', add: ['hx-sck'], ring: pin('d', 10), text: ['SCK to the next pin, the 10th: D7.'], cam: 'mcu', tags: [{ at: pin('d', 10), text: 'SCK → 10th pin', small: 'that pin is D7', tone: 'you' }] },
-      { title: 'The two capacitors', who: 'you', add: ['c10u', 'c100n'], text: ['The 10 µF across the left + and − rails, beside row 7: its striped leg in the − rail.', 'The 100 nF beside row 9, the same way; it has no stripe, either way round.'], cam: [[20, 88, 48], [33, 9, 21]], tags: [{ at: { hole: ['L-', 7] }, text: '10 µF', small: 'stripe in the − rail', tone: 'you' }, { at: { hole: ['L+', 9] }, text: '100 nF', small: 'beside row 9' }] },
+      { title: 'The capacitor', who: 'you', add: ['c10u'], text: ['One electrolytic across the left + and − rails, beside row 7: your 100 µF 25 V, or a 10 µF if one of yours reads that.', 'Its striped leg in the − rail. No small ceramic needed: the HX711 board has its own, beside its chip.'], cam: [[20, 88, 48], [33, 9, 21]], tags: [{ at: { hole: ['L-', 7] }, text: '100 µF', small: 'stripe in the − rail', tone: 'you' }] },
       { title: 'USB in', who: 'claude', usb: 'in', screen: true, text: ['Claude restarts the board and reads its boot line: it still starts, so nothing is short-circuited.'], cam: 'bench', tags: [{ at: [0, 20, 0], text: 'E boot node=a', small: 'it still starts', tone: 'ok' }] },
     ],
     cards: [
@@ -305,7 +303,7 @@ export const BENCH_SCENES: Record<string, BenchScene> = {
       { title: 'VCC → left + rail', text: 'The 3.3 V rail, beside row 5. Never the 5 V rail.', colour: 'red' },
       { title: 'DT → 9th pin', text: 'Row next to the breadboard: D6. Female–female.', colour: 'yellow' },
       { title: 'SCK → 10th pin', text: 'Row next to the breadboard: D7. Female–female.', colour: 'orange' },
-      { title: '10 µF and 100 nF', text: 'Across the left rails, beside rows 7 and 9. The 10 µF’s stripe in the − rail.' },
+      { title: 'One electrolytic', text: 'Your 100 µF (or a 10 µF) across the left rails, beside row 7. Its stripe in the − rail.' },
     ],
   },
   'm2-real-weight/bench-mount': {

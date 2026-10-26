@@ -94,7 +94,7 @@ export function MissingMap() {
         className="fig"
         viewBox="0 0 360 242"
         role="img"
-        aria-label="Où va chaque pièce manquante : le HX711 entre la cellule de charge et la carte NodeMCU, le deuxième bouton à côté de la carte, les condensateurs près de chaque carte, la microSD et les condensateurs de 1000 µF côté caméra, le chargeur sous les deux."
+        aria-label="Où va chaque pièce encore manquante : la microSD et les condensateurs de 1000 µF côté caméra, le chargeur sous les deux cartes."
       >
         <rect className="view" x="4" y="4" width="172" height="182" rx="10" />
         <text className="t-small t-strong" x="14" y="18">
@@ -108,16 +108,13 @@ export function MissingMap() {
         {/* the scale: load cell, then the amplifier, then the board */}
         <path className="ln-thin" d="M50 58V82M86 95H102" />
         <Box x={14} y={32} w={72} h={26} label="Cellule" />
-        <Box x={14} y={82} w={72} h={26} label="HX711" missing="hx711" />
+        <Box x={14} y={82} w={72} h={26} label="HX711" />
         <rect className="pcb" x="102" y="70" width="64" height="48" rx="5" />
         <text className="t-strong" x="134" y="97" textAnchor="middle">
           NodeMCU
         </text>
-        <path className="ln-thin" d="M118 118V138M150 118V138" />
-        <Box x={102} y={138} w={32} h={22} label="TARE" small />
-        <Box x={138} y={138} w={34} h={22} label="PHOTO" missing="push-button" small />
-        <path className="ln-faint dash" d="M86 149C94 149 96 118 102 112" />
-        <Box x={14} y={138} w={72} h={22} label="100 nF" missing="cap-ceramic" />
+        <path className="ln-thin" d="M134 118V138" />
+        <Box x={102} y={138} w={70} h={22} label="BOUTON" small />
 
         {/* the camera */}
         <rect className="pcb" x="194" y="70" width="70" height="48" rx="5" />
@@ -128,8 +125,6 @@ export function MissingMap() {
         <Box x={194} y={138} w={70} h={22} label="6 LED" />
         <Box x={278} y={36} w={68} h={22} label="microSD" missing="microsd" />
         <Box x={278} y={84} w={68} h={22} label="1000 µF" missing="cap-1000u" />
-        <path className="ln-faint dash" d="M278 149C270 149 268 118 264 112" />
-        <Box x={278} y={138} w={68} h={22} label="100 nF" missing="cap-ceramic" />
 
         {/* the radio link between the boards, and the supply under both */}
         <path className="hot-ln dash" d="M166 82H194" />

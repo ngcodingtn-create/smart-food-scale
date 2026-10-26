@@ -130,7 +130,7 @@ export type PartSpec =
   | { id: string; kind: 'book' }
   | { id: string; kind: 'tape' }
   | { id: string; kind: 'cup' }
-  /** Across two holes: the 10 µF stands on its legs, its striped leg in `to`; the 100 nF is a small disc. */
+  /** Across two holes: an electrolytic stands on its legs, its striped leg in `to`; a ceramic is a small disc. */
   | { id: string; kind: 'cap'; type: 'electrolytic' | 'ceramic'; from: [Col, number]; to: [Col, number] }
   | { id: string; kind: 'mb-base' }
   | { id: string; kind: 'esp32cam'; on: 'base' | 'breadboard' }

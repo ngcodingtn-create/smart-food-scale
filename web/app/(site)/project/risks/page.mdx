@@ -25,7 +25,7 @@ is a reflash of credentials, not a rewrite.
 The 3.3 V rail sags when the camera initialises while Wi-Fi transmits. Symptom is a
 reset mid-capture, or a corrupt frame with a weight reading that drifted.
 
-**Mitigation:** 5 V / 2 A supply, 470–1000 µF low-ESR + 100 nF across the rail as
+**Mitigation:** 5 V / 2 A supply, 470–1000 µF low-ESR across the rail as
 close as possible, thick short cables, **no breadboard in the power path**, and the
 HX711 on Node A's 3V3 pin, never on the camera's rail. This risk is the reason there are
 [two boards](/project/architecture).

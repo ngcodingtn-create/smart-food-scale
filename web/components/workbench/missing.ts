@@ -46,24 +46,6 @@ export type Ask = {
 
 export const ASKS: Ask[] = [
   {
-    kit: 'cap-ceramic',
-    urgency: 'useful',
-    name: 'Condensateurs céramiques 100 nF',
-    qty: '4',
-    role: 'Un près de chaque carte, pour filtrer l’alimentation. Les mesures de poids sont plus stables avec.',
-    looks: 'Petites pastilles jaunes, orange ou bleues à deux pattes, marquées « 104 ».',
-    instead: 'Toute valeur entre 47 nF (473) et 220 nF (224).',
-    photo: {
-      kind: 'web',
-      file: 'cap-100n.jpg',
-      caption: 'Un condensateur céramique de 100 nF.',
-      author: 'oomlout',
-      licence: 'CC BY-SA 2.0',
-      licenceUrl: 'https://creativecommons.org/licenses/by-sa/2.0/',
-      source: 'https://commons.wikimedia.org/wiki/File:100_nF_Capacitor.jpg',
-    },
-  },
-  {
     kit: 'cap-1000u',
     urgency: 'final',
     name: 'Condensateurs électrolytiques 1000 µF, 16 V ou plus',

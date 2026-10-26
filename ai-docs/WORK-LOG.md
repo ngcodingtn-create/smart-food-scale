@@ -648,3 +648,11 @@ yes do 3-9, continue all")
 - `/rig` shows one button. Build passes (95 pages).
 - Not done: the blue connector photo; the owner needs more male–male jumpers before
   milestone 4; firmware 0.3.6 not yet flashed; the buzzer (1.6) still open.
+
+**26 October, night: milestone 1 done; electrolytics only**
+
+- The owner heard the beep: 1.6 ticked. The whole test passed twice; the owner watched the
+  second: 1.7 ticked. Firmware 0.3.6 flashed (`fw=0.3.6`, `E button main=0`).
+- The owner has no 100 nF ceramics: the plan, wiring, 3D, kit and missing pages now use
+  electrolytics only, saying why. The missing page also shows the HX711 received and the
+  one button.

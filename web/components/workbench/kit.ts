@@ -144,7 +144,7 @@ export const KIT: KitItem[] = [
     photo: 'resistor.jpg',
     why: 'In labelled paper strips: 6 × 100 Ω, 470 Ω, 1 kΩ and 10 kΩ. Keep them in the strips until each goes in.',
   },
-  { id: 'cap-ceramic', line: 13, bom: 'Ceramic capacitor, 100 nF', qty: '4', status: 'check', why: 'Ticked on the form, but not in your photos. Small yellow or brown discs, usually marked 104.' },
+  { id: 'cap-ceramic', line: 13, bom: 'Ceramic capacitor, 100 nF', qty: '4', status: 'skip', why: 'Not in your kit, and the build goes without them (26 October): the HX711, the ESP32-CAM and the NodeMCU each carry small ceramic capacitors of their own, and the plan uses your electrolytics.' },
   {
     id: 'cap-10u',
     line: 14,

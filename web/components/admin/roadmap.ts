@@ -335,7 +335,7 @@ export const MILESTONES: Milestone[] = [
     title: 'Real weight',
     goal: 'The HX711 and the load cell replace the pretend weight: the scale weighs, tares when the button is held, and is calibrated in grams.',
     when: 'next: the HX711 is here',
-    parts: ['hx711', 'load-cell', 'cap-10u', 'cap-ceramic', 'header-pins'],
+    parts: ['hx711', 'load-cell', 'cap-10u', 'header-pins'],
     doneWhen: 'Holding the button 5 s gives TARE OK, and a known mass reads within a gram or two.',
     steps: [
       {
@@ -365,17 +365,17 @@ export const MILESTONES: Milestone[] = [
         id: 'hx711-wires',
         title: 'Wire the HX711',
         goal: 'Power from the 3.3 V rail; DT to D6, SCK to D7.',
-        parts: ['hx711', 'cap-10u', 'cap-ceramic'],
+        parts: ['hx711', 'cap-10u'],
         wires: { node: 'a', ids: ['a-hx-vcc', 'a-hx-gnd', 'a-hx-dt', 'a-hx-sck', 'a-hx-caps'] },
         actions: [
           'USB out.',
           'VCC to the left + rail, the 3.3 V one; GND to the left − rail. Never VCC on the 5 V rail.',
           'DT to D6 and SCK to D7: the row next to the breadboard, the 9th and 10th pins from the far end.',
-          'The 10 µF and the 100 nF across the left + and − rails, where the HX711’s two wires go in. The 10 µF’s striped leg in the − rail.',
+          'One electrolytic capacitor across the left + and − rails, beside row 7: your 100 µF 25 V (or a 10 µF if one of yours reads that). Its striped leg in the − rail.',
           'USB back in.',
         ],
         claude: ['Restarts the board and reads its boot line: it still starts, so nothing is short-circuited.'],
-        checks: ['VCC on the 3.3 V rail, not 5 V', 'DT on D6, SCK on D7', 'The 10 µF’s stripe in the − rail', 'Claude says it still boots'],
+        checks: ['VCC on the 3.3 V rail, not 5 V', 'DT on D6, SCK on D7', 'The capacitor’s stripe in the − rail', 'Claude says it still boots'],
       },
       {
         id: 'bench-mount',

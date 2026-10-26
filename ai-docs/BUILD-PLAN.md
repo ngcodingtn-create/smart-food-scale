@@ -25,7 +25,7 @@ Update this file as steps get done; move it to the work log when the build is fi
   2 USB cables.
 - **Arriving 24 October** (the owner said so on 23 October): the **HX711**, the **second
   push button**, a **microSD card**.
-- **Still missing after that**: 4 × 100 nF ceramics (the prototype runs without),
+- **Still missing after that**: no 100 nF ceramics are needed any more (26 October: electrolytics only; the boards carry their own ceramics),
   2 × 1000 µF and the 5 V 2 A charger (final build only), a header strip if the HX711
   comes with loose pins. The French sheet for the lab is `/workbench/missing`.
 - **Lab only**: multimeter and soldering iron. The faculty was closed on 23 October.
@@ -143,7 +143,7 @@ bench page into the chat.
    the transistor; open: a piezo); VIN to G on the NodeMCU on USB.
 3. Ask whether the lab lends **calibration masses** (100 g to 1 kg). If not, a kitchen
    scale to weigh a few household things, whose weights become the references.
-4. If they have them: the 100 nF ceramics.
+4. No ceramics needed (26 October): the plan uses electrolytics only.
 
 ### Then
 
