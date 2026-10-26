@@ -56,28 +56,31 @@
       1,
       2,
       3
+    ],
+    "m2-real-weight/flash-real": [
+      0
     ]
   },
-  "updated": "2026-10-26T18:16:53.576Z",
+  "updated": "2026-10-26T18:21:19.000Z",
   "sfs-wired-v1": [
     "a-3v3",
     "a-5v",
+    "a-buz-base",
+    "a-buz-collector",
+    "a-buz-diode",
+    "a-buz-emitter",
+    "a-buz-supply",
     "a-gnd",
+    "a-hx-caps",
+    "a-hx-dt",
+    "a-hx-gnd",
+    "a-hx-sck",
+    "a-hx-vcc",
     "a-oled-gnd",
     "a-oled-scl",
     "a-oled-sda",
     "a-oled-vcc",
     "a-tare",
-    "a-tare-gnd",
-    "a-buz-base",
-    "a-buz-collector",
-    "a-buz-emitter",
-    "a-buz-supply",
-    "a-buz-diode",
-    "a-hx-vcc",
-    "a-hx-gnd",
-    "a-hx-dt",
-    "a-hx-sck",
-    "a-hx-caps"
+    "a-tare-gnd"
   ]
 }
