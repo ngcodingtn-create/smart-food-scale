@@ -178,7 +178,7 @@ export function meetScene(variant: string): SceneDef {
         { at: [171, 33, 2], text: 'RST: restarts it, nothing lost', dx: 90, dy: -60 },
         { at: [163, 63, 2], text: 'ESP8266: the brain, with Wi-Fi', dx: 90, dy: 40 },
         { at: [152.5, 60, 2], text: 'D1, D2, D5 to D8: the scale’s pins', dx: -90, dy: 20 },
-        { at: [173.5, 72, 2], text: '3V, G, VIN: power out', dx: 40, dy: 100 },
+        { at: [173.5, 72, 2], text: '3V, G, VU: power out', dx: 40, dy: 100 },
       ]);
     case 'camera':
       return meet(() => <Camera x={150} y={40} base={false} />, [163, 60, 2], 130, [
@@ -336,7 +336,7 @@ function wireVariant(variant: string): WireVariant {
         wires: [
           { from: pinR(13), to: bb(170, 115), colour: COLOURS.red, say: '3V to the back + rail: the 3.3 V rail', label: '3.3 V rail' },
           { from: pinR(14), to: bb(200, 120), colour: COLOURS.black, say: 'G to the − rail', label: '− rail' },
-          { from: pinL(14), to: bb(160, 154), colour: COLOURS.orange, say: 'VIN to the front + rail: the 5 V rail', label: '5 V rail' },
+          { from: pinL(2), to: bb(160, 154), colour: COLOURS.orange, say: 'VU to the front + rail: the 5 V rail', label: '5 V rail' },
         ],
         end: {
           T: 2.6,

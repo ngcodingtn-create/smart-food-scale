@@ -85,7 +85,7 @@ const NODEMCU_SPOTS: Spot[] = [
   { x: 38.1, y: 31.1, label: 'FLASH button', note: 'Used only while Claude flashes the board, and only if Claude asks. It is also joined to D3, so pressing it takes a photo, like a click on your own button. Otherwise ignore it.' },
   { x: 55.7, y: 31.4, label: 'RST button', note: 'Restarts the board. Nothing is lost.' },
   { x: 50.5, y: 37.1, label: 'CH340 chip', note: 'The USB chip. Windows names the board’s port after it.' },
-  { x: 61.4, y: 35.4, label: 'VIN', note: '5 V from USB: the buzzer’s rail.' },
+  { x: 61.4, y: 35.4, label: 'VIN', note: 'Gives no 5 V on USB on this board. The buzzer’s 5 V rail takes VU, the third pin from the other end of this row.' },
   { x: 32.9, y: 53.4, label: '3V and G', note: 'The 3.3 V rail and ground, for the display and, in milestone 9, the HX711.' },
   { x: 32.9, y: 47, label: 'D5 to D8', note: 'D5 your one button (click: photo · hold 5 s: tare) · D6 and D7 the HX711, in milestone 9 · D8 the buzzer.' },
   { x: 32.9, y: 58.6, label: 'D3', note: 'Already joined to the FLASH button. Nothing to wire here now; a second button may go here in milestone 9, if you want one.' },
@@ -139,7 +139,7 @@ export const MILESTONES: Milestone[] = [
         parts: ['devkit'],
         photo: { file: 'devkit.jpg', alt: 'The NodeMCU board, USB socket at the top, two rows of pins down its sides', size: [1050, 1400], view: [27, 25, 41, 52], spots: NODEMCU_SPOTS },
         actions: ['Tap each numbered dot on the photo, then find the same thing on your board.', 'Read the pin names printed beside the pins: D1, D2 and so on.'],
-        checks: ['I found the USB socket, FLASH and RST', 'I can find D1, D2, D5 to D8, 3V, G and VIN'],
+        checks: ['I found the USB socket, FLASH and RST', 'I can find D1, D2, D5 to D8, 3V, G and VU'],
       },
       {
         id: 'camera',
@@ -263,7 +263,7 @@ export const MILESTONES: Milestone[] = [
           'Plug USB back in and tell Claude.',
         ],
         claude: ['Restarts the board and checks it still boots: a short circuit stops it.'],
-        checks: ['3V to one + rail', 'G to the − rail', 'VIN to the other + rail', 'The two + rails are not joined', 'Claude says it still boots'],
+        checks: ['3V to one + rail', 'G to the − rail', 'VU to the other + rail', 'The two + rails are not joined', 'Claude says it still boots'],
       },
       {
         id: 'display',

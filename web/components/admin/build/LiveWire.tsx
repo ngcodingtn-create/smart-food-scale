@@ -212,7 +212,7 @@ function LivePanel({ step, onPass }: { step: LiveStep; onPass: () => void }) {
         pass: false,
         lights: [{ label: 'No sound', state: 'bad' }],
         say: 'The board sent the beep, but nothing was heard.',
-        fix: ['1 kΩ from D8 (row next to the breadboard, 11th pin from the far end) to the transistor’s middle leg.', 'Transistor flat face to the left: E, B, C from the top. E → the − rail.', 'C → the buzzer’s −. The buzzer’s S → the 5 V rail (VIN’s rail).', 'The 1N4148 across − and S, its band towards S.'],
+        fix: ['1 kΩ from D8 (row next to the breadboard, 11th pin from the far end) to the transistor’s middle leg.', 'Transistor flat face to the left: E, B, C from the top. E → the − rail.', 'C → the buzzer’s −. The buzzer’s S → the 5 V rail (VU’s rail, not VIN).', 'The 1N4148 across − and S, its band towards S.'],
       });
   };
   const runMeal = async () => {

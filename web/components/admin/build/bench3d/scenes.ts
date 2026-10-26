@@ -14,7 +14,7 @@ const say = (row: 'd' | 'outer', n: number) => ({ text: `${pinName(row, n)}`, sm
 const RAILS: WireSpec[] = [
   { id: 'rail-g', from: pin('outer', 10), to: { hole: ['L-', 22] }, colour: 'grey', ends: 'fm' },
   { id: 'rail-3v', from: pin('outer', 11), to: { hole: ['L+', 21] }, colour: 'teal', ends: 'fm' },
-  { id: 'rail-vin', from: pin('outer', 15), to: { hole: ['R+', 27] }, colour: 'purple', ends: 'fm', lift: 26 },
+  { id: 'rail-5v', from: pin('outer', 3), to: { hole: ['R+', 27] }, colour: 'purple', ends: 'fm', lift: 26 },
 ];
 const DISPLAY_WIRES: WireSpec[] = [
   { id: 'disp-vcc', from: { dpin: 0 }, to: pin('d', 6), colour: 'red', ends: 'ff' },
@@ -64,13 +64,13 @@ export const BENCH_SCENES: Record<string, BenchScene> = {
       { title: 'USB out', who: 'you', text: ['Always first: nothing is wired with the power on.'], cam: 'bench', usb: 'out' },
       { title: '3V → the left + rail', who: 'you', add: ['rail-3v'], ring: pin('outer', 11), text: [`Outer row, the 11th pin from the far end: that is 3V.`, 'A female–male jumper: socket on the pin, its pin into the left + rail (the red line).'], cam: 'mcu', tags: [{ at: pin('outer', 11), ...say('outer', 11), tone: 'you' }] },
       { title: 'G → the left − rail', who: 'you', add: ['rail-g'], ring: pin('outer', 10), text: ['The pin before it, the 10th: that is G, ground.', 'Into the left − rail (the blue line).'], cam: 'mcu', tags: [{ at: pin('outer', 10), ...say('outer', 10), tone: 'you' }] },
-      { title: 'VIN → the right + rail', who: 'you', add: ['rail-vin'], ring: pin('outer', 15), text: ['Outer row, the last pin, by the USB: VIN, 5 V.', 'Across to the right + rail. Keep the two + rails apart: 3.3 V on the left, 5 V on the right.'], cam: 'bench', tags: [{ at: pin('outer', 15), ...say('outer', 15), tone: 'you' }] },
+      { title: 'VU → the right + rail', who: 'you', add: ['rail-5v'], ring: pin('outer', 3), text: ['Outer row, the 3rd pin from the far end: VU, the USB’s 5 V. Not VIN, by the USB: on this board VIN gives no 5 V on USB.', 'Across to the right + rail. Keep the two + rails apart: 3.3 V on the left, 5 V on the right.'], cam: 'bench', tags: [{ at: pin('outer', 3), ...say('outer', 3), tone: 'you' }] },
       { title: 'USB in', who: 'claude', usb: 'in', text: ['Claude restarts the board: it still starts, so nothing is short-circuited.'], cam: 'bench' },
     ],
     cards: [
       { title: '3V → left + rail', text: 'Outer row, 11th pin from the far end.', colour: 'teal' },
       { title: 'G → left − rail', text: 'Outer row, 10th pin from the far end.', colour: 'grey' },
-      { title: 'VIN → right + rail', text: 'Outer row, the last pin, by the USB.', colour: 'purple' },
+      { title: 'VU → right + rail', text: 'Outer row, the 3rd pin from the far end.', colour: 'purple' },
     ],
   },
   'm1-scale-brain/display': {
@@ -132,7 +132,7 @@ export const BENCH_SCENES: Record<string, BenchScene> = {
       { title: 'Emitter to ground', who: 'you', add: ['buz-e'], text: ['From row 16, column a, to the left − rail.'], cam: { rows: [13, 19] }, tags: [{ at: { hole: ['a', 16] }, text: 'row 16 → − rail', tone: 'you' }] },
       { title: 'The buzzer module', who: 'you', add: ['buzzer'], text: ['Its three pins down column j, rows 16, 17, 18: S at row 16, − at row 18. Its board hangs out over the right edge.', 'The + on the buzzer is on the S side.'], cam: { rows: [13, 20], side: 'right' }, tags: [{ at: { hole: ['j', 16] }, text: 'S', small: 'row 16' }, { at: { hole: ['j', 18] }, text: '−', small: 'row 18' }] },
       { title: 'Collector → buzzer −', who: 'you', add: ['buz-c'], text: ['From row 18, column d, across the gap to row 18, column f: the buzzer’s − row.'], cam: { rows: [14, 20] }, tags: [{ at: { hole: ['d', 18] }, text: 'C, row 18' }, { at: { hole: ['f', 18] }, text: 'buzzer −, row 18', tone: 'you' }] },
-      { title: 'S → the 5 V rail', who: 'you', add: ['buz-s'], text: ['From row 16, column g, to the right + rail at row 24, past the buzzer’s board: the 5 V from VIN.'], cam: { rows: [14, 25], side: 'right' }, tags: [{ at: { hole: ['g', 16] }, text: 'S row 16', tone: 'you' }, { at: { hole: ['R+', 24] }, text: '+ rail, 5 V' }] },
+      { title: 'S → the 5 V rail', who: 'you', add: ['buz-s'], text: ['From row 16, column g, to the right + rail at row 24, past the buzzer’s board: the 5 V from VU.'], cam: { rows: [14, 25], side: 'right' }, tags: [{ at: { hole: ['g', 16] }, text: 'S row 16', tone: 'you' }, { at: { hole: ['R+', 24] }, text: '+ rail, 5 V' }] },
       { title: 'The diode across it', who: 'you', add: ['diode'], text: ['The 1N4148 in column h, from row 16 to row 18.', 'Its black band at row 16, towards S.'], cam: { rows: [14, 19], side: 'right' }, tags: [{ at: { hole: ['h', 16] }, text: 'band towards S', tone: 'you' }] },
       { title: 'USB in: a beep', who: 'claude', usb: 'in', screen: true, text: ['Claude sends “beep” from the laptop: you hear a short beep.', CHECK], cam: 'bench', tags: [{ at: [74, 26, -4], text: 'beep', tone: 'ok' }] },
     ],

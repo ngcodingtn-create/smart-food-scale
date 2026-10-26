@@ -120,7 +120,7 @@ const A_WIRES: Record<string, WireArt> = {
   // rails
   'a-3v3': line(aRight('3V'), [A_V33, aRight('3V')[1]]),
   'a-gnd': line(aRight('G'), [A_GND, aRight('G')[1]]),
-  'a-5v': line(aLeft('VIN'), [A_V5, aLeft('VIN')[1]]),
+  'a-5v': line(aLeft('VU'), [A_V5, aLeft('VU')[1]]),
   'a-decouple': line([A_V33, 544], [A_GND, 544], [210, 544]),
   // HX711
   'a-hx-vcc': line([A_MOD, 426], [A_V33, 426]),
@@ -163,7 +163,7 @@ const A_WIRES: Record<string, WireArt> = {
   'a-supply-gnd': line([128, 566], [A_GND, 566]),
 };
 
-const A_USED = new Set(['right:3V', 'right:G', 'left:VIN', 'right:D1', 'right:D2', 'right:D3', 'right:D5', 'right:D6', 'right:D7', 'right:D8']);
+const A_USED = new Set(['right:3V', 'right:G', 'left:VU', 'right:D1', 'right:D2', 'right:D3', 'right:D5', 'right:D6', 'right:D7', 'right:D8']);
 
 function NodeAParts() {
   return (

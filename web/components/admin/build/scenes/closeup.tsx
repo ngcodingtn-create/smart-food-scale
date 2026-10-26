@@ -36,8 +36,8 @@ const RIGHT = [...FRONT_RIGHT].reverse();
 
 function mcuPin(name: string, prefer?: 'left' | 'right'): { at: Pt; side: 'left' | 'right'; index: number } {
   const order: ('left' | 'right')[] = prefer === 'left' ? ['left', 'right'] : ['right', 'left'];
-  // The pins named in wiring.ts: 3V and G are the pair between D4 and D5 in the D row; VIN is the outer row's pin by the USB.
-  const wanted: Record<string, { side: 'left' | 'right'; index: number }> = { '3V': { side: 'right', index: 9 }, G: { side: 'right', index: 8 }, VIN: { side: 'left', index: 0 } };
+  // The pins named in wiring.ts: 3V and G are the pair between D4 and D5 in the D row.
+  const wanted: Record<string, { side: 'left' | 'right'; index: number }> = { '3V': { side: 'right', index: 9 }, G: { side: 'right', index: 8 } };
   const fixed = wanted[name];
   if (fixed) return { at: [COL_X[fixed.side], PIN_TOP + fixed.index * PIN_STEP], ...fixed };
   for (const side of order) {

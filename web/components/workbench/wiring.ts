@@ -141,11 +141,11 @@ const NODE_A: NodeWiring = {
         },
         {
           id: 'a-5v',
-          from: { part: 'mcu', pin: 'VIN' },
+          from: { part: 'mcu', pin: 'VU' },
           to: { part: 'v5', pin: 'rail' },
           colour: 'red',
-          say: 'NodeMCU VIN to the + rail on the other side of the breadboard. This is the 5 V rail.',
-          why: 'Keep the two + rails apart. One carries 3.3 V, the other 5 V; joining them destroys the board. On USB, VIN may sit a diode’s drop under 5 V: measure yours, VIN to G.',
+          say: 'NodeMCU VU, the outer row’s third pin from the far end, to the + rail on the other side of the breadboard. This is the 5 V rail.',
+          why: 'Keep the two + rails apart. One carries 3.3 V, the other 5 V; joining them destroys the board. VU is the USB’s 5 V. On our board VIN gave none while it ran on USB: the buzzer stayed silent on VIN and clicked on VU (click tests, 26 October 2026). No voltage was measured.',
           proposed: 'The pin map never said where the buzzer takes its supply. 5 V keeps its pulses off the 3V3 that feeds the HX711.',
         },
         {
