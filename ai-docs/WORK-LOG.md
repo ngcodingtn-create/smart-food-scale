@@ -602,3 +602,18 @@ right")
 - `web/components/admin/build/bench3d/`: a 3D bench for the step pages (scenes as data,
   three from npm, loaded only where shown). All of milestone 1 converted and checked frame by
   frame in the browser; tsc and the build pass.
+
+**26 October, small hours: the silent buzzer (step 1.6) traced to VIN**
+
+- Click tests in 3D, one page per answer: Transistor Check (it faced the wrong way), Diode
+  Check (each beep had dropped the board off USB), Click Test (no click: the 5 V side),
+  Buzzer, Straight to the Board (clicked on 3V: the module works), Find the 5 V (test A on
+  the VIN wire: no click), VIN or VU (clicked on VU).
+- One false lead caught from the owner's photos: the S jumper had gone onto the module's
+  middle pin. Redone on S, test A still gave no click.
+- Fix, commit `faa0fc9`: the 5 V rail takes VU, not VIN, in `wiring.ts` and everything
+  generated from it or drawn by hand (3D rails step, 2.5D scene, board drawing, close-up,
+  roadmap, live page, wiring page). tsc and the build pass.
+- Noticed: the photos put the breadboard beside the outer row; the 3D scenes draw it beside
+  the D row. Pin counts are unaffected; the scenes need mirroring.
+- Not done: the buzzer back in place and a `beep` from the board; step 1.6 is still un-ticked.

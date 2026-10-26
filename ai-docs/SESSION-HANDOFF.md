@@ -1,6 +1,7 @@
 # Session handoff
 
-**Written:** 25 October 2026, evening, Tunis time, at the end of the long session that built
+**Written:** 25 October 2026, evening, Tunis time; **section 0d added 26 October** during the
+buzzer debugging. First written at the end of the long session that built
 `/admin` and the build companion, by an account about to hit its usage limit. **The next
 session is another Claude account on the same machine and the same folder.** Read this whole
 file before doing anything. History is in [WORK-LOG.md](WORK-LOG.md) (newest at the end); how
@@ -15,7 +16,40 @@ owner's own messages are the `type:"user"` lines. Mine it with Python run as `py
 
 ---
 
-## 0. Latest (second account, 25 Oct, night): read this first
+## 0d. Latest (26 Oct, small hours): the silent buzzer was VIN. Read this first
+
+- **Found:** on the owner's NodeMCU, **VIN gives no 5 V while it runs on USB**. Proven by click
+  tests with the buzzer module out of the breadboard on female–female jumpers. On 3V it
+  clicked; on the wire from VIN it stayed silent; on **VU** (outer row, 3rd pin from the far
+  end: A0, G, VU) it clicked. No voltage was measured. Commit `faa0fc9` moved the 5 V rail from
+  VIN to VU everywhere it is generated: `wiring.ts` (`a-5v`), `bench3d/scenes.ts` (wire
+  `rail-5v`, rails step), `bench-scenes.tsx`, `boards.tsx`, `closeup.tsx`, `roadmap.ts`,
+  `LiveWire.tsx`, the wiring page. `tsc` and `npm run build` pass; the rails 3D step was looked at.
+- **Where the owner is:** the brown 5 V wire's socket is now on VU, its other pin still in
+  the teal jumper on the buzzer's S. **Next:** brown's pin back into its + rail hole; the
+  teal and white jumpers off; the buzzer module back in its rows. Then Claude runs `beep`
+  (close the `/admin/wire` tab first, or use its Beep button). **Step 1.6 stays un-ticked
+  until the owner hears it.** Then 1.7, the whole test (`board.py meal-test --no-camera`).
+- **Correct earlier claims:** the owner's photos (26 Oct) show the breadboard beside the
+  NodeMCU's **outer** row (A0…VIN), not the D row. This fits physics: back up, USB away puts
+  the outer row on the left. The 3D scenes draw the breadboard on the D-row side. Pin
+  counts from the far end are right either way, so nothing wired is wrong, but the scenes
+  should be mirrored. Confirm with a fresh photo first.
+- **The owner's real wire colours** on the 5 V path: brown (VU → + rail); on the buzzer while
+  testing, teal (S) and white (−). The buzzer module's pins: S (next to the printed S), middle,
+  −. The owner once put the S jumper on the middle pin; check the S pin in any photo.
+- **Artifacts this session** (all 3D, three.js r128, source in `ai-docs/artifacts/`):
+  Transistor Check, Diode Check, Click Test, **Buzzer, Straight to the Board**
+  (<https://claude.ai/artifact/Jr2bSJtndwYhR1H5xbmxd2>, `buzzer-direct.html`), **Find the 5 V**
+  (<https://claude.ai/artifact/Wm53mCXzA14eaYvtgG6SgD>, `find-5v.html`), **VIN or VU**
+  (<https://claude.ai/artifact/KSjaDit9K26vnimfEXa53W>, `vin-to-vu.html`). Each page is built
+  from the one before by a Python script in the session scratchpad (`make_*.py`); the newest
+  page's scene is the one to copy. Test a page through a temporary `web/public/zz-*.html`
+  copy at a 1000×760 viewport, using its `window.<name>.show(step, t)` hook, then delete the copy.
+- `ai-docs/artifacts/photo-s-pin-empty.png` is a marked-up crop of the owner's photo; it is
+  not committed.
+
+## 0. Second account, 25 Oct, night
 
 - **Section 5.A is done** (commit `5de43de`). The close-ups were checked frame by frame by
   rendering them to PNG sheets offline (see "Checking scenes offline" below). The ESP32-CAM
