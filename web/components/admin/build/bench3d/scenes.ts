@@ -68,10 +68,10 @@ const M2_WIRES: WireSpec[] = [...M1_WIRES, ...HX_WIRES, ...CELL_WIRES];
 
 // Where to look.
 const CAM_HX: [V3, V3] = [[-112, 62, 112], [-44, 8, 34]];
-const CAM_CELL: [V3, V3] = [[-200, 130, 140], [-95, 40, -25]];
-const CAM_FREE_END: [V3, V3] = [[-165, 105, 115], [-100, 58, 15]];
+const CAM_CELL: [V3, V3] = [[-230, 120, 170], [-110, 30, 20]];
+const CAM_FREE_END: [V3, V3] = [[-330, 95, 150], [-110, 35, 25]];
 const CAM_HX_RAILS: [V3, V3] = [[-8, 105, 150], [-6, 6, 26]];
-const CAM_E_PINS: [V3, V3] = [[-120, 58, 120], [-62, 6, 42]];
+const CAM_E_PINS: [V3, V3] = [[-80, 70, 150], [-50, 6, 50]];
 const CAM_LEFT: [V3, V3] = [[-55, 165, 200], [-35, 0, -5]];
 /** The top of the button, for a finger. */
 const BUTTON_TOP: V3 = [(COL_X.e + COL_X.f) / 2, BB.top + 7.4, (rowZ(8) + rowZ(10)) / 2];
@@ -129,9 +129,10 @@ const CAM_RIG_FRONT: [V3, V3] = [[60, 140, 260], [0, 50, 90]];
 const RIG_BUTTON_TOP: V3 = [27, 38 + 3.6 + 3, 101];
 
 const FREE_END: V3 = [CELL.x, BOOK.h + CELL.size, 52];
-/** The cup's front rim, where a finger presses. */
-const CUP_RIM: V3 = [CUP[0], CUP[1] + 10, CUP[2] + 8];
+/** The middle of the top plate, where a finger presses. */
+const CUP_RIM: V3 = [CUP[0], CUP[1], CUP[2]];
 const CUP_TAG: V3 = [CUP[0], CUP[1] + 16, CUP[2]];
+const PLATE_Z = CUP[2];
 
 export const BENCH_SCENES: Record<string, BenchScene> = {
   'm1-scale-brain/port': {
@@ -312,14 +313,15 @@ export const BENCH_SCENES: Record<string, BenchScene> = {
     wires: [...M1_WIRES, ...HX_WIRES],
     newParts: MOUNT,
     beats: [
-      { title: 'Your power bank, lying flat', who: 'you', add: ['book'], text: ['Your power bank, lying flat on the desk left of the HX711: solid and square. Anything that does not squash will do.'], cam: CAM_CELL },
-      { title: 'The cell on it', who: 'you', add: ['cell'], text: ['Only the last 2 cm of the wired end, with its two holes, on the power bank.', 'The white patch in the middle (the sensor) and the “20Kg ↓” end out in the air. Holes up; the arrow points down.'], cam: CAM_CELL, tags: [{ at: [CELL.x, BOOK.h + 18, CELL.z1], text: '20Kg ↓ end', small: 'in the air', tone: 'you' }, { at: [CELL.x, BOOK.h + 20, 8], text: 'white patch', small: 'in the air too' }, { at: [CELL.x, BOOK.h + 22, -12], text: 'only 2 cm', small: 'on the power bank' }] },
-      { title: 'Your hand holds it', who: 'you', add: ['tape'], text: ['One hand holds those 2 cm flat on the power bank. No tape: tape that reaches the white patch stops the bar bending.', 'For the calibration, something heavy laid across that end takes the hand’s place: a hand moves.'], cam: CAM_CELL, tags: [{ at: [CELL.x, BOOK.h + 40, -19], text: 'your hand', small: 'no tape', tone: 'you' }] },
-      { title: 'A cup on the free end', who: 'you', add: ['cup'], text: ['A small, light cup on the free end, a little tape under it only: the masses go in it.', 'Nothing else may touch the free end or the white patch: not the power bank, not a wire.'], cam: CAM_FREE_END, tags: [{ at: CUP_TAG, text: 'a small light cup', small: 'touches nothing else', tone: 'you' }] },
+      { title: 'A board and the first block', who: 'you', add: ['book'], text: ['A wooden board on four small feet (so the screw heads underneath do not touch the desk), left of the HX711.', 'Near its back, a block about 1.5 cm thick, as wide as the cell: the wired end goes on it. Sizes here are a proposal: any firm wood will do.'], cam: CAM_CELL, tags: [{ at: [CELL.x, 40, -9], text: 'the first block', small: 'under the wired end' }] },
+      { title: 'The cell on the block', who: 'you', add: ['cell'], text: ['The wired end on the block, its two holes over it. The rest of the cell in the air above the board, with the block’s thickness of gap under it.', 'Holes up; the label end, “20Kg ↓”, at the other end, its arrow pointing down.'], cam: CAM_CELL, tags: [{ at: [CELL.x, BOOK.h + 20, 8], text: 'the white patch', small: 'in the air: it must bend' }, { at: [CELL.x, BOOK.h + 22, CELL.z1], text: '20Kg ↓ end', small: 'free' }] },
+      { title: 'Screw the wired end down', who: 'you', add: ['tape'], text: ['Two screws up from under the board, through the board and the block, into the wired end’s two holes. Tight.', 'Screws that fit the holes: try an M4; if it wobbles, M5. Long enough to bite the cell, never longer than the cell is thick (12.7 mm into it).'], cam: [[-250, 55, 110], [-110, 18, -11]], tags: [{ at: [CELL.x - 30, 8, -11], text: 'two screws from below', small: 'into the wired end’s holes', tone: 'you' }] },
+      { title: 'The second block and the top plate', who: 'you', add: ['cup'], text: ['A second block on top of the label end, over its two holes; the top plate on that block.', 'Two screws down through the plate and the block into the label end’s holes. Now the plate touches nothing but that block: masses and food go in its middle.'], cam: CAM_FREE_END, tags: [{ at: [CELL.x, CUP[1] + 10, PLATE_Z], text: 'top plate', small: 'on the label end’s block only', tone: 'you' }] },
     ],
     cards: [
-      { title: 'Held end', text: 'The wired end’s last 2 cm on the power bank, held by your hand; for calibration, by something heavy. No tape.' },
-      { title: 'Free end', text: 'Out in the air, the arrow pointing down, a small cup on top.' },
+      { title: 'Wired end', text: 'On the first block, screwed from below through the board.' },
+      { title: 'Label end', text: 'Under the second block and the top plate, screwed from above.' },
+      { title: 'Never', text: 'Tape, or anything else touching the middle of the cell.' },
     ],
   },
   'm2-real-weight/cell-wires': {
@@ -354,16 +356,16 @@ export const BENCH_SCENES: Record<string, BenchScene> = {
     wires: M2_WIRES,
     beats: [
       { title: 'Hands off', who: 'claude', lines: ['CAMERA ?', 'raw …', 'NOT CALIBRATED'], text: ['Claude reads the counts with nothing on the cell.'], cam: CAM_FREE_END },
-      { title: 'Press the cup down', who: 'you', press: { at: CUP_RIM, how: 'press' }, text: ['When Claude says “now”: press the cup down gently with one finger, then let go.'], cam: CAM_FREE_END, T: 3.4, tags: [{ at: [CUP_RIM[0], CUP_RIM[1] + 34, CUP_RIM[2]], text: 'press gently', small: 'then let go', tone: 'you' }] },
-      { title: 'Up, or down?', who: 'claude', ring: { hx: 'A−' }, text: ['Rose: done. Fell, with the cell held as in step 2.4: USB out, swap the brown and green jumpers on A− and A+, USB in, and press again.'], cam: CAM_E_PINS, tags: [{ at: { hx: 'A−' }, text: 'brown on A−' }, { at: { hx: 'A+' }, text: 'green on A+', small: 'swap only if Claude says' }] },
+      { title: 'Press the plate', who: 'you', press: { at: CUP_RIM, how: 'press' }, text: ['Press the middle of the top plate down with one finger and hold it; while holding, tell Claude “holding”.'], cam: CAM_FREE_END, T: 3.4, tags: [{ at: [CUP_RIM[0], CUP_RIM[1] + 34, CUP_RIM[2]], text: 'press the plate', small: 'then let go', tone: 'you' }] },
+      { title: 'Up, or down?', who: 'claude', ring: { hx: 'A−' }, text: ['Rose: done. Fell: USB out, swap the brown and green jumpers on A− and A+, USB in, and press again.'], cam: CAM_E_PINS, tags: [{ at: { hx: 'A−' }, text: 'brown on A−' }, { at: { hx: 'A+' }, text: 'green on A+', small: 'swap only if Claude says' }] },
     ],
   },
   'm2-real-weight/calibrate': {
     parts: M2_PARTS,
     wires: M2_WIRES,
     beats: [
-      { title: 'Empty cup', who: 'claude', lines: ['CAMERA ?', 'raw …', 'NOT CALIBRATED'], text: ['Claude zeroes the scale with the cup empty.'], cam: CAM_FREE_END },
-      { title: 'A known mass in', who: 'you', mass: 'in', text: ['Put a known mass in the cup and tell Claude its weight in grams.', 'A calibration mass from the lab, or something you weighed on a kitchen scale.'], cam: CAM_FREE_END, tags: [{ at: CUP_TAG, text: 'a known mass', small: 'say its grams', tone: 'you' }] },
+      { title: 'Empty plate', who: 'claude', lines: ['CAMERA ?', 'raw …', 'NOT CALIBRATED'], text: ['Claude zeroes the scale with the plate empty.'], cam: CAM_FREE_END },
+      { title: 'A known mass in', who: 'you', mass: 'in', text: ['Put a known mass in the middle of the plate and tell Claude its weight in grams.', 'A calibration mass from the lab, or something you weighed on a kitchen scale.'], cam: CAM_FREE_END, tags: [{ at: CUP_TAG, text: 'a known mass', small: 'say its grams', tone: 'you' }] },
       { title: 'Steady counts', who: 'claude', text: ['Claude reads the counts until they are steady, for that mass.'], cam: CAM_FREE_END, tags: [{ at: CUP_TAG, text: 'hands off', small: 'until Claude says' }] },
       { title: 'The next one', who: 'you', mass: 'out', text: ['Take it out; then the next mass, when Claude asks. Three to five of them, light to heavy.'], cam: CAM_FREE_END },
       { title: 'Saved on the board', who: 'claude', lines: ['CAMERA ?', '0.0 g', 'READY'], text: ['Claude works out the counts per gram and saves it on the board. Then it checks each mass again: each within a gram or two.'], cam: 'display', tags: [{ at: [14, 26, 52], text: '0.0 g', small: 'grams now', tone: 'ok' }] },
@@ -373,9 +375,9 @@ export const BENCH_SCENES: Record<string, BenchScene> = {
     parts: M2_PARTS,
     wires: M2_WIRES,
     beats: [
-      { title: 'Hold the button', who: 'you', press: { at: BUTTON_TOP, how: 'hold' }, lines: ['CAMERA ?', '0.0 g', 'HOLD: TARE IN 3 s'], text: ['Cup empty. Hold the button down: the display counts down 5, 4, 3, 2, 1.'], cam: [[60, 70, 120], [30, 8, 30]], T: 4, tags: [{ at: [BUTTON_TOP[0], BUTTON_TOP[1] + 30, BUTTON_TOP[2]], text: 'hold it', small: '5 seconds', tone: 'you' }] },
+      { title: 'Hold the button', who: 'you', press: { at: BUTTON_TOP, how: 'hold' }, lines: ['CAMERA ?', '0.0 g', 'HOLD: TARE IN 3 s'], text: ['Plate empty. Hold the button down: the display counts down 5, 4, 3, 2, 1.'], cam: [[60, 70, 120], [30, 8, 30]], T: 4, tags: [{ at: [BUTTON_TOP[0], BUTTON_TOP[1] + 30, BUTTON_TOP[2]], text: 'hold it', small: '5 seconds', tone: 'you' }] },
       { title: 'TARE OK', who: 'you', lines: ['CAMERA ?', '0.0 g', 'TARE OK'], text: ['At 0: a short beep and TARE OK. Let go.'], cam: 'display', tags: [{ at: [14, 26, 52], text: 'TARE OK', tone: 'ok' }] },
-      { title: 'A known mass in', who: 'you', mass: 'in', lines: ['CAMERA ?', '150.0 g', 'TARE OK'], text: ['Put a known mass in the cup: the display shows its weight.'], cam: CAM_LEFT, tags: [{ at: [14, 26, 52], text: '150.0 g', small: 'with a 150 g mass, for example', tone: 'ok' }] },
+      { title: 'A known mass in', who: 'you', mass: 'in', lines: ['CAMERA ?', '150.0 g', 'TARE OK'], text: ['Put a known mass on the plate: the display shows its weight.'], cam: CAM_LEFT, tags: [{ at: [14, 26, 52], text: '150.0 g', small: 'with a 150 g mass, for example', tone: 'ok' }] },
       { title: 'Click: PHOTO', who: 'you', press: { at: BUTTON_TOP, how: 'tap' }, lines: ['CAMERA ?', '150.0 g', 'NO CAMERA'], text: ['Click the button once, quickly: that is PHOTO.', 'NO CAMERA and a long low beep: right, there is no camera yet.'], cam: [[60, 70, 120], [30, 8, 30]], tags: [{ at: [14, 26, 52], text: 'NO CAMERA', small: 'right, for now', tone: 'ok' }] },
       { title: 'Claude checks', who: 'claude', text: ['Claude reads E tare for the hold, and E capture with the grams for the click.'], cam: 'bench', tags: [{ at: [0, 20, 0], text: 'E capture g=150.0', small: 'for a 150 g mass', tone: 'ok' }] },
     ],
@@ -532,9 +534,9 @@ export const BENCH_SCENES: Record<string, BenchScene> = {
     parts: M4_PARTS,
     wires: M4_WIRES,
     beats: [
-      { title: 'Hold to tare', who: 'you', press: { at: BUTTON_TOP, how: 'hold' }, lines: ['CAMERA ch 6', '0.0 g', 'HOLD: TARE IN 3 s'], text: ['Cup empty: hold the button 5 s.'], cam: [[60, 70, 120], [30, 8, 30]], T: 4 },
+      { title: 'Hold to tare', who: 'you', press: { at: BUTTON_TOP, how: 'hold' }, lines: ['CAMERA ch 6', '0.0 g', 'HOLD: TARE IN 3 s'], text: ['Plate empty: hold the button 5 s.'], cam: [[60, 70, 120], [30, 8, 30]], T: 4 },
       { title: 'TARE OK', who: 'you', lines: ['CAMERA ch 6', '0.0 g', 'TARE OK'], text: ['A short beep, TARE OK. Let go.'], cam: 'display' },
-      { title: 'Food in', who: 'you', food: 'in', lines: ['CAMERA ch 6', '150.0 g', 'TARE OK'], text: ['Put some food in the cup: the display shows its weight.'], cam: CAM_FREE_END, tags: [{ at: CUP_TAG, text: 'food', small: '150 g, for example', tone: 'you' }] },
+      { title: 'Food in', who: 'you', food: 'in', lines: ['CAMERA ch 6', '150.0 g', 'TARE OK'], text: ['Put some food on the plate: the display shows its weight.'], cam: CAM_FREE_END, tags: [{ at: CUP_TAG, text: 'food', small: '150 g, for example', tone: 'you' }] },
       { title: 'Click: the photo', who: 'you', press: { at: BUTTON_TOP, how: 'tap' }, light: true, lines: ['CAMERA ch 6', '150.0 g', 'SENT'], text: ['Click the button once: the light flashes, the camera takes the photo, the grams go with it. SENT.'], cam: CAM_WHOLE, T: 3.4 },
       { title: 'SAVED', who: 'claude', lines: ['CAMERA ch 6', '150.0 g', 'SAVED'], laptop: ['E result seq=1 outcome=saved', 'A meal in the server: 150 g, with its photo'], text: ['A moment later: SAVED. Claude checks the meal in the server, photo and grams.'], cam: 'display', tags: [{ at: [14, 26, 52], text: 'SAVED', tone: 'ok' }] },
     ],
@@ -628,8 +630,8 @@ export const BENCH_SCENES: Record<string, BenchScene> = {
     parts: [...M4_PARTS, PHONE],
     wires: M4_WIRES,
     beats: [
-      { title: 'Hold to tare', who: 'you', press: { at: BUTTON_TOP, how: 'hold' }, lines: ['CAMERA ch 6', '0.0 g', 'HOLD: TARE IN 3 s'], text: ['Cup empty: hold the button 5 s, TARE OK.'], cam: [[60, 70, 120], [30, 8, 30]], T: 4 },
-      { title: 'Food, click', who: 'you', food: 'in', lines: ['CAMERA ch 6', '150.0 g', 'SENT'], light: true, text: ['Food in the cup, then a click: the light, the photo, the grams.'], cam: CAM_WHOLE, T: 3.4 },
+      { title: 'Hold to tare', who: 'you', press: { at: BUTTON_TOP, how: 'hold' }, lines: ['CAMERA ch 6', '0.0 g', 'HOLD: TARE IN 3 s'], text: ['Plate empty: hold the button 5 s, TARE OK.'], cam: [[60, 70, 120], [30, 8, 30]], T: 4 },
+      { title: 'Food, click', who: 'you', food: 'in', lines: ['CAMERA ch 6', '150.0 g', 'SENT'], light: true, text: ['Food on the plate, then a click: the light, the photo, the grams.'], cam: CAM_WHOLE, T: 3.4 },
       { title: 'In the app', who: 'you', phone: ['Aujourd’hui', 'the meal: its photo', '150 g · pesé', 'its dish and kcal'], text: ['The meal appears in the app, weighed, photographed, named.'], cam: CAM_PHONE },
     ],
   },

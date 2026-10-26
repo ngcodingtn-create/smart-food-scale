@@ -57,11 +57,13 @@
       2,
       3
     ],
-    "m2-real-weight/flash-real": [
-      0
+    "m2-real-weight/bench-mount": [
+      0,
+      1,
+      2
     ]
   },
-  "updated": "2026-10-26T18:21:19.000Z",
+  "updated": "2026-10-26T18:34:51.285Z",
   "sfs-wired-v1": [
     "a-3v3",
     "a-5v",

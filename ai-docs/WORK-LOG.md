@@ -656,3 +656,14 @@ yes do 3-9, continue all")
 - The owner has no 100 nF ceramics: the plan, wiring, 3D, kit and missing pages now use
   electrolytics only, saying why. The missing page also shows the HX711 received and the
   one button.
+
+**26 October, late: the HX711 answers; the cell's mount, then a bolted one**
+
+- The HX711 wired (2.3) and the real-scale firmware flashed (2.6); it answers on D6/D7.
+- The owner's cell is 20 kg. The real jumper colours are in the 3D and the pages.
+- Finding where the cell bends took many presses, with a background listener on the board
+  and a 3D page, "Where does the cell bend?" (artifact `EmrtZSE3nhbqKa6ZtqZWrg`): tape over
+  the sensor kills the response; only the wired end's tip on a support works.
+- The owner asked to mount it as in production: step 2.4 is now a bolted sandwich (board,
+  block, cell, block, top plate), drawn in 3D and checked in the browser; later steps load
+  the plate. Build passes. Not pushed.

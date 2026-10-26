@@ -10,10 +10,13 @@ Nothing is marked done unless it has been run. Newest work first.
 
 ## ▶ Continue here (26 October 2026)
 
-To pick up, tell Claude: **"continue from progress.md"**. **Milestone 1 is done** (26 October).
-The build is at **milestone 2, real weight, step 2.3: wire the HX711**
-(http://localhost:3000/admin/build/m2-real-weight/hx711-wires). 2.1 and 2.2 are ticked; the
-connector photo for 2.5 is still to send.
+To pick up, tell Claude: **"continue from progress.md"**. **Milestone 1 is done.** The build
+is at **milestone 2, step 2.4: mount the cell, bolted as in the finished scale**
+(http://localhost:3000/admin/build/m2-real-weight/bench-mount): a board on feet, a block under
+the wired end screwed from below, a block and the top plate on the label end screwed from
+above. 2.1, 2.2, 2.3 and 2.6 are ticked; the board runs the real-scale firmware. Your cell is
+**20 kg**. Still to check: the jumper order on the blue connector (yellow E+, red E−, brown A−,
+green A+).
 
 ### The plan, in order (changed 26 October)
 
@@ -29,7 +32,7 @@ connector photo for 2.5 is still to send.
 | 9 | Finished scale: microSD, power, rig, calibrate again, accuracy, demo | ✅ |
 
 **One button only**: a click is PHOTO, a 5-second hold is TARE. The second button is gone
-everywhere; firmware 0.3.6 is built but not yet flashed (the board runs 0.3.5).
+everywhere.
 
 **Waiting on you:** one photo on Bench Photos, the blue connector on the cell's wires, close
 (your HX711 photos are in: an XFW-HX711, pins already soldered). And before milestone 4,
