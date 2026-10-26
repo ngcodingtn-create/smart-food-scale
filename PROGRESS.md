@@ -20,18 +20,19 @@ has arrived).
 | --- | --- | --- |
 | 0 | Know the parts | 2.5D |
 | 1 | The scale's brain (pretend weight) | ✅ |
-| **2** | **Real weight: HX711, load cell, calibration** | ✅ (redrawn from your HX711 photo when it comes) |
-| 3 | The camera online | ⏳ to do |
-| 4 | The light | ⏳ to do |
-| 5 | Both boards together | ⏳ to do |
-| 6–8 | Server, app, pairing (on the laptop and phone) | ⏳ simpler scenes to do |
-| 9 | Finished scale: microSD, power, rig, calibrate again, accuracy, demo | ⏳ to do |
+| **2** | **Real weight: HX711, load cell, calibration** | ✅ your XFW-HX711, drawn from your photos |
+| 3 | The camera online | ✅ |
+| 4 | The light (needs about 8 male–male jumpers: get more) | ✅ |
+| 5 | Both boards together | ✅ |
+| 6–8 | Server, app, pairing (on the laptop and phone) | ✅ simpler scenes; the software is still to write |
+| 9 | Finished scale: microSD, power, rig, calibrate again, accuracy, demo | ✅ |
 
 **One button only**: a click is PHOTO, a 5-second hold is TARE. The second button is gone
 everywhere; firmware 0.3.6 is built but not yet flashed (the board runs 0.3.5).
 
-**Waiting on you for milestone 2:** two photos on Bench Photos (it opens on step 2.1): the
-HX711 from above, labels readable; and the blue connector on the cell's wires, close.
+**Waiting on you:** one photo on Bench Photos, the blue connector on the cell's wires, close
+(your HX711 photos are in: an XFW-HX711, pins already soldered). And before milestone 4,
+more male–male jumpers.
 
 ### Milestone 1, the scale's brain
 
@@ -75,7 +76,7 @@ HX711 from above, labels readable; and the blue connector on the cell's wires, c
 4. Claude flashes firmware 0.3.6 (one button) when the board is free.
 5. Milestone 2, real weight: redraw the HX711 and the cell's jumpers from the photos, then
    the steps at `/admin/build/m2-real-weight`.
-6. 3D for milestones 3, 4, 5 and 9 (an ESP32-CAM and MB-base model first), then 6–8.
+6. Every step of milestones 1 to 9 now has its 3D (milestone 0 stays 2.5D).
 7. **Asked, not yet answered:** "the final 3D, how it should be after all": the whole
    bench in one 3D view. The step 1.7 page draws milestone 1's; step 2.9 draws it with the
    HX711 and the cell.

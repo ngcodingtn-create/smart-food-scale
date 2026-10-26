@@ -633,3 +633,18 @@ tare … perfect 3D … end to end")
   the cup), calibration (a known mass), and the scale by hand (hold, mass, click).
 - Not done: the HX711 and the cell's jumper colours wait for the owner's photos; 3D for
   milestones 3–9; flashing 0.3.6; the buzzer (1.6).
+
+**26 October, evening: every step in 3D, milestones 1 to 9** (the owner: "sent the hx711 and
+yes do 3-9, continue all")
+
+- The owner's HX711 read from their photos: XFW-HX711, about 24.6 × 16 mm, pins already
+  soldered. The 3D draws it; step 2.2 tells them to skip.
+- The 3D engine draws the ESP32-CAM (from the owner's photo) and its base, LEDs, a microSD
+  card, a phone and a laptop with changing screens, food, a charger, the rig from its specs,
+  and can take things off the bench.
+- Scenes for every step of milestones 3 to 9, checked in the browser; the plan's steps match.
+  Milestone 4 has a bench layout for the light on the shared breadboard (the right − rail
+  becomes the LEDs' line; 8 male–male jumpers needed).
+- `/rig` shows one button. Build passes (95 pages).
+- Not done: the blue connector photo; the owner needs more male–male jumpers before
+  milestone 4; firmware 0.3.6 not yet flashed; the buzzer (1.6) still open.

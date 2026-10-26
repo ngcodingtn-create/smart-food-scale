@@ -44,5 +44,13 @@ the standard for every hands-on step, on the site and in artifacts. The model to
   jsdelivr, `three@0.128.0/examples/js/controls/OrbitControls.js`).
 - The site's build companion for every step page: the 3D bench in
   `web/components/admin/build/bench3d/` (three from npm, already a dependency for `/rig`),
-  scenes as data, one per step. Steps are converted in build order; the 2.5D SVG scenes
-  stay only until a step has its 3D one.
+  scenes as data, one per step. Every step of milestones 1 to 9 has one (26 October); only
+  milestone 0, meeting the parts, keeps its 2.5D scenes.
+- What a scene can show (`bench3d/model.ts`): the NodeMCU, breadboard and display; button,
+  transistors, resistors, diode, buzzer module; the owner's XFW-HX711 and load cell (on a book,
+  taped, with a cup); capacitors; the ESP32-CAM on its MB base or on the breadboard; LEDs that
+  glow; a microSD card; a phone and a laptop whose screens change per beat; a phone charger;
+  the rig's pieces from `rig/specs.ts`. A beat can add things, take them off (`remove`), press
+  with a finger, put a mass or food in, light the LEDs, and change the display's text.
+  `bench: false` drops the bench, for the rig and the laptop-and-phone steps.
+- Draw what the owner has from their photos; label anything drawn from a reference instead.

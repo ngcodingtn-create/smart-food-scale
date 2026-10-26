@@ -16,7 +16,32 @@ owner's own messages are the `type:"user"` lines. Mine it with Python run as `py
 
 ---
 
-## 0e. Latest (26 Oct): HX711 arrived, real weight is milestone 2, one button. Read this first
+## 0f. Latest (26 Oct, evening): every step of milestones 1 to 9 is in 3D. Read this first
+
+- **The owner's HX711** (photos on Bench Photos, answered): an **XFW-HX711**, about 24.6 × 16 mm
+  (measured from the photo against the pin pitch), **pins already soldered** (step 2.2 says to
+  skip). Its printed order matches the 3D. The blue connector photo was not sent: the cell's
+  jumpers are still drawn in the cell's own colours.
+- **Commit `fba4091`**: 3D scenes for every step of milestones 3 to 9 (`bench3d/scenes.ts`),
+  checked frame by frame in the browser; the plan's text for those steps matches
+  (`roadmap.ts`); `/rig` shows one button. Milestone 4 gained steps **make-room** and **leds**.
+- **The light's bench layout (milestone 4), a design decision:** one breadboard for both
+  boards. The camera on the far half, rows 36–43 (5V column in b, lens up, its name towards the
+  owner), fed by its empty MB base on the desk through four male–male jumpers (5V → a43,
+  GND → j40, U0R → j38, U0T → j37), a42 → left − rail for a shared ground. Transistor c47–49,
+  IO13 a40 → a46, 470 Ω b46 → b48, 10 kΩ a48 → L−, emitter a47 → L−, collector d49 → R−59.
+  LEDs in rows 46, 49, 51, 55, 57, 61: 100 Ω R+ → j, LED long leg in i, short leg in R− one row
+  on. **The right − rail becomes the LEDs' common line**: the ground bridge comes out and the
+  button's ground moves to the left − rail. The LEDs' 5 V is the right + rail (VU), so the
+  NodeMCU must be plugged in. It needs **8 male–male jumpers**; the scale already uses about 4
+  of the 10, so **ask the owner to get more male–male jumpers** before milestone 4.
+- **Milestone 9 power on the bench**: a phone charger's cut cable, 5 V into R+, ground into L−;
+  a43 → R+ for the camera; both USB cables out (never both). The 1000 µF capacitors go in with
+  the soldered build in the rig. 6–8 and the rig step stay `draft` (software not built yet).
+- Checking scenes: the temporary `web/app/zz-bench3d/page.tsx` (see 0e), plus **resize the
+  pane between screenshots** (1100×800 ↔ 1100×801): a hidden pane repaints only on resize.
+
+## 0e. 26 Oct: HX711 arrived, real weight is milestone 2, one button
 
 - **New order** (`web/components/admin/roadmap.ts`, ids renumbered): 0 parts, 1 scale's brain,
   **2 real weight** (`m2-real-weight`: meet-hx711, headers, hx711-wires, bench-mount,
